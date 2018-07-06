@@ -192,11 +192,15 @@ describe('Helix Project', () => {
       .init()
       .then(cfg => cfg.start())
       .then((cfg) => {
+        assert.equal(true, cfg.started);
         assert.notEqual(cfg.server.port, 0);
         assert.notEqual(cfg.server.port, 3000);
         return cfg.stop();
       })
-      .then(() => done())
+      .then((cfg) => {
+        assert.equal(false, cfg.started);
+        done();
+      })
       .catch(done);
   });
 });
