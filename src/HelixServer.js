@@ -74,18 +74,14 @@ class HelixServer {
           .then(boundResolve)
           .then(executeTemplate)
           .then((result) => {
-            if (result.response && result.response.error) {
-              logger.error(`Error while rendering the resource: ${result.response.error.stack || result.response.error}`);
+            if (result instanceof Error || (result.response && result.response.error)) {
+              const stack = result.stack || result.response.error.stack;
+              logger.error(`Error while rendering the resource: ${stack}`);
               res.status(500).send();
             } else {
-              if (!result.response) {
-                logger.error(`Empty response, don't know what to do`);
-                res.status(500).send();
-              } else {
-                esi.process(result.response.body).then((body) => {
-                  res.send(body);
-                });
-              }
+              esi.process(result.response.body).then((body) => {
+                res.send(body);
+              });
             }
           })
           .catch((err) => {
