@@ -76,7 +76,7 @@ class HelixServer {
           .then((result) => {
             if (result.response.error) {
               logger.error(`Error while rendering the resource: ${result.response.error.stack || result.response.error}`);
-               res.status(500).send();
+              res.status(500).send();
             } else {
               esi.process(result.response.body).then((body) => {
                 res.send(body);
