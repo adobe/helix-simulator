@@ -79,7 +79,7 @@ class HelixServer {
               res.status(500).send();
             } else {
               if (!result.response) {
-                logger.error(`Empty resource, don't know what to do`);
+                logger.error(`Empty response, don't know what to do`);
                 res.status(500).send();
               } else {
                 esi.process(result.response.body).then((body) => {
