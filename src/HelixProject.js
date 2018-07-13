@@ -128,6 +128,10 @@ class HelixProject {
     return this._srcDir;
   }
 
+  /**
+   * Location of the content repo.
+   * @returns {null|GitUrl}
+   */
   get contentRepo() {
     return this._contentRepo;
   }

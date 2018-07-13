@@ -10,9 +10,7 @@
  * governing permissions and limitations under the License.
  */
 const fs = require('fs-extra');
-const util = require('util');
-
-const stat = util.promisify(fs.stat);
+const request = require('request-promise');
 
 const utils = {
 
@@ -21,14 +19,46 @@ const utils = {
    * @param {String} filename Path to file
    * @returns {Promise} Returns promise that resolves with the filename or rejects if is not a file.
    */
-  isFile(filename) {
-    return stat(filename)
-      .then((stats) => {
-        if (!stats.isFile()) {
-          throw Error(`no regular file: ${filename}`);
-        }
-        return filename;
+  async isFile(filename) {
+    const stats = await fs.stat(filename);
+    if (!stats.isFile()) {
+      throw Error(`no regular file: ${filename}`);
+    }
+    return filename;
+  },
+
+  /**
+   * Fetches content from the given uri.
+   * @param {String} uri Either filesystem path (starting with '/') or URL
+   * @returns {*} The requested content
+   */
+  async fetch(uri) {
+    if (uri.charAt(0) === '/') {
+      return fs.readFile(uri);
+    }
+    try {
+      const response = await request({
+        method: 'GET',
+        uri,
+        resolveWithFullResponse: true,
+        encoding: null,
       });
+      return response.body;
+    } catch (e) {
+      throw new Error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
+    }
+  },
+
+  /**
+   * Fetches static resources and stores it in the context.
+   * @param {RequestContext} ctx Context
+   * @return {Promise} A promise that resolves to the request context.
+   */
+  async fetchStatic(ctx) {
+    const uri = ctx.config.contentRepo.raw + ctx.path;
+    const data = await utils.fetch(uri);
+    ctx.content = Buffer.from(data, 'utf8');
+    return ctx;
   },
 
 };
