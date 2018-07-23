@@ -93,6 +93,7 @@ class HelixServer {
         res.status(404).send();
         return;
       }
+      ctx.logger = logger;
 
       if (ctx.extension === 'html' || ctx.extension === 'md') {
         // md files to be transformed
@@ -127,7 +128,7 @@ class HelixServer {
           });
       } else {
         // all the other files (css, images...)
-        // for now, fetch code if resource under /dist other, fetch in content.
+        // for now, fetch from dist or content.
         Promise.resolve(ctx)
           .then(utils.fetchStatic)
           .then((result) => {
@@ -135,7 +136,7 @@ class HelixServer {
             res.send(result.content);
           }).catch((err) => {
             logger.error(`Error while delivering resource: ${err.stack || err}`);
-            res.status(500).send();
+            res.status(err.code || 500).send();
           });
       }
     });
