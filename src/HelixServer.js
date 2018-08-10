@@ -95,7 +95,7 @@ class HelixServer {
       }
       ctx.logger = logger;
 
-      if (ctx.extension === 'html' || ctx.extension === 'md') {
+      if (ctx.extension === 'html' || ctx.extension === 'md' || ctx.extension === 'json') {
         // md files to be transformed
         Promise.resolve(ctx)
           .then(boundResolver)
@@ -119,6 +119,7 @@ class HelixServer {
             }
 
             esi.process(result.response.body).then((body) => {
+              res.type(ctx.extension);
               res.send(body);
             });
           })
