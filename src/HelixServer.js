@@ -96,7 +96,7 @@ class HelixServer {
       }
       ctx.logger = logger;
 
-      if (ctx.extension === 'html' || ctx.extension === 'md' || ctx.extension === 'json') {
+      if (ctx.extension === 'html' || ctx.extension === 'md') {
         // md files to be transformed
         Promise.resolve(ctx)
           .then(boundResolver)
