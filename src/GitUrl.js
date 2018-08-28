@@ -20,7 +20,7 @@ const RAW_TYPE = 'raw';
 const API_TYPE = 'api';
 const DEFAULT_BRANCH = 'master';
 
-const constructUrl = (urlParse, type) => `${urlParse.protocols[0]}://${type}.${urlParse.resource}${urlParse.port ? `:${urlParse.port}` : ''}`;
+const constructUrl = (urlParse, type) => `${urlParse.protocols[0]}://${urlParse.resource}${urlParse.port ? `:${urlParse.port}` : ''}/${type}/`;
 
 module.exports = class GitUrl {
   constructor(url) {
