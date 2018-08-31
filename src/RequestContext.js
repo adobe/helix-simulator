@@ -24,7 +24,7 @@ module.exports = class RequestContext {
     this._extension = '';
     this._headers = req.headers;
     this._method = req.method;
-    this._params = {};
+    this._params = req.query;
 
     let relPath = this._path;
     const lastSlash = relPath.lastIndexOf('/');
@@ -41,14 +41,6 @@ module.exports = class RequestContext {
       if (selDot > lastSlash) {
         this._selector = relPath.substring(selDot + 1);
         relPath = relPath.substring(0, selDot);
-      }
-      // extract query params
-      if (queryParamIndex > -1) {
-        const list = this._path.substring(queryParamIndex + 1).split('&');
-        list.forEach((element) => {
-          const [key, value] = element.split('=');
-          this._params[key] = value;
-        });
       }
     } else if (lastSlash === relPath.length - 1) {
       relPath += 'index';
