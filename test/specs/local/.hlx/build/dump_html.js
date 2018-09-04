@@ -122,9 +122,9 @@ parcelRequire = (function (modules, cache, entry, globalName) {
  *
  */
 
-module.exports.pre = payload => {
-  payload.request.headers.host = 'localhost:3000';
-  payload.dump = JSON.stringify(payload.request, null, "  ");
+module.exports.pre = (payload, action) => {
+  action.request.headers.host = 'localhost:3000';
+  payload.dump = JSON.stringify(action.request, null, "  ");
 };
 },{}],"dump_html.htl":[function(require,module,exports) {
 /*
