@@ -198,8 +198,16 @@ function wrap(main) {
     const runthis = (p, s, l) => {
       const next = (p, s, l) => {
         function cont(next) {
-          const config = Object.assign({}, s, { logger: l });
-          const ret = pre(p, config);
+          const action = {
+            secrets: s,
+            logger: l,
+            request: {
+              // this is currently in the wrong place.
+              params: p.request.params,
+              headers: p.request.headers
+            }
+          };
+          const ret = pre(p, action);
           if (ret && _isFunction(ret.then)) {
             return ret.then(pp => next(pp || p, s, l));
           }
