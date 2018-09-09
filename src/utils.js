@@ -73,6 +73,7 @@ const utils = {
     for (let i = 0; i < uris.length; i += 1) {
       const uri = uris[i];
       ctx.logger.debug(`fetching static resource from ${uri}`);
+      // eslint-disable-next-line no-await-in-loop
       const data = await utils.fetch(uri);
       if (data != null) {
         ctx.content = Buffer.from(data, 'utf8');
