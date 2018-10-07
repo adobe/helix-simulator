@@ -26,6 +26,11 @@ module.exports = class RequestContext {
     this._method = req.method || 'GET';
     this._params = req.query || {};
 
+    if (this._path === '/') {
+      // request to root
+      this._path = '/index.html';
+    }
+
     let relPath = this._path;
     const lastSlash = relPath.lastIndexOf('/');
     const lastDot = relPath.lastIndexOf('.');
@@ -42,8 +47,6 @@ module.exports = class RequestContext {
         this._selector = relPath.substring(selDot + 1);
         relPath = relPath.substring(0, selDot);
       }
-    } else if (lastSlash === relPath.length - 1) {
-      relPath += 'index';
     }
     this._resourcePath = relPath;
   }
