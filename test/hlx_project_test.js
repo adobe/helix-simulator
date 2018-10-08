@@ -256,4 +256,40 @@ describe('Helix Project', () => {
       })
       .catch(done);
   });
+
+  it('computes correct index: finds index', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    new HelixProject()
+      .withCwd(cwd)
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.index, '/index');
+        done();
+      })
+      .catch(done);
+  });
+
+  it('computes correct index: finds README', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'index_is_readme');
+    new HelixProject()
+      .withCwd(cwd)
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.index, '/README');
+        done();
+      })
+      .catch(done);
+  });
+
+  it('computes correct index when index and README are here', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'which_index');
+    new HelixProject()
+      .withCwd(cwd)
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.index, '/index');
+        done();
+      })
+      .catch(done);
+  });
 });
