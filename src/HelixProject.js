@@ -163,6 +163,14 @@ class HelixProject {
     return this._server;
   }
 
+  /**
+   * Returns the index resource path: /index or /README
+   */
+  get index() {
+    const p = this._indexMd;
+    return p.substring(p.lastIndexOf('/'), p.lastIndexOf('.'));
+  }
+
   async loadConfig() {
     const cfgPath = path.resolve(this._cwd, HELIX_CONFIG);
     if (await isFile(cfgPath)) {
@@ -171,14 +179,14 @@ class HelixProject {
   }
 
   async checkPaths() {
-    const idxPath = path.resolve(this._cwd, INDEX_MD);
-    if (await isFile(idxPath)) {
-      this._indexMd = idxPath;
-    }
-
     const readmePath = path.join(this._cwd, README_MD);
     if (await isFile(readmePath)) {
       this._indexMd = readmePath;
+    }
+
+    const idxPath = path.resolve(this._cwd, INDEX_MD);
+    if (await isFile(idxPath)) {
+      this._indexMd = idxPath;
     }
 
     const srcPath = path.join(this._cwd, SRC_DIR);

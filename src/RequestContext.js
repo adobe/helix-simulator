@@ -28,7 +28,7 @@ module.exports = class RequestContext {
 
     if (this._path === '/') {
       // request to root
-      this._path = '/index.html';
+      this._path = `${this._cfg.index}.html`;
     }
 
     let relPath = this._path;
