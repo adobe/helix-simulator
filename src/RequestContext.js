@@ -27,8 +27,8 @@ module.exports = class RequestContext {
     this._params = req.query || {};
 
     if (this._path === '/') {
-      // request to root
-      this._path = `${this._cfg.index}.html`;
+      // request to root must either use computed index from config or just fallack to index.html
+      this._path = this._cfg ? `${this._cfg.index}.html` : '/index.html';
     }
 
     let relPath = this._path;
