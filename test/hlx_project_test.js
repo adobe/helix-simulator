@@ -39,6 +39,8 @@ const SPECS_WITH_FAKE_GIT = [
   path.join(SPEC_ROOT, 'local'),
   path.join(SPEC_ROOT, 'remote'),
   path.join(SPEC_ROOT, 'emptycfg'),
+  path.join(SPEC_ROOT, 'which_index'),
+  path.join(SPEC_ROOT, 'index_is_readme'),
 ];
 
 function initRepository(dir) {
