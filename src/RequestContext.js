@@ -58,7 +58,7 @@ module.exports = class RequestContext {
       'X-Openwhisk-Activation-Id': this._wskActivationId,
       'X-Request-Id': this._requestId,
       'X-Backend-Name': 'localhost--F_Petridish',
-      'X-CDN-Request-Id': this._cdnRequestId,
+      'X-CDN-Request-ID': this._cdnRequestId,
     }, this._headers);
   }
 
