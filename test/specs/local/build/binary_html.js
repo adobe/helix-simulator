@@ -23,11 +23,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-module.exports.main = function main(params){
+module.exports.main = function main(){
   return {
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/octet-stream',
     },
-    body: params,
+    body: Buffer.from('00112233', 'hex'),
   };
 };
