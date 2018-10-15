@@ -12,6 +12,8 @@
 const fs = require('fs-extra');
 const request = require('request-promise');
 const path = require('path');
+const crypto = require('crypto');
+const logger = require('./logger.js');
 
 const utils = {
 
@@ -53,10 +55,14 @@ const utils = {
       });
       return response.body;
     } catch (e) {
-      if (e.response.statusCode === 404) {
+      if (e.response && e.response.statusCode) {
+        if (e.response.statusCode !== 404) {
+          logger.error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
+        }
         return null;
       }
-      throw new Error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
+      logger.error(`resource at ${uri} does not exist. ${e.message}`);
+      return null;
     }
   },
 
@@ -85,6 +91,32 @@ const utils = {
     throw error;
   },
 
+  /**
+   * Generates a random string of the given `length` consisting of alpha numerical characters.
+   * if `hex` is {@code true}, the string will only consist of hexadecimal digits.
+   * @param {number}length length of the string.
+   * @param {boolean} hex returns a hex string if {@code true}
+   * @returns {String} a random string.
+   */
+  randomChars(length, hex = false) {
+    if (length === 0) {
+      return '';
+    }
+    if (hex) {
+      return crypto.randomBytes(Math.round(length / 2)).toString('hex').substring(0, length);
+    }
+    const str = crypto.randomBytes(length).toString('base64');
+    return str.substring(0, length);
+  },
+
+  /**
+   * Generates a completely random uuid of the format:
+   * `00000000-0000-0000-0000-000000000000`
+   * @returns {string} A random uuid.
+   */
+  uuid() {
+    return `${utils.randomChars(8, true)}-${utils.randomChars(4, true)}-${utils.randomChars(4, true)}-${utils.randomChars(4, true)}-${utils.randomChars(12, true)}`;
+  },
 };
 
 module.exports = Object.freeze(utils);
