@@ -20,7 +20,7 @@ const utils = require('./utils.js');
 module.exports = class RequestContext {
   constructor(req, cfg) {
     const { url } = req;
-    this._cfg = cfg;
+    this._cfg = cfg || {};
     this._url = url;
     this._path = url || '/';
     this._selector = '';
@@ -36,10 +36,10 @@ module.exports = class RequestContext {
     let lastDot = this._path.lastIndexOf('.');
     if (lastDot <= lastSlash) {
       // no extension means a folder request
-      const index = this._cfg.directoryIndex;
+      const index = this._cfg.directoryIndex || 'index.html';
       this._path = `${this._path}/${index}`;
       // remove multipe slashes
-      this._path = this._path.replace(/([^:]\/)\/+/g, '$1');
+      this._path = this._path.replace(/\/+/g, '/');
       lastDot = this._path.lastIndexOf('.');
     }
 

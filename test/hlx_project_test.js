@@ -265,7 +265,7 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .init()
       .then((cfg) => {
-        assert.equal(cfg.index, '/index');
+        assert.equal(cfg.directoryIndex, 'index.html');
         done();
       })
       .catch(done);
@@ -277,7 +277,7 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .init()
       .then((cfg) => {
-        assert.equal(cfg.index, '/README');
+        assert.equal(cfg.directoryIndex, 'README.html');
         done();
       })
       .catch(done);
@@ -289,7 +289,7 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .init()
       .then((cfg) => {
-        assert.equal(cfg.index, '/index');
+        assert.equal(cfg.directoryIndex, 'index.html');
         done();
       })
       .catch(done);

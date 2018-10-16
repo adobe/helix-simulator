@@ -23,7 +23,7 @@ describe('Utils Test', () => {
         url: '/', valid: true, path: '/index.html', resourcePath: '/index', selector: '', extension: 'html',
       },
       {
-        url: '/content', valid: true, path: '/content', resourcePath: '/content', selector: '', extension: '',
+        url: '/content', valid: true, path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
       },
       {
         url: '/content/index.html', valid: true, path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
