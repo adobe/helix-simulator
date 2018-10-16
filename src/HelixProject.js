@@ -173,12 +173,13 @@ class HelixProject {
     return this._server;
   }
 
-  /**
-   * Returns the index resource path: /index or /README
-   */
-  get index() {
-    const p = this._indexMd;
-    return p.substring(p.lastIndexOf('/'), p.lastIndexOf('.'));
+  withDirectoryIndex(index) {
+    this._directoryIndex = index;
+    return this;
+  }
+
+  get directoryIndex() {
+    return this._directoryIndex;
   }
 
   /*
@@ -206,6 +207,9 @@ class HelixProject {
     if (await isFile(idxPath)) {
       this._indexMd = idxPath;
     }
+
+    const directoryIndex = `${this._indexMd.substring(this._indexMd.lastIndexOf('/') + 1, this._indexMd.lastIndexOf('.'))}.html`;
+    this.withDirectoryIndex(directoryIndex);
 
     const srcPath = path.join(this._cwd, SRC_DIR);
     if (await isDirectory(srcPath)) {
