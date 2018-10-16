@@ -1,0 +1,67 @@
+{
+    "strains": {
+        "client": {
+            "code": "/acapt/default/https---github-com-adobe-project-helix-io-git--master--",
+            "condition": "req.http.host == \"client.project-helix.io\"",
+            "content": {
+                "filepath": "",
+                "owner": "adobe",
+                "ref": "master",
+                "repo": "helix-cli"
+            },
+            "directoryIndex": "index.html",
+            "name": "client",
+            "static": {
+                "allow": [],
+                "deny": [],
+                "filepath": "/webroot",
+                "magic": false,
+                "owner": "adobe",
+                "ref": "master",
+                "repo": "project-helix.io"
+            }
+        },
+        "default": {
+            "code": "/acapt/default/https---github-com-adobe-project-helix-io-git--master--",
+            "condition": "req.http.host == \"www.project-helix.io\"",
+            "content": {
+                "filepath": "",
+                "owner": "adobe",
+                "ref": "master",
+                "repo": "project-helix.io"
+            },
+            "directoryIndex": "readme.html",
+            "name": "default",
+            "static": {
+                "allow": [],
+                "deny": [],
+                "filepath": "/dist",
+                "magic": false,
+                "owner": "adobe",
+                "ref": "master",
+                "repo": "project-helix.io"
+            }
+        },
+        "pipeline": {
+            "code": "/acapt/default/https---github-com-adobe-project-helix-io-git--master--",
+            "condition": "req.http.host == \"pipeline.project-helix.io\"",
+            "content": {
+                "filepath": "",
+                "owner": "adobe",
+                "ref": "master",
+                "repo": "hypermedia-pipeline"
+            },
+            "directoryIndex": "index.html",
+            "name": "pipeline",
+            "static": {
+                "allow": [],
+                "deny": [],
+                "filepath": "/dist",
+                "magic": false,
+                "owner": "adobe",
+                "ref": "master",
+                "repo": "project-helix.io"
+            }
+        }
+    }
+}

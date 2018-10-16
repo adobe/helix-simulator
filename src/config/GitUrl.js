@@ -9,11 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-/**
- * StrainConfig wrapper
- *
- * @type {module.StrainURLs}
- */
+
 const GitUrlParse = require('git-url-parse');
 
 const RAW_TYPE = 'raw';
@@ -28,8 +24,30 @@ const constructUrl = (urlParse, type) => {
   return `${urlParse.protocols[0]}://${type}.${urlParse.resource}${urlParse.port ? `:${urlParse.port}` : ''}`;
 };
 
-module.exports = class GitUrl {
-  constructor(url) {
+/**
+ * Represents a GIT url.
+ * @property {String} owner Git owner
+ * @property {String} repo Git repository name
+ * @property {String} ref Reference (branch, tag)
+ * @property {String} filepath Resource path.
+ */
+class GitUrl {
+  constructor(url, defaults) {
+    if (defaults) {
+      this._urlParse = {
+        protocols: ['https'],
+        resource: 'github.com',
+        owner: url.owner || defaults.owner,
+        name: url.repo || defaults.repo,
+        ref: url.ref || defaults.ref,
+        filepath: url.root || defaults.root || '',
+        toString() {
+          return `${this.protocols[0]}://${this.resource}/${this.owner}/${this.name}/${this.ref}${this.filepath}`;
+        },
+      };
+      return;
+    }
+
     this._urlParse = GitUrlParse(url);
   }
 
@@ -59,7 +77,22 @@ module.exports = class GitUrl {
     return this._urlParse.ref || DEFAULT_BRANCH;
   }
 
+  get filepath() {
+    return this._urlParse.filepath;
+  }
+
   toString() {
     return `${this._urlParse}`;
   }
-};
+
+  toPlainObject() {
+    return {
+      owner: this.owner,
+      repo: this.repo,
+      ref: this.ref,
+      filepath: this.filepath,
+    };
+  }
+}
+
+module.exports = GitUrl;

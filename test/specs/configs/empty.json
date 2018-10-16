@@ -1,0 +1,25 @@
+{
+    "strains": {
+        "default": {
+            "code": "",
+            "condition": "",
+            "content": {
+                "filepath": "",
+                "owner": "local",
+                "ref": "master",
+                "repo": "default"
+            },
+            "directoryIndex": "index.html",
+            "name": "default",
+            "static": {
+                "allow": [],
+                "deny": [],
+                "filepath": "/dist",
+                "magic": false,
+                "owner": "local",
+                "ref": "master",
+                "repo": "default"
+            }
+        }
+    }
+}
