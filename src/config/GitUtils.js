@@ -23,7 +23,7 @@ class GitUtils {
         silent: true,
       })
       .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-').length;
+      .replace(/[\W]/g, '-').length > 0;
   }
 
   static getBranch() {
@@ -67,10 +67,14 @@ class GitUtils {
   }
 
   static getOrigin() {
-    const origin = $.exec('git config --get remote.origin.url', {
-      silent: true,
-    }).stdout.replace(/\n/g, '');
-    return origin;
+    try {
+      const origin = $.exec('git config --get remote.origin.url', {
+        silent: true,
+      }).stdout.replace(/\n/g, '');
+      return origin;
+    } catch (e) {
+      return '';
+    }
   }
 
   static getOriginURL() {
