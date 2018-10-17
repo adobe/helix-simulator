@@ -24,73 +24,143 @@ const constructUrl = (urlParse, type) => {
   return `${urlParse.protocols[0]}://${type}.${urlParse.resource}${urlParse.port ? `:${urlParse.port}` : ''}`;
 };
 
+
 /**
  * Represents a GIT url.
- * @property {String} owner Git owner
- * @property {String} repo Git repository name
- * @property {String} ref Reference (branch, tag)
- * @property {String} filepath Resource path.
  */
 class GitUrl {
+  /**
+   * Creates a new GitUrl either from a String URL or from a serialized object.
+   * @param {String|GitUrl~JSON} url URL or object defining the new git url.
+   * @param {GitUrl~JSON} defaults Defaults for missing properties in the `url` param.
+   */
   constructor(url, defaults) {
     if (defaults) {
       this._urlParse = {
         protocols: ['https'],
-        resource: 'github.com',
+        resource: url.host || defaults.host || 'github.com',
+        port: url.port || defaults.port || '',
         owner: url.owner || defaults.owner,
         name: url.repo || defaults.repo,
         ref: url.ref || defaults.ref,
-        filepath: url.root || defaults.root || '',
+        filepath: url.path || defaults.path || '',
         toString() {
-          return `${this.protocols[0]}://${this.resource}/${this.owner}/${this.name}/${this.ref}${this.filepath}`;
+          return `${this.protocols[0]}://${this.resource}/${this.owner}/${this.name}/${this.ref}${this.path}`;
         },
       };
       return;
     }
-
     this._urlParse = GitUrlParse(url);
   }
 
+  /**
+   * The raw github url in the form 'https://raw.github.com/owner/repo/ref`. In case the
+   * {@link #host} is an IP, the returned url is of the form 'https://xxx.xxx.xxx.xxx/raw/owner/repo/ref`.
+   * @type String
+   */
   get raw() {
     let url = constructUrl(this._urlParse, RAW_TYPE);
     url += `/${this.owner}/${this.repo}/${this.ref}`;
     return url;
   }
 
+  /**
+   * Root of the raw github url in the form 'https://raw.github.com`. In case the
+   * {@link #host} is an IP, the returned url is of the form 'https://xxx.xxx.xxx.xxx/raw`.
+   * @type String
+   */
   get rawRoot() {
     return constructUrl(this._urlParse, RAW_TYPE);
   }
 
+  /**
+   * Root of the github api in the form 'https://api.github.com`. In case the
+   * {@link #host} is an IP, the returned url is of the form 'https://xxx.xxx.xxx.xxx/api`.
+   * @type String
+   */
   get apiRoot() {
     return constructUrl(this._urlParse, API_TYPE);
   }
 
+  /**
+   * Hostname of the repository provider. eg `github.com`
+   * @type String
+   */
+  get host() {
+    return this._urlParse.resource;
+  }
+
+  /**
+   * Port of the repository provider.
+   * @type String
+   */
+  get port() {
+    return this._urlParse.port;
+  }
+
+  /**
+   * Repository owner.
+   * @type String
+   */
   get owner() {
     return this._urlParse.owner;
   }
 
+  /**
+   * Repository name.
+   * @type String
+   */
   get repo() {
     return this._urlParse.name;
   }
 
+  /**
+   * Repository ref, such as `master`.
+   * @type String
+   */
   get ref() {
     return this._urlParse.ref || DEFAULT_BRANCH;
   }
 
-  get filepath() {
+  /**
+   * Resource path. eg `/README.md`
+   * @type String
+   */
+  get path() {
     return this._urlParse.filepath;
   }
 
+  /**
+   * String representation of the git url.
+   * @returns {String} url.
+   */
   toString() {
     return `${this._urlParse}`;
   }
 
-  toPlainObject() {
+  /**
+   * JSON Serialization of GitUrl
+   * @typedef {Object} GitUrl~JSON
+   * @property {String} host Repository provider host name
+   * @property {String} port Repository provider port
+   * @property {String} owner Repository owner
+   * @property {String} repo Repository name
+   * @property {String} ref Repository reference, such as `master`
+   * @property {String} path Relative path to the resource
+   */
+
+  /**
+   * Returns a plain object representation.
+   * @returns {GitUrl~JSON} A plain object suitable for serialization.
+   */
+  toJSON() {
     return {
+      host: this.host,
+      port: this.port,
       owner: this.owner,
       repo: this.repo,
       ref: this.ref,
-      filepath: this.filepath,
+      path: this.path,
     };
   }
 }

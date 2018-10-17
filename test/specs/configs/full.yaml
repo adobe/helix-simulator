@@ -11,10 +11,10 @@
 
 # defines the default content repository
 # content: local
-content: https://github.com/adobe/project-helix.io/blob/master
+content: https://github.com/adobe/project-helix.io
 
 # defines the default code repository
-code: https://github.com/adobe/project-helix.io/blob/master
+code: https://github.com/adobe/project-helix.io
 
 # defines the default static root relative to the code repository
 staticRoot: /webroot
@@ -27,13 +27,6 @@ strains:
   default:
     code: /acapt/default/https---github-com-adobe-project-helix-io-git--master--
     condition: req.http.host == "www.project-helix.io"
-    content:
-      repo: project-helix.io
-      ref: master
-      owner: adobe
-    static:
-      root: /dist
-    directoryIndex: readme.html
 
   client:
     code: /acapt/default/https---github-com-adobe-project-helix-io-git--master--
@@ -42,6 +35,7 @@ strains:
       repo: helix-cli
       ref: master
       owner: adobe
+    directoryIndex: readme.html
 
   pipeline:
     code: /acapt/default/https---github-com-adobe-project-helix-io-git--master--

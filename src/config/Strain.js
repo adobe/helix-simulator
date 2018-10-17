@@ -14,10 +14,6 @@ const GitUrl = require('./GitUrl.js');
 
 /**
  * Static content handling
- * @property {GitUrl} url
- * @property {boolean} magic
- * @property {String[]} allow
- * @property {String[]} deny
  */
 class Static {
   constructor(cfg, defaults) {
@@ -43,8 +39,37 @@ class Static {
     return this._deny;
   }
 
-  toPlainObject() {
-    return Object.assign({}, this.url.toPlainObject(), {
+  get path() {
+    return this._url.path;
+  }
+
+  get owner() {
+    return this._url.owner;
+  }
+
+  get repo() {
+    return this._url.repo;
+  }
+
+  get ref() {
+    return this._url.ref;
+  }
+
+  /**
+   * JSON Serialization of Static
+   * @typedef Static~JSON
+   * @augments GitUrl~JSON
+   * @property {boolean} magic
+   * @property {String[]} allow
+   * @property {String[]} deny
+   */
+
+  /**
+   * Returns a json representation
+   * @returns {Static~JSON}
+   */
+  toJSON() {
+    return Object.assign({}, this.url.toJSON(), {
       magic: this.magic,
       allow: this.allow,
       deny: this.deny,
@@ -53,25 +78,64 @@ class Static {
 }
 
 /**
+ * Performance Definition
+ */
+class Performance {
+  constructor(cfg = {}) {
+    this._device = cfg.device || '';
+    this._location = cfg.location || '';
+    this._connection = cfg.connection || '';
+  }
+
+
+  get device() {
+    return this._device;
+  }
+
+  get location() {
+    return this._location;
+  }
+
+  get connection() {
+    return this._connection;
+  }
+
+  /**
+   * JSON Serialization of Performance
+   * @typedef Performance~JSON
+   * @property {String} device
+   * @property {String} location
+   * @property {String} connection
+   */
+
+  /**
+   * Returns a json representation
+   * @returns {Performance~JSON}
+   */
+  toJSON() {
+    return {
+      device: this.device,
+      location: this.location,
+      connection: this.connection,
+    };
+  }
+}
+
+/**
  * Strain
- * @property {String} name
- * @property {String} code
- * @property {GitUrl} content
- * @property {Static} staticContent
- * @property {String} condition
- * @property {String} directoryIndex
  */
 class Strain {
   constructor(name, cfg, defaults) {
     this._name = name;
     this._content = new GitUrl(cfg.content || {}, defaults.content);
     this._code = cfg.code || '';
-    const staticDefaults = Object.assign({}, defaults.code.toPlainObject(), {
-      root: defaults.staticRoot,
+    const staticDefaults = Object.assign({}, defaults.code.toJSON(), {
+      path: defaults.staticRoot,
     });
     this._static = new Static(cfg.static || {}, staticDefaults);
     this._condition = cfg.condition || '';
     this._directoryIndex = cfg.directoryIndex || defaults.directoryIndex;
+    this._perf = new Performance(cfg.perf);
   }
 
   get name() {
@@ -82,8 +146,16 @@ class Strain {
     return this._content;
   }
 
+  set content(url) {
+    this._content = url;
+  }
+
   get code() {
     return this._code;
+  }
+
+  set code(code) {
+    this._code = code;
   }
 
   get static() {
@@ -98,14 +170,35 @@ class Strain {
     return this._directoryIndex;
   }
 
-  toPlainObject() {
+  get perf() {
+    return this._perf;
+  }
+
+  /**
+   * JSON Serialization of a Strain
+   * @typedef Strain~JSON
+   * @property {String} name
+   * @property {String} code
+   * @property {GitUrl~JSON} content
+   * @property {Static~JSON} static
+   * @property {String} condition
+   * @property {String} directoryIndex
+   * @property {Performance~JSON} perf
+   */
+
+  /**
+   * Returns a json representation
+   * @returns {Strain~JSON}
+   */
+  toJSON() {
     return {
       name: this.name,
-      code: this.code, // .toPlainObject(),
-      content: this.content.toPlainObject(),
-      static: this.static.toPlainObject(),
+      code: this.code,
+      content: this.content.toJSON(),
+      static: this.static.toJSON(),
       condition: this.condition,
       directoryIndex: this.directoryIndex,
+      perf: this.perf.toJSON(),
     };
   }
 }

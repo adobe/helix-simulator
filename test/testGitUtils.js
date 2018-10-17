@@ -10,14 +10,19 @@
  * governing permissions and limitations under the License.
  */
 
-const HelixProject = require('./HelixProject.js');
-const GitUrl = require('./config/GitUrl.js');
-const GitUtils = require('./config/GitUtils.js');
-const HelixConfig = require('./config/HelixConfig.js');
+/* eslint-env mocha */
 
-module.exports = {
-  HelixProject,
-  GitUrl,
-  GitUtils,
-  HelixConfig,
-};
+const assert = require('assert');
+const { GitUtils } = require('../src/index');
+
+describe('Testing GitUtils', () => {
+  it('getOrigin #unit', () => {
+    assert.ok(GitUtils.getOrigin());
+    assert.ok(/petridish/.test(GitUtils.getOrigin()));
+  });
+
+  it('getOriginURL #unit', () => {
+    assert.ok(GitUtils.getOriginURL());
+    assert.equal(GitUtils.getOriginURL().repo, 'petridish');
+  });
+});

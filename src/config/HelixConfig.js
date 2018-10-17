@@ -42,6 +42,13 @@ class HelixConfig {
     };
 
     this._strains = new Map();
+    this._strains.toJSON = () => {
+      const strains = {};
+      this._strains.forEach((strain, name) => {
+        strains[name] = strain.toJSON();
+      });
+      return strains;
+    };
   }
 
   withConfigPath(cfgPath) {
@@ -49,9 +56,13 @@ class HelixConfig {
     return this;
   }
 
-  withCwd(cwd) {
+  withDirectory(cwd) {
     this._cwd = cwd;
     return this;
+  }
+
+  get directory() {
+    return this._cwd;
   }
 
   get strains() {
@@ -99,14 +110,10 @@ class HelixConfig {
     return this;
   }
 
-  toPlainObject() {
-    const obj = {
-      strains: {},
+  toJSON() {
+    return {
+      strains: this._strains.toJSON(),
     };
-    this._strains.forEach((strain, name) => {
-      obj.strains[name] = strain.toPlainObject();
-    });
-    return obj;
   }
 }
 

@@ -26,7 +26,7 @@ describe('Helix Config', () => {
       .init();
 
     const expected = JSON.parse(await fs.readFile(path.resolve(SPEC_ROOT, 'empty.json'), 'utf-8'));
-    const actual = cfg.toPlainObject();
+    const actual = cfg.toJSON();
     assert.deepEqual(actual, expected);
   });
 
@@ -36,7 +36,17 @@ describe('Helix Config', () => {
       .init();
 
     const expected = JSON.parse(await fs.readFile(path.resolve(SPEC_ROOT, 'full.json'), 'utf-8'));
-    const actual = cfg.toPlainObject();
+    const actual = cfg.toJSON();
+    assert.deepEqual(actual, expected);
+  });
+
+  it('can serialize strains as json', async () => {
+    const cfg = await new HelixConfig()
+      .withConfigPath(path.resolve(SPEC_ROOT, 'full.yaml'))
+      .init();
+
+    const expected = JSON.parse(await fs.readFile(path.resolve(SPEC_ROOT, 'full.json'), 'utf-8')).strains;
+    const actual = JSON.parse(JSON.stringify(cfg.strains, null, '  '));
     assert.deepEqual(actual, expected);
   });
 });

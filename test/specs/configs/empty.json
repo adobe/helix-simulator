@@ -4,19 +4,28 @@
             "code": "",
             "condition": "",
             "content": {
-                "filepath": "",
+                "host": "localhost",
                 "owner": "local",
+                "path": "",
+                "port": "",
                 "ref": "master",
                 "repo": "default"
             },
             "directoryIndex": "index.html",
             "name": "default",
+            "perf": {
+                "connection": "",
+                "device": "",
+                "location": ""
+            },
             "static": {
                 "allow": [],
                 "deny": [],
-                "filepath": "/dist",
+                "host": "localhost",
                 "magic": false,
                 "owner": "local",
+                "path": "/dist",
+                "port": "",
                 "ref": "master",
                 "repo": "default"
             }
