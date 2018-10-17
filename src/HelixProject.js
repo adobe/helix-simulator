@@ -173,7 +173,16 @@ class HelixProject {
     return this._server;
   }
 
-  /**
+  withDirectoryIndex(index) {
+    this._directoryIndex = index;
+    return this;
+  }
+
+  get directoryIndex() {
+    return this._directoryIndex;
+  }
+
+  /*
    * Returns the git state
    * @returns {Object}
    */
@@ -189,15 +198,18 @@ class HelixProject {
   }
 
   async checkPaths() {
+    const readmePath = path.join(this._cwd, README_MD);
+    if (await isFile(readmePath)) {
+      this._indexMd = readmePath;
+    }
+
     const idxPath = path.resolve(this._cwd, INDEX_MD);
     if (await isFile(idxPath)) {
       this._indexMd = idxPath;
     }
 
-    const readmePath = path.join(this._cwd, README_MD);
-    if (await isFile(readmePath)) {
-      this._indexMd = readmePath;
-    }
+    const directoryIndex = `${this._indexMd.substring(this._indexMd.lastIndexOf('/') + 1, this._indexMd.lastIndexOf('.'))}.html`;
+    this.withDirectoryIndex(directoryIndex);
 
     const srcPath = path.join(this._cwd, SRC_DIR);
     if (await isDirectory(srcPath)) {

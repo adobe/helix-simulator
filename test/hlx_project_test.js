@@ -39,6 +39,8 @@ const SPECS_WITH_FAKE_GIT = [
   path.join(SPEC_ROOT, 'local'),
   path.join(SPEC_ROOT, 'remote'),
   path.join(SPEC_ROOT, 'emptycfg'),
+  path.join(SPEC_ROOT, 'which_index'),
+  path.join(SPEC_ROOT, 'index_is_readme'),
 ];
 
 function initRepository(dir) {
@@ -253,6 +255,42 @@ describe('Helix Project', () => {
         project.stop().then(() => {
           done(err);
         });
+      })
+      .catch(done);
+  });
+
+  it('computes correct index: finds index', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    new HelixProject()
+      .withCwd(cwd)
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.directoryIndex, 'index.html');
+        done();
+      })
+      .catch(done);
+  });
+
+  it('computes correct index: finds README', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'index_is_readme');
+    new HelixProject()
+      .withCwd(cwd)
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.directoryIndex, 'README.html');
+        done();
+      })
+      .catch(done);
+  });
+
+  it('computes correct index when index and README are here', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'which_index');
+    new HelixProject()
+      .withCwd(cwd)
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.directoryIndex, 'index.html');
+        done();
       })
       .catch(done);
   });
