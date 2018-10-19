@@ -20,7 +20,7 @@ const utils = require('./utils.js');
 module.exports = class RequestContext {
   constructor(req, cfg) {
     const { url } = req;
-    this._cfg = cfg;
+    this._cfg = cfg || {};
     this._url = url;
     this._path = url || '/';
     this._selector = '';
@@ -32,25 +32,31 @@ module.exports = class RequestContext {
     this._requestId = utils.randomChars(32);
     this._cdnRequestId = utils.uuid();
 
-    let relPath = this._path;
-    const lastSlash = relPath.lastIndexOf('/');
-    const lastDot = relPath.lastIndexOf('.');
-    if (lastDot > lastSlash) {
-      relPath = relPath.substring(0, lastDot);
-      const queryParamIndex = this._path.lastIndexOf('?');
-      this._extension = this._path.substring(
-        lastDot + 1,
-        (queryParamIndex !== -1 ? queryParamIndex : this._path.length),
-      );
-      // check for selector
-      const selDot = relPath.lastIndexOf('.');
-      if (selDot > lastSlash) {
-        this._selector = relPath.substring(selDot + 1);
-        relPath = relPath.substring(0, selDot);
-      }
-    } else if (lastSlash === relPath.length - 1) {
-      relPath += 'index';
+    const lastSlash = this._path.lastIndexOf('/');
+    let lastDot = this._path.lastIndexOf('.');
+    if (lastDot <= lastSlash) {
+      // no extension means a folder request
+      const index = this._cfg.directoryIndex || 'index.html';
+      this._path = `${this._path}/${index}`;
+      // remove multipe slashes
+      this._path = this._path.replace(/\/+/g, '/');
+      lastDot = this._path.lastIndexOf('.');
     }
+
+    let relPath = this._path.substring(0, lastDot);
+
+    const queryParamIndex = this._path.lastIndexOf('?');
+    this._extension = this._path.substring(
+      lastDot + 1,
+      (queryParamIndex !== -1 ? queryParamIndex : this._path.length),
+    );
+    // check for selector
+    const selDot = relPath.lastIndexOf('.');
+    if (selDot > lastSlash) {
+      this._selector = relPath.substring(selDot + 1);
+      relPath = relPath.substring(0, selDot);
+    }
+
     this._resourcePath = relPath;
 
     // generate headers
