@@ -51,11 +51,16 @@ class GitUrl {
       }
       // special case for `scp` form
       if (url.startsWith('git@')) {
-        if (!url.endsWith('/') && !url.endsWith('.git')) {
-          this._url = new URL(`ssh://${url}.git`);
-        } else {
-          this._url = new URL(`ssh://${url}`);
+        const cIdx = url.indexOf(':');
+        if (cIdx < 0) {
+          throw Error(`Invalid URL: no valid scp url: ${url}`);
         }
+        const auth = url.substring(0, cIdx);
+        let path = url.substring(cIdx + 1);
+        if (!path.endsWith('/') && !path.endsWith('.git')) {
+          path += '.git';
+        }
+        this._url = new URL(`ssh://${auth}/${path}`);
       } else {
         this._url = new URL(url);
       }

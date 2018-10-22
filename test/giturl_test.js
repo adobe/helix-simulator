@@ -22,7 +22,7 @@ describe('GitUrl from string tests', () => {
       const url = new GitUrl();
       assert.fail('should fail with no arguments');
     } catch (e) {
-      assert.equal('Invalid URL: undefined', e.message);
+      assert.equal(e.message, 'Invalid URL: undefined');
     }
   });
 
@@ -32,12 +32,12 @@ describe('GitUrl from string tests', () => {
       const url = new GitUrl('https://github.com/no/git');
       assert.fail('should fail with no arguments');
     } catch (e) {
-      assert.equal('Invalid URL: no valid git-url: https://github.com/no/git', e.message);
+      assert.equal(e.message, 'Invalid URL: no valid git-url: https://github.com/no/git');
     }
   });
 
   it('Full example', () => {
-    const url = new GitUrl('http://git.example.com:1234/company/repository.git/docs/main#products/v2');
+    const url = new GitUrl('http://users:password@git.example.com:1234/company/repository.git/docs/main#products/v2');
     assert.equal(url.protocol, 'http');
     assert.equal(url.hostname, 'git.example.com');
     assert.equal(url.port, '1234');
@@ -49,7 +49,7 @@ describe('GitUrl from string tests', () => {
     assert.equal(url.raw, 'http://raw.git.example.com:1234/company/repository/products/v2');
     assert.equal(url.rawRoot, 'http://raw.git.example.com:1234');
     assert.equal(url.apiRoot, 'http://api.git.example.com:1234');
-    assert.equal(url.toString(), 'http://git.example.com:1234/company/repository.git/docs/main#products/v2');
+    assert.equal(url.toString(), 'http://users:password@git.example.com:1234/company/repository.git/docs/main#products/v2');
     assert.deepEqual(url.toJSON(), {
       protocol: 'http',
       host: 'git.example.com:1234',
@@ -192,8 +192,34 @@ describe('GitUrl from string tests', () => {
     });
   });
 
-  it('scp origin form', () => {
-    const url = new GitUrl('git@git.example.com/company/repository');
+  it('IP instead of hostname', () => {
+    const url = new GitUrl('http://127.0.0.1:1234/company/repository.git');
+    assert.equal(url.protocol, 'http');
+    assert.equal(url.hostname, '127.0.0.1');
+    assert.equal(url.port, '1234');
+    assert.equal(url.host, '127.0.0.1:1234');
+    assert.equal(url.owner, 'company');
+    assert.equal(url.repo, 'repository');
+    assert.equal(url.path, '');
+    assert.equal(url.ref, '');
+    assert.equal(url.raw, 'http://127.0.0.1:1234/raw/company/repository/master');
+    assert.equal(url.rawRoot, 'http://127.0.0.1:1234/raw');
+    assert.equal(url.apiRoot, 'http://127.0.0.1:1234/api');
+    assert.equal(url.toString(), 'http://127.0.0.1:1234/company/repository.git');
+    assert.deepEqual(url.toJSON(), {
+      protocol: 'http',
+      host: '127.0.0.1:1234',
+      hostname: '127.0.0.1',
+      owner: 'company',
+      path: '',
+      port: '1234',
+      ref: '',
+      repo: 'repository',
+    });
+  });
+
+  it('scp origin format', () => {
+    const url = new GitUrl('git@git.example.com:company/repository');
     assert.equal(url.protocol, 'ssh');
     assert.equal(url.hostname, 'git.example.com');
     assert.equal(url.port, '');
@@ -216,6 +242,16 @@ describe('GitUrl from string tests', () => {
       ref: '',
       repo: 'repository',
     });
+  });
+
+  it('Fails for non scp-url arguments', () => {
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const url = new GitUrl('git@github.com/no/git');
+      assert.fail('should fail with no arguments');
+    } catch (e) {
+      assert.equal(e.message, 'Invalid URL: no valid scp url: git@github.com/no/git');
+    }
   });
 });
 
@@ -327,7 +363,7 @@ describe('GitUrl from object tests', () => {
       });
       assert.fail('should fail with no arguments');
     } catch (e) {
-      assert.equal('Invalid URL: no owner', e.message);
+      assert.equal(e.message, 'Invalid URL: no owner');
     }
   });
 
@@ -339,7 +375,7 @@ describe('GitUrl from object tests', () => {
       });
       assert.fail('should fail with no arguments');
     } catch (e) {
-      assert.equal('Invalid URL: no repo', e.message);
+      assert.equal(e.message, 'Invalid URL: no repo');
     }
   });
 });
