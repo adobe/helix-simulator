@@ -25,6 +25,8 @@ class GitUrl {
    * Creates a new GitUrl either from a String URL or from a serialized object. The string must be
    * of the format "<scheme>://<hostname>[:<port>]/<owner>/<repo>.git[/<path>][#ref>]".
    *
+   * see https://www.git-scm.com/docs/git-clone#_git_urls_a_id_urls_a
+   *
    * @param {String|GitUrl~JSON} url URL or object defining the new git url.
    * @param {GitUrl~JSON} defaults Defaults for missing properties in the `url` param.
    */
@@ -44,7 +46,20 @@ class GitUrl {
         throw Error('Invalid URL: no repo');
       }
     } else {
-      this._url = new URL(url);
+      if (!url) {
+        throw Error('Invalid URL: undefined');
+      }
+      // special case for `scp` form
+      if (url.startsWith('git@')) {
+        if (!url.endsWith('/') && !url.endsWith('.git')) {
+          this._url = new URL(`ssh://${url}.git`);
+        } else {
+          this._url = new URL(`ssh://${url}`);
+        }
+      } else {
+        this._url = new URL(url);
+      }
+
       const parts = MATCH_GIT_URL.exec(this._url.pathname);
       if (parts === null) {
         throw Error(`Invalid URL: no valid git-url: ${url}`);
@@ -67,10 +82,11 @@ class GitUrl {
    * @private
    */
   _getRootURL(type) {
+    const protocol = this.protocol === 'ssh' ? 'https' : this.protocol;
     if (MATCH_IP.test(this.hostname)) {
-      return `${this.protocol}://${this.host}/${type}`;
+      return `${protocol}://${this.host}/${type}`;
     }
-    return `${this.protocol}://${type}.${this.host}`;
+    return `${protocol}://${type}.${this.host}`;
   }
 
   /**
@@ -172,7 +188,17 @@ class GitUrl {
    */
   toString() {
     const hash = this.ref ? `#${this.ref}` : '';
-    return `${this.protocol}://${this.host}/${this.owner}/${this.repo}.git${this.path}${hash}`;
+    let auth = '';
+    if (this._url.username) {
+      auth = this._url.username;
+    }
+    if (this._url.password) {
+      auth += `:${this._url.password}`;
+    }
+    if (auth) {
+      auth += '@';
+    }
+    return `${this.protocol}://${auth}${this.host}/${this.owner}/${this.repo}.git${this.path}${hash}`;
   }
 
   /**

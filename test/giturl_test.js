@@ -191,6 +191,32 @@ describe('GitUrl from string tests', () => {
       repo: 'repository',
     });
   });
+
+  it('scp origin form', () => {
+    const url = new GitUrl('git@git.example.com/company/repository');
+    assert.equal(url.protocol, 'ssh');
+    assert.equal(url.hostname, 'git.example.com');
+    assert.equal(url.port, '');
+    assert.equal(url.host, 'git.example.com');
+    assert.equal(url.owner, 'company');
+    assert.equal(url.repo, 'repository');
+    assert.equal(url.path, '');
+    assert.equal(url.ref, '');
+    assert.equal(url.raw, 'https://raw.git.example.com/company/repository/master');
+    assert.equal(url.rawRoot, 'https://raw.git.example.com');
+    assert.equal(url.apiRoot, 'https://api.git.example.com');
+    assert.equal(url.toString(), 'ssh://git@git.example.com/company/repository.git');
+    assert.deepEqual(url.toJSON(), {
+      protocol: 'ssh',
+      host: 'git.example.com',
+      hostname: 'git.example.com',
+      owner: 'company',
+      path: '',
+      port: '',
+      ref: '',
+      repo: 'repository',
+    });
+  });
 });
 
 describe('GitUrl from object tests', () => {
