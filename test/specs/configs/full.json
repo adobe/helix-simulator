@@ -5,9 +5,11 @@
             "condition": "req.http.host == \"client.project-helix.io\"",
             "content": {
                 "host": "github.com",
+                "hostname": "github.com",
                 "owner": "adobe",
                 "path": "",
                 "port": "",
+                "protocol": "https",
                 "ref": "master",
                 "repo": "helix-cli"
             },
@@ -22,11 +24,13 @@
                 "allow": [],
                 "deny": [],
                 "host": "github.com",
+                "hostname": "github.com",
                 "magic": false,
                 "owner": "adobe",
                 "path": "/webroot",
                 "port": "",
-                "ref": "master",
+                "protocol": "https",
+                "ref": "",
                 "repo": "project-helix.io"
             }
         },
@@ -35,10 +39,12 @@
             "condition": "req.http.host == \"www.project-helix.io\"",
             "content": {
                 "host": "github.com",
+                "hostname": "github.com",
                 "owner": "adobe",
                 "path": "",
                 "port": "",
-                "ref": "master",
+                "protocol": "https",
+                "ref": "",
                 "repo": "project-helix.io"
             },
             "directoryIndex": "index.html",
@@ -52,11 +58,13 @@
                 "allow": [],
                 "deny": [],
                 "host": "github.com",
+                "hostname": "github.com",
                 "magic": false,
                 "owner": "adobe",
                 "path": "/webroot",
                 "port": "",
-                "ref": "master",
+                "protocol": "https",
+                "ref": "",
                 "repo": "project-helix.io"
             }
         },
@@ -65,9 +73,11 @@
             "condition": "req.http.host == \"pipeline.project-helix.io\"",
             "content": {
                 "host": "github.com",
+                "hostname": "github.com",
                 "owner": "adobe",
                 "path": "",
                 "port": "",
+                "protocol": "https",
                 "ref": "master",
                 "repo": "hypermedia-pipeline"
             },
@@ -82,11 +92,13 @@
                 "allow": [],
                 "deny": [],
                 "host": "github.com",
+                "hostname": "github.com",
                 "magic": false,
                 "owner": "adobe",
                 "path": "/webroot",
                 "port": "",
-                "ref": "master",
+                "protocol": "https",
+                "ref": "",
                 "repo": "project-helix.io"
             }
         }

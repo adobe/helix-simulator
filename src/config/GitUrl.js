@@ -10,47 +10,67 @@
  * governing permissions and limitations under the License.
  */
 
-const GitUrlParse = require('git-url-parse');
+const { URL } = require('url');
 
 const RAW_TYPE = 'raw';
 const API_TYPE = 'api';
 const DEFAULT_BRANCH = 'master';
 const MATCH_IP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-
-const constructUrl = (urlParse, type) => {
-  if (MATCH_IP.test(urlParse.resource)) {
-    return `${urlParse.protocols[0]}://${urlParse.resource}${urlParse.port ? `:${urlParse.port}` : ''}/${type}`;
-  }
-  return `${urlParse.protocols[0]}://${type}.${urlParse.resource}${urlParse.port ? `:${urlParse.port}` : ''}`;
-};
-
-
+const MATCH_GIT_URL = /^\/([^/]+)\/([^/]+)\.git(\/.*)?$/;
 /**
  * Represents a GIT url.
  */
 class GitUrl {
   /**
-   * Creates a new GitUrl either from a String URL or from a serialized object.
+   * Creates a new GitUrl either from a String URL or from a serialized object. The string must be
+   * of the format "<scheme>://<hostname>[:<port>]/<owner>/<repo>.git[/<path>][#ref>]".
+   *
    * @param {String|GitUrl~JSON} url URL or object defining the new git url.
    * @param {GitUrl~JSON} defaults Defaults for missing properties in the `url` param.
    */
-  constructor(url, defaults) {
-    if (defaults) {
-      this._urlParse = {
-        protocols: ['https'],
-        resource: url.host || defaults.host || 'github.com',
-        port: url.port || defaults.port || '',
-        owner: url.owner || defaults.owner,
-        name: url.repo || defaults.repo,
-        ref: url.ref || defaults.ref,
-        filepath: url.path || defaults.path || '',
-        toString() {
-          return `${this.protocols[0]}://${this.resource}/${this.owner}/${this.name}/${this.ref}${this.path}`;
-        },
-      };
-      return;
+  constructor(url, defaults = {}) {
+    if (url === Object(url)) {
+      this._url = new URL(`${url.protocol || defaults.protocol || 'https'}://${url.hostname || defaults.hostname || 'github.com'}`);
+      this._url.port = url.port || defaults.port || 443;
+      this._owner = url.owner || defaults.owner;
+      this._repo = url.repo || defaults.repo;
+      this._ref = url.ref || defaults.ref;
+      this._path = url.path || defaults.path;
+
+      if (!this._owner) {
+        throw Error('Invalid URL: no owner');
+      }
+      if (!this._repo) {
+        throw Error('Invalid URL: no repo');
+      }
+    } else {
+      this._url = new URL(url);
+      const parts = MATCH_GIT_URL.exec(this._url.pathname);
+      if (parts === null) {
+        throw Error(`Invalid URL: no valid git-url: ${url}`);
+      }
+      // noinspection JSConsecutiveCommasInArrayLiteral
+      [, this._owner, this._repo, this._path] = parts;
+      this._ref = this._url.hash.substring(1);
     }
-    this._urlParse = GitUrlParse(url);
+
+    // sanitize path
+    if (this._path === '/') {
+      this._path = '';
+    }
+  }
+
+  /**
+   * Constructs a root url for the given type.
+   * @param {String} type Either `raw` or `api`.
+   * @returns {string} The URL
+   * @private
+   */
+  _getRootURL(type) {
+    if (MATCH_IP.test(this.hostname)) {
+      return `${this.protocol}://${this.host}/${type}`;
+    }
+    return `${this.protocol}://${type}.${this.host}`;
   }
 
   /**
@@ -59,8 +79,8 @@ class GitUrl {
    * @type String
    */
   get raw() {
-    let url = constructUrl(this._urlParse, RAW_TYPE);
-    url += `/${this.owner}/${this.repo}/${this.ref}`;
+    let url = this._getRootURL(RAW_TYPE);
+    url += `/${this.owner}/${this.repo}/${this.ref || DEFAULT_BRANCH}`;
     return url;
   }
 
@@ -70,7 +90,7 @@ class GitUrl {
    * @type String
    */
   get rawRoot() {
-    return constructUrl(this._urlParse, RAW_TYPE);
+    return this._getRootURL(RAW_TYPE);
   }
 
   /**
@@ -79,15 +99,31 @@ class GitUrl {
    * @type String
    */
   get apiRoot() {
-    return constructUrl(this._urlParse, API_TYPE);
+    return this._getRootURL(API_TYPE);
+  }
+
+  /**
+   * Protocol of the URL. eg `https`.
+   * @type String
+   */
+  get protocol() {
+    return this._url.protocol.replace(':', '');
   }
 
   /**
    * Hostname of the repository provider. eg `github.com`
    * @type String
    */
+  get hostname() {
+    return this._url.hostname;
+  }
+
+  /**
+   * Host of the repository provider. eg `localhost:44245`
+   * @type String
+   */
   get host() {
-    return this._urlParse.resource;
+    return this._url.host;
   }
 
   /**
@@ -95,7 +131,7 @@ class GitUrl {
    * @type String
    */
   get port() {
-    return this._urlParse.port;
+    return this._url.port;
   }
 
   /**
@@ -103,7 +139,7 @@ class GitUrl {
    * @type String
    */
   get owner() {
-    return this._urlParse.owner;
+    return this._owner;
   }
 
   /**
@@ -111,7 +147,7 @@ class GitUrl {
    * @type String
    */
   get repo() {
-    return this._urlParse.name;
+    return this._repo;
   }
 
   /**
@@ -119,7 +155,7 @@ class GitUrl {
    * @type String
    */
   get ref() {
-    return this._urlParse.ref || DEFAULT_BRANCH;
+    return this._ref || '';
   }
 
   /**
@@ -127,7 +163,7 @@ class GitUrl {
    * @type String
    */
   get path() {
-    return this._urlParse.filepath;
+    return this._path || '';
   }
 
   /**
@@ -135,14 +171,17 @@ class GitUrl {
    * @returns {String} url.
    */
   toString() {
-    return `${this._urlParse}`;
+    const hash = this.ref ? `#${this.ref}` : '';
+    return `${this.protocol}://${this.host}/${this.owner}/${this.repo}.git${this.path}${hash}`;
   }
 
   /**
    * JSON Serialization of GitUrl
    * @typedef {Object} GitUrl~JSON
-   * @property {String} host Repository provider host name
+   * @property {String} protocol Transport protocol
+   * @property {String} hostname Repository provider host name
    * @property {String} port Repository provider port
+   * @property {String} host Repository provider hostname and port.
    * @property {String} owner Repository owner
    * @property {String} repo Repository name
    * @property {String} ref Repository reference, such as `master`
@@ -155,8 +194,10 @@ class GitUrl {
    */
   toJSON() {
     return {
+      protocol: this.protocol,
       host: this.host,
       port: this.port,
+      hostname: this.hostname,
       owner: this.owner,
       repo: this.repo,
       ref: this.ref,

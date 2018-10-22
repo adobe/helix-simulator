@@ -11,10 +11,10 @@
 
 # defines the default content repository
 # content: local
-content: https://github.com/adobe/project-helix.io
+content: https://github.com/adobe/project-helix.io.git
 
 # defines the default code repository
-code: https://github.com/adobe/project-helix.io
+code: https://github.com/adobe/project-helix.io.git
 
 # defines the default static root relative to the code repository
 staticRoot: /webroot

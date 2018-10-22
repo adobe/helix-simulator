@@ -4,11 +4,13 @@
             "code": "",
             "condition": "",
             "content": {
-                "host": "localhost",
+                "host": "localhost:443",
+                "hostname": "localhost",
                 "owner": "local",
                 "path": "",
-                "port": "",
-                "ref": "master",
+                "port": "443",
+                "protocol": "http",
+                "ref": "",
                 "repo": "default"
             },
             "directoryIndex": "index.html",
@@ -21,12 +23,14 @@
             "static": {
                 "allow": [],
                 "deny": [],
-                "host": "localhost",
+                "host": "localhost:443",
+                "hostname": "localhost",
                 "magic": false,
                 "owner": "local",
                 "path": "/dist",
-                "port": "",
-                "ref": "master",
+                "port": "443",
+                "protocol": "http",
+                "ref": "",
                 "repo": "default"
             }
         }

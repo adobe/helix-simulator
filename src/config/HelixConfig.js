@@ -35,8 +35,8 @@ class HelixConfig {
     this._cfg = {};
 
     this._defaults = {
-      content: new GitUrl('http://localhost/local/default/blob/master'),
-      code: new GitUrl('http://localhost/local/default/blob/master'),
+      content: new GitUrl('http://localhost/local/default.git'),
+      code: new GitUrl('http://localhost/local/default.git'),
       staticRoot: '/dist',
       directoryIndex: 'index.html',
     };
