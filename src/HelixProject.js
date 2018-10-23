@@ -105,6 +105,7 @@ class HelixProject {
     this._contentRepo = null;
     this._server = new HelixServer(this);
     this._displayVersion = packageJson.version;
+    this._logger = logger;
   }
 
   withCwd(cwd) {
@@ -134,6 +135,11 @@ class HelixProject {
 
   withRuntimeModulePaths(paths) {
     this._runtimePaths = paths;
+    return this;
+  }
+
+  withLogger(winstonlogger) {
+    this._logger = winstonlogger;
     return this;
   }
 
@@ -247,26 +253,26 @@ class HelixProject {
     } else {
       throw new Error('Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
     }
-    logger.info('    __ __    ___         ');
-    logger.info('   / // /__ / (_)_ __    ');
-    logger.info('  / _  / -_) / /\\ \\ / ');
-    logger.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
-    logger.info('                         ');
-    logger.debug('Initialized helix-config with: ');
-    logger.debug(` contentRepo: ${this._contentRepo}`);
-    logger.debug(`     srcPath: ${this._srcDir}`);
-    logger.debug(`    buildDir: ${this._buildDir}`);
+    this._logger.info('    __ __    ___         ');
+    this._logger.info('   / // /__ / (_)_ __    ');
+    this._logger.info('  / _  / -_) / /\\ \\ / ');
+    this._logger.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
+    this._logger.info('                         ');
+    this._logger.debug('Initialized helix-config with: ');
+    this._logger.debug(` contentRepo: ${this._contentRepo}`);
+    this._logger.debug(`     srcPath: ${this._srcDir}`);
+    this._logger.debug(`    buildDir: ${this._buildDir}`);
     return this;
   }
 
   async startGitServer() {
-    logger.debug('Launching local git server for development...');
-    this._gitConfig.logger = logger.getLogger('git');
+    this._logger.debug('Launching local git server for development...');
+    this._gitConfig.logger = this._logger.getLogger('git');
     this._gitState = await gitServer.start(this._gitConfig);
   }
 
   async stopGitServer() {
-    logger.debug('Stopping local git server..');
+    this._logger.debug('Stopping local git server..');
     await gitServer.stop();
     this._gitState = null;
   }
@@ -282,14 +288,14 @@ class HelixProject {
       this._contentRepo = new GitUrl(`http://${GIT_LOCAL_HOST}:${this._gitState.httpPort}/${GIT_LOCAL_OWNER}/${GIT_LOCAL_CONTENT_REPO}/tree/${currentBranch}`);
     }
 
-    logger.debug('Launching petridish server for development...');
+    this._logger.debug('Launching petridish server for development...');
     this._server.init();
     await this._server.start(this);
     return this;
   }
 
   async stop() {
-    logger.debug('Stopping petridish server..');
+    this._logger.debug('Stopping petridish server..');
     await this._server.stop();
 
     if (this._needLocalServer) {

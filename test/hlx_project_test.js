@@ -115,6 +115,31 @@ describe('Helix Project', () => {
       .catch(done);
   });
 
+  it('Logs to custom logger', (done) => {
+    let count = 0;
+    const counter = () => {
+      if (count === 0) {
+        done();
+      }
+      count += 1;
+    };
+
+    const cwd = path.join(SPEC_ROOT, 'emptycfg');
+    new HelixProject()
+      .withLogger({
+        info: counter,
+        debug: counter,
+      })
+      .withCwd(cwd)
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.contentRepo, undefined);
+        assert.equal(cfg._needLocalServer, true);
+        counter();
+      })
+      .catch(done);
+  });
+
   it('detects local src and readme', (done) => {
     const cwd = path.join(SPEC_ROOT, 'local');
 
