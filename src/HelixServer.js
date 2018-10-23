@@ -67,7 +67,7 @@ function executeTemplate(ctx) {
   return Promise.resolve(mod.main({
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
-    __ow_logger: logger, // this causes ow-wrapper to use this logger
+    __ow_logger: this._logger, // this causes ow-wrapper to use this logger
     owner: ctx.config.contentRepo.owner,
     repo: ctx.config.contentRepo.repo,
     ref: ctx.config.contentRepo.ref,
@@ -89,6 +89,8 @@ class HelixServer extends EventEmitter {
     this._app = express();
     this._port = DEFAULT_PORT;
     this._server = null;
+    /* eslint-disable no-underscore-dangle */
+    this._logger = this._project._logger || logger;
 
     // todo: make configurable
     this._templateResolver = new TemplateResolver().with(TemplateResolverPlugins.simple);
@@ -103,7 +105,7 @@ class HelixServer extends EventEmitter {
         res.status(404).send();
         return;
       }
-      ctx.logger = logger;
+      ctx.logger = this._logger;
 
       if (ctx.extension === 'html' || ctx.extension === 'md') {
         // md files to be transformed
@@ -136,7 +138,7 @@ class HelixServer extends EventEmitter {
             });
           })
           .catch((err) => {
-            logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
+            this._logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
             res.status(500).send();
           });
       } else {
@@ -149,9 +151,9 @@ class HelixServer extends EventEmitter {
             res.send(result.content);
           }).catch((err) => {
             if (err.code === 404) {
-              logger.error(`Resource not found: ${ctx.path}`);
+              this._logger.error(`Resource not found: ${ctx.path}`);
             } else {
-              logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
+              this._logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
             }
             res.status(err.code || 500).send();
           });
@@ -179,7 +181,7 @@ class HelixServer extends EventEmitter {
           reject(new Error(`Error while starting http server: ${err}`));
         }
         this._port = this._server.address().port;
-        logger.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
+        this._logger.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
         resolve(this._port);
       });
     });
@@ -194,7 +196,7 @@ class HelixServer extends EventEmitter {
         if (err) {
           reject(new Error(`Error while stopping http server: ${err}`));
         }
-        logger.info('Local Helix Dev server stopped.');
+        this._logger.info('Local Helix Dev server stopped.');
         this._server = null;
         resolve();
       });
