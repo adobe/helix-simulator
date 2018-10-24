@@ -17,7 +17,7 @@ const assert = require('assert');
 const fse = require('fs-extra');
 const http = require('http');
 const path = require('path');
-const shell = require('shelljs'); // eslint-disable-line import/no-extraneous-dependencies
+const shell = require('shelljs');
 const HelixProject = require('../src/HelixProject.js');
 
 if (!shell.which('git')) {

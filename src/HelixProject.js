@@ -16,7 +16,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 const _ = require('lodash');
 const gitServer = require('@adobe/git-server/lib/server.js');
-const GitUrl = require('./GitUrl.js');
+const GitUrl = require('./config/GitUrl.js');
 const HelixServer = require('./HelixServer.js');
 const logger = require('./logger.js');
 const packageJson = require('../package.json');
@@ -284,8 +284,14 @@ class HelixProject {
       const { currentBranch } = await gitServer.getRepoInfo(
         this._gitConfig, GIT_LOCAL_OWNER, GIT_LOCAL_CONTENT_REPO,
       );
-      // FIXME: what's the canonical way of specifying a branch in a git url?
-      this._contentRepo = new GitUrl(`http://${GIT_LOCAL_HOST}:${this._gitState.httpPort}/${GIT_LOCAL_OWNER}/${GIT_LOCAL_CONTENT_REPO}/tree/${currentBranch}`);
+      this._contentRepo = new GitUrl({
+        protocol: 'http',
+        hostname: GIT_LOCAL_HOST,
+        port: this._gitState.httpPort,
+        owner: GIT_LOCAL_OWNER,
+        repo: GIT_LOCAL_CONTENT_REPO,
+        ref: currentBranch,
+      });
     }
 
     this._logger.debug('Launching petridish server for development...');
