@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 const fs = require('fs-extra');
-const request = require('request-promise');
+const request = require('request-promise-native');
 const path = require('path');
 const crypto = require('crypto');
 const logger = require('./logger.js');
