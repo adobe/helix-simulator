@@ -253,15 +253,16 @@ class HelixProject {
     } else {
       throw new Error('Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
     }
-    this._logger.info('    __ __    ___         ');
-    this._logger.info('   / // /__ / (_)_ __    ');
-    this._logger.info('  / _  / -_) / /\\ \\ / ');
-    this._logger.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
-    this._logger.info('                         ');
-    this._logger.debug('Initialized helix-config with: ');
-    this._logger.debug(` contentRepo: ${this._contentRepo}`);
-    this._logger.debug(`     srcPath: ${this._srcDir}`);
-    this._logger.debug(`    buildDir: ${this._buildDir}`);
+    const log = this._logger;
+    log.info('    __ __    ___         ');
+    log.info('   / // /__ / (_)_ __    ');
+    log.info('  / _  / -_) / /\\ \\ / ');
+    log.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
+    log.info('                         ');
+    log.debug('Initialized helix-config with: ');
+    log.debug(` contentRepo: ${this._contentRepo}`);
+    log.debug(`     srcPath: ${this._srcDir}`);
+    log.debug(`    buildDir: ${this._buildDir}`);
     return this;
   }
 

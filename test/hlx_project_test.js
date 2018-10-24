@@ -115,29 +115,22 @@ describe('Helix Project', () => {
       .catch(done);
   });
 
-  it('Logs to custom logger', (done) => {
+  it('Logs to custom logger', async () => {
     let count = 0;
     const counter = () => {
-      if (count === 0) {
-        done();
-      }
       count += 1;
     };
 
     const cwd = path.join(SPEC_ROOT, 'emptycfg');
-    new HelixProject()
+    await new HelixProject()
       .withLogger({
         info: counter,
         debug: counter,
       })
       .withCwd(cwd)
-      .init()
-      .then((cfg) => {
-        assert.equal(cfg.contentRepo, undefined);
-        assert.equal(cfg._needLocalServer, true);
-        counter();
-      })
-      .catch(done);
+      .init();
+
+    assert.ok(count > 0, 'custom logger should have been invoked.');
   });
 
   it('detects local src and readme', (done) => {
