@@ -8,7 +8,6 @@
     "connection": "close"
   },
   "__ow_method": "get",
-  "__ow_logger": {},
   "owner": "helix",
   "repo": "content",
   "ref": "master",

@@ -115,6 +115,24 @@ describe('Helix Project', () => {
       .catch(done);
   });
 
+  it('Logs to custom logger', async () => {
+    let count = 0;
+    const counter = () => {
+      count += 1;
+    };
+
+    const cwd = path.join(SPEC_ROOT, 'emptycfg');
+    await new HelixProject()
+      .withLogger({
+        info: counter,
+        debug: counter,
+      })
+      .withCwd(cwd)
+      .init();
+
+    assert.ok(count > 0, 'custom logger should have been invoked.');
+  });
+
   it('detects local src and readme', (done) => {
     const cwd = path.join(SPEC_ROOT, 'local');
 
