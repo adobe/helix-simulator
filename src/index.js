@@ -11,13 +11,7 @@
  */
 
 const HelixProject = require('./HelixProject.js');
-const GitUrl = require('./config/GitUrl.js');
-const GitUtils = require('./config/GitUtils.js');
-const HelixConfig = require('./config/HelixConfig.js');
 
 module.exports = {
   HelixProject,
-  GitUrl,
-  GitUtils,
-  HelixConfig,
 };
