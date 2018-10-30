@@ -10,7 +10,6 @@
  * governing permissions and limitations under the License.
  */
 const path = require('path');
-const logger = require('./logger');
 const utils = require('./utils');
 
 /**
@@ -24,7 +23,7 @@ const simple = (ctx) => {
   // TODO: be more sophisticated and also check what templates are available for sensitive fallbacks
   let template = ctx.selector ? `${ctx.selector}_` : '';
   template += `${ctx.extension || 'html'}`;
-  logger.debug(`resolved ${ctx.path} -> ${template}`);
+  ctx.logger.debug(`resolved ${ctx.path} -> ${template}`);
   return template;
 };
 
@@ -53,13 +52,13 @@ class TemplateResolver {
 
     const templatePath = path.resolve(ctx.config.buildDir, `${templateName}.js`);
     return utils.isFile(templatePath).then(() => {
-      logger.debug(`found template at ${templatePath}`);
+      ctx.logger.debug(`found template at ${templatePath}`);
       ctx.templatePath = templatePath;
       ctx.templateName = templateName;
       return ctx;
     }).catch((error) => {
       const msg = `Unable to resolve template: ${error.message}`;
-      logger.error(msg);
+      ctx.logger.error(msg);
       throw Error(msg);
     });
   }

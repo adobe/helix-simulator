@@ -121,12 +121,15 @@ describe('Helix Project', () => {
       count += 1;
     };
 
+    const logger = {
+      info: counter,
+      debug: counter,
+      getLogger: () => logger,
+    };
+
     const cwd = path.join(SPEC_ROOT, 'emptycfg');
     await new HelixProject()
-      .withLogger({
-        info: counter,
-        debug: counter,
-      })
+      .withLogger(logger)
       .withCwd(cwd)
       .init();
 
