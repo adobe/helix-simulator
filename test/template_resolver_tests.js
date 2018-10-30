@@ -42,7 +42,6 @@ describe('Template Resolver', () => {
           url: t.url,
         };
         const ctx = new RequestContext(mockReq);
-        ctx.logger = console;
         const template = TemplateResolverPlugins.simple(ctx);
         assert.equal(template, t.template, 'resolved template');
       });
@@ -56,7 +55,6 @@ describe('Template Resolver', () => {
         const ctx = new RequestContext(mockReq, {
           buildDir: BUILD_DIR,
         });
-        ctx.logger = console;
         const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
 
         const templatePath = path.resolve(BUILD_DIR, t.script);
@@ -74,7 +72,6 @@ describe('Template Resolver', () => {
       const ctx = new RequestContext(mockReq, {
         buildDir: BUILD_DIR,
       });
-      ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
       res.resolve(ctx).then(() => {
         done(Error('resolution for non existent file should fail.'));
@@ -92,7 +89,6 @@ describe('Template Resolver', () => {
       const ctx = new RequestContext(mockReq, {
         buildDir: BUILD_DIR,
       });
-      ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
       res.resolve(ctx).then(() => {
         done(Error('resolution for non existent file should fail.'));

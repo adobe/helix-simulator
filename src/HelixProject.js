@@ -16,8 +16,9 @@ const path = require('path');
 const yaml = require('js-yaml');
 const _ = require('lodash');
 const gitServer = require('@adobe/git-server/lib/server.js');
-const { GitUrl, Logger } = require('@adobe/helix-shared');
+const { GitUrl } = require('@adobe/helix-shared');
 const HelixServer = require('./HelixServer.js');
+const logger = require('./logger.js');
 const packageJson = require('../package.json');
 
 const stat = util.promisify(fs.stat);
@@ -104,7 +105,7 @@ class HelixProject {
     this._contentRepo = null;
     this._server = new HelixServer(this);
     this._displayVersion = packageJson.version;
-    this._logger = null;
+    this._logger = logger;
   }
 
   withCwd(cwd) {
@@ -231,12 +232,6 @@ class HelixProject {
   }
 
   async init() {
-    if (!this._logger) {
-      this._logger = Logger.getLogger('hlx');
-    } else {
-      this._logger = this._logger.getLogger('hlx');
-    }
-
     await this.loadConfig();
     await this.checkPaths();
 
