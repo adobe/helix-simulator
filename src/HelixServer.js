@@ -14,8 +14,8 @@ const EventEmitter = require('events');
 const { Module } = require('module');
 const express = require('express');
 const NodeESI = require('nodesi');
+const { Logger } = require('@adobe/helix-shared');
 const utils = require('./utils.js');
-const logger = require('./logger.js');
 
 const RequestContext = require('./RequestContext.js');
 const { TemplateResolver, Plugins: TemplateResolverPlugins } = require('../src/template_resolver');
@@ -89,14 +89,14 @@ class HelixServer extends EventEmitter {
     this._app = express();
     this._port = DEFAULT_PORT;
     this._server = null;
-    /* eslint-disable no-underscore-dangle */
-    this._logger = this._project._logger || logger;
 
     // todo: make configurable
     this._templateResolver = new TemplateResolver().with(TemplateResolverPlugins.simple);
   }
 
   init() {
+    /* eslint-disable no-underscore-dangle */
+    this._logger = this._project._logger || Logger.getLogger('hlx');
     const boundResolver = this._templateResolver.resolve.bind(this._templateResolver);
     this._app.get('*', (req, res) => {
       const ctx = new RequestContext(req, this._project);
@@ -175,6 +175,7 @@ class HelixServer extends EventEmitter {
   }
 
   async start() {
+    this._logger.info('stating project');
     return new Promise((resolve, reject) => {
       this._server = this._app.listen(this._port, (err) => {
         if (err) {
