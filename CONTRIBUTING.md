@@ -61,7 +61,7 @@ Then, you can release using:
 
 ### Versioning
 
-use `npm verison` to set the new package version create the git tag. eg:
+use `npm version` to set the new package version create the git tag. eg:
 
 ```bash
 $ npm version 1.0.1-SNAPSHOT.30
