@@ -85,7 +85,7 @@ function executeTemplate(ctx) {
     __ow_logger: ctx.logger,
     owner: ctx.config.contentRepo.owner,
     repo: ctx.config.contentRepo.repo,
-    ref: ctx.config.contentRepo.ref,
+    ref: ctx.config.contentRepo.ref || 'master',
     path: `${ctx.resourcePath}.md`,
     REPO_RAW_ROOT: `${ctx.config.contentRepo.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.config.contentRepo.apiRoot}/`,
