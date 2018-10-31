@@ -27,6 +27,21 @@ const esi = new NodeESI({
   baseUrl: `http://localhost:${DEFAULT_PORT}`,
 });
 
+function safeCycles() {
+  const seen = [];
+  function guardCycles(_, v) {
+    if (!v || typeof (v) !== 'object') {
+      return (v);
+    }
+    if (seen.indexOf(v) !== -1) {
+      return ('[Circular]');
+    }
+    seen.push(v);
+    return (v);
+  }
+  return guardCycles;
+}
+
 /**
  * Executes the template and resolves with the content.
  * @param {RequestContext} ctx Context
@@ -67,7 +82,7 @@ function executeTemplate(ctx) {
   return Promise.resolve(mod.main({
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
-    __ow_logger: this._logger, // this causes ow-wrapper to use this logger
+    __ow_logger: ctx.logger,
     owner: ctx.config.contentRepo.owner,
     repo: ctx.config.contentRepo.repo,
     ref: ctx.config.contentRepo.ref,
@@ -128,7 +143,7 @@ class HelixServer extends EventEmitter {
             const status = result.statusCode || 200;
             const contentType = headers['Content-Type'] || 'text/html';
             if (/.*\/json/.test(contentType)) {
-              body = JSON.stringify(body);
+              body = JSON.stringify(body, safeCycles());
             } else if (/.*\/octet-stream/.test(contentType) || /image\/.*/.test(contentType)) {
               body = Buffer.from(body, 'base64');
             }

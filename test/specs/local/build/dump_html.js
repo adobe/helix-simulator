@@ -12,6 +12,10 @@
 
 /* eslint-disable */
 module.exports.main = function main(params){
+  if (!params.__ow_logger) {
+    throw Error('expected logger');
+  }
+  delete params.__ow_logger; // remove for tests
   return {
     headers: {
       'Content-Type': 'application/json',
