@@ -11,19 +11,12 @@
  */
 
 const fs = require('fs-extra');
-const util = require('util');
 const path = require('path');
-const yaml = require('js-yaml');
 const _ = require('lodash');
 const gitServer = require('@adobe/git-server/lib/server.js');
-const { GitUrl, Logger } = require('@adobe/helix-shared');
+const { GitUrl, Logger, HelixConfig } = require('@adobe/helix-shared');
 const HelixServer = require('./HelixServer.js');
 const packageJson = require('../package.json');
-
-const stat = util.promisify(fs.stat);
-const readFile = util.promisify(fs.readFile);
-
-const HELIX_CONFIG = 'helix-config.yaml';
 
 const INDEX_MD = 'index.md';
 
@@ -80,11 +73,11 @@ const GIT_SERVER_CONFIG = {
 };
 
 async function isFile(filePath) {
-  return stat(filePath).then(stats => stats.isFile()).catch(() => false);
+  return fs.stat(filePath).then(stats => stats.isFile()).catch(() => false);
 }
 
 async function isDirectory(dirPath) {
-  return stat(dirPath).then(stats => stats.isDirectory()).catch(() => false);
+  return fs.stat(dirPath).then(stats => stats.isDirectory()).catch(() => false);
 }
 
 class HelixProject {
@@ -92,19 +85,18 @@ class HelixProject {
     this._cwd = process.cwd();
     this._srcDir = '';
     this._indexMd = '';
-    this._cfgPath = '';
     this._repoPath = '';
-    this._cfg = {};
+    this._cfg = null;
     this._gitConfig = _.cloneDeep(GIT_SERVER_CONFIG);
     this._gitState = null;
     this._needLocalServer = false;
     this._buildDir = DEFAULT_BUILD_DIR;
     this._runtimePaths = module.paths;
     this._webRootDir = DEFAULT_WEB_ROOT;
-    this._contentRepo = null;
     this._server = new HelixServer(this);
     this._displayVersion = packageJson.version;
     this._logger = null;
+    this._strainName = 'default';
   }
 
   withCwd(cwd) {
@@ -119,6 +111,16 @@ class HelixProject {
 
   withBuildDir(dir) {
     this._buildDir = dir;
+    return this;
+  }
+
+  withHelixConfig(cfg) {
+    this._cfg = cfg;
+    return this.withLogger(cfg.log);
+  }
+
+  withStrainName(name) {
+    this._strainName = name;
     return this;
   }
 
@@ -142,6 +144,10 @@ class HelixProject {
     return this;
   }
 
+  get config() {
+    return this._cfg;
+  }
+
   get gitConfig() {
     return this._gitConfig;
   }
@@ -163,7 +169,11 @@ class HelixProject {
    * @returns {null|GitUrl}
    */
   get contentRepo() {
-    return this._contentRepo;
+    return this.strain.content;
+  }
+
+  get strain() {
+    return this.config.strains.get(this._strainName);
   }
 
   get started() {
@@ -178,13 +188,8 @@ class HelixProject {
     return this._server;
   }
 
-  withDirectoryIndex(index) {
-    this._directoryIndex = index;
-    return this;
-  }
-
   get directoryIndex() {
-    return this._directoryIndex;
+    return this.strain.directoryIndex;
   }
 
   /*
@@ -193,13 +198,6 @@ class HelixProject {
    */
   get gitState() {
     return this._gitState;
-  }
-
-  async loadConfig() {
-    const cfgPath = path.resolve(this._cwd, HELIX_CONFIG);
-    if (await isFile(cfgPath)) {
-      this._cfg = yaml.safeLoad(await readFile(cfgPath, 'utf8')) || {};
-    }
   }
 
   async checkPaths() {
@@ -212,9 +210,6 @@ class HelixProject {
     if (await isFile(idxPath)) {
       this._indexMd = idxPath;
     }
-
-    const directoryIndex = `${this._indexMd.substring(this._indexMd.lastIndexOf('/') + 1, this._indexMd.lastIndexOf('.'))}.html`;
-    this.withDirectoryIndex(directoryIndex);
 
     const srcPath = path.join(this._cwd, SRC_DIR);
     if (await isDirectory(srcPath)) {
@@ -237,27 +232,33 @@ class HelixProject {
       this._logger = this._logger.getLogger('hlx');
     }
 
-    await this.loadConfig();
+    if (!this._cfg) {
+      this._cfg = await new HelixConfig()
+        .withDirectory(this._cwd)
+        .withLogger(this._logger).init();
+    }
+
     await this.checkPaths();
 
-    const cfg = this._cfg;
     if (!this._srcDir) {
-      throw new Error('Invalid config. No "code" location specified and no "src" directory.');
+      throw new Error('Invalid config. No "src" directory.');
     }
 
-    if (cfg.contentRepo) {
-      this._contentRepo = new GitUrl(cfg.contentRepo);
-    } else if (this._indexMd) {
-      if (!this._repoPath) {
-        throw new Error('Local README.md or index.md must be inside a valid git repository.');
+    // if strains has default content repo we need to start git server
+    if (this.contentRepo.toString() === 'http://localhost/local/default.git') {
+      if (this._indexMd) {
+        if (!this._repoPath) {
+          throw new Error('Local README.md or index.md must be inside a valid git repository.');
+        }
+        this._gitConfig.virtualRepos[GIT_LOCAL_OWNER][GIT_LOCAL_CONTENT_REPO] = {
+          path: this._repoPath,
+        };
+        this._needLocalServer = true;
+      } else {
+        throw new Error('Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
       }
-      this._gitConfig.virtualRepos[GIT_LOCAL_OWNER][GIT_LOCAL_CONTENT_REPO] = {
-        path: this._repoPath,
-      };
-      this._needLocalServer = true;
-    } else {
-      throw new Error('Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
     }
+
     const log = this._logger;
     log.info('    __ __    ___         ');
     log.info('   / // /__ / (_)_ __    ');
@@ -265,7 +266,8 @@ class HelixProject {
     log.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
     log.info('                         ');
     log.debug('Initialized helix-config with: ');
-    log.debug(` contentRepo: ${this._contentRepo}`);
+    log.debug(`      strain: ${this.strain.name}`);
+    log.debug(` contentRepo: ${this.contentRepo}`);
     log.debug(`     srcPath: ${this._srcDir}`);
     log.debug(`    buildDir: ${this._buildDir}`);
     return this;
@@ -290,7 +292,7 @@ class HelixProject {
       const { currentBranch } = await gitServer.getRepoInfo(
         this._gitConfig, GIT_LOCAL_OWNER, GIT_LOCAL_CONTENT_REPO,
       );
-      this._contentRepo = new GitUrl({
+      this.strain.content = new GitUrl({
         protocol: 'http',
         hostname: GIT_LOCAL_HOST,
         port: this._gitState.httpPort,
