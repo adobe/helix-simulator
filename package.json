@@ -1,6 +1,6 @@
 {
   "name": "@adobe/petridish",
-  "version": "2.4.2-pre.0",
+  "version": "2.5.1-pre.0",
   "description": "Helix Testing Environment",
   "repository": "https://github.com/adobe/petridish",
   "main": "src/index.js",
@@ -17,11 +17,10 @@
   },
   "dependencies": {
     "@adobe/git-server": "^0.9.7",
-    "@adobe/helix-shared": "^0.0.2",
+    "@adobe/helix-shared": "^0.0.4",
     "colors": "^1.3.0",
     "express": "^4.16.3",
     "fs-extra": "^7.0.0",
-    "js-yaml": "^3.12.0",
     "lodash": "^4.17.5",
     "moment": "^2.22.2",
     "nodesi": "^1.8.0",

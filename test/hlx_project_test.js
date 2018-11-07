@@ -95,7 +95,7 @@ describe('Helix Project', () => {
         done('expected error');
       })
       .catch((e) => {
-        assert.equal(e.toString(), 'Error: Invalid config. No "code" location specified and no "src" directory.');
+        assert.equal(e.toString(), 'Error: Invalid config. No "src" directory.');
         done();
       })
       .catch(done);
@@ -175,7 +175,7 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .init()
       .then((cfg) => {
-        assert.equal(cfg.contentRepo, undefined);
+        assert.equal(cfg.contentRepo.toString(), 'http://localhost/local/default.git');
         assert.equal(cfg._needLocalServer, true);
         assert.deepEqual(cfg.gitConfig, GIT_CONFIG);
         done();
@@ -189,7 +189,7 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .init()
       .then((cfg) => {
-        assert.equal(cfg.contentRepo, undefined);
+        assert.equal(cfg.contentRepo.toString(), 'http://localhost/local/default.git');
         assert.equal(cfg._needLocalServer, true);
         done();
       })
@@ -282,30 +282,6 @@ describe('Helix Project', () => {
 
   it('computes correct index: finds index', (done) => {
     const cwd = path.join(SPEC_ROOT, 'local');
-    new HelixProject()
-      .withCwd(cwd)
-      .init()
-      .then((cfg) => {
-        assert.equal(cfg.directoryIndex, 'index.html');
-        done();
-      })
-      .catch(done);
-  });
-
-  it('computes correct index: finds README', (done) => {
-    const cwd = path.join(SPEC_ROOT, 'index_is_readme');
-    new HelixProject()
-      .withCwd(cwd)
-      .init()
-      .then((cfg) => {
-        assert.equal(cfg.directoryIndex, 'README.html');
-        done();
-      })
-      .catch(done);
-  });
-
-  it('computes correct index when index and README are here', (done) => {
-    const cwd = path.join(SPEC_ROOT, 'which_index');
     new HelixProject()
       .withCwd(cwd)
       .init()
