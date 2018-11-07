@@ -264,6 +264,7 @@ class HelixProject {
     log.info('  / _  / -_) / /\\ \\ / ');
     log.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
     log.info('                         ');
+    log.info('HELLO FROM ALEX BRANCH');
     log.debug('Initialized helix-config with: ');
     log.debug(` contentRepo: ${this._contentRepo}`);
     log.debug(`     srcPath: ${this._srcDir}`);
