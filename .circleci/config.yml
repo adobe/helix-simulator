@@ -1,11 +1,7 @@
 version: 2
 jobs:
   build:
-    # Currently this doesn't help much since most of the time is spent in npm install,
-    # which is slow for all parallel processes
-    # parallelism: 10
     docker:
-    # specify the version you desire here
     - image: circleci/node:8-stretch
     working_directory: ~/repo
     environment:
@@ -53,6 +49,16 @@ jobs:
 
     - store_artifacts:
         path: junit
+
+    - run:
+        name: Call helix-cli moke test
+        command:
+            curl \
+                --header "Content-Type: application/json" \
+                --data '{"build_parameters": {"CIRCLE_JOB": "smoke", "GDM_MODULE_BRANCHES": { "petridish": "$CIRCLE_BRANCH"}}}' \
+                --request POST \
+                "https://circleci.com/api/v1.1/project/github/adobe/helix-cli/tree/issues/289?circle-token=$CIRCLE_TOKEN"
+
 
   publish-pre-release:
     docker:
