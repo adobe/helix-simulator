@@ -52,7 +52,11 @@ jobs:
 
     - run:
         name: Call helix-cli moke test
-        command: curl --header "Content-Type: application/json" --data '\{"build_parameters": \{"CIRCLE_JOB": "smoke", "GDM_MODULE_BRANCHES": \{ "petridish": "$CIRCLE_BRANCH"\}\}\}' --request POST "https://circleci.com/api/v1.1/project/github/adobe/helix-cli/tree/issues/289?circle-token=$CIRCLE_TOKEN" 
+        command: |
+            curl \
+            --header "Content-Type: application/json" \
+            --data "{\"build_parameters\": {\"CIRCLE_JOB\": \"smoke\", \"GDM_MODULE_BRANCHES\": { \"petridish\": \"$CIRCLE_BRANCH\"}}}\" \
+            --request POST "https://circleci.com/api/v1.1/project/github/adobe/helix-cli/tree/issues/289?circle-token=$CIRCLE_TOKEN"
 
   publish-pre-release:
     docker:
