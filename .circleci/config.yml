@@ -51,13 +51,34 @@ jobs:
         path: junit
 
     - run:
-        name: Call helix-cli moke test
+        name: Call helix-cli smoke test
         command: |
             curl \
             --user ${SMOKE_TEST_TOKEN}: \
             --header "Content-Type: application/json" \
             --data "{\"build_parameters\": {\"CIRCLE_JOB\": \"smoke\", \"GDM_MODULE_BRANCHES\": { \"petridish\": \"${CIRCLE_BRANCH}\"}}}" \
-            --request POST "https://circleci.com/api/v1.1/project/github/adobe/helix-cli/tree/issues/289"
+            --request POST "https://circleci.com/api/v1.1/project/github/adobe/helix-cli/tree/issues/289" > smoke_job.json
+
+    - run:
+        name: Wait for smoke job to complete and fetch job exit code
+        command: |
+            smoke_job_build_num=$(jq '.build_num' < smoke_job.json)
+            circle_api=https://circleci.com/api/v1.1
+            build_url="${circle_api}/project/github/adobe/helix-cli/${backend_build_num}"
+
+            RUNNING=true
+                while [ $RUNNING == true ]; do
+                sleep 10;
+                status=$(curl --silent --header "Accept: application/json" "${build_url}?circle-token=$SMOKE_TEST_TOKEN" | jq -r '.status');
+                echo 'running queued scheduled not_running' | grep --silent "$status" || RUNNING=false;
+                echo -n "."
+            done
+            echo 'fixed success' | grep --silent "$status"
+            exit_code=$?
+            echo ""
+            echo "Backend build https://circleci.com/gh/adobe/helix-cli/${backend_build_num} finished with status ${status}"
+
+            exit $exit_code
 
   publish-pre-release:
     docker:
