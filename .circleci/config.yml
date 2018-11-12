@@ -64,8 +64,10 @@ jobs:
         command: |
             smoke_job_build_num=$(jq '.build_num' < smoke_job.json)
             circle_api=https://circleci.com/api/v1.1
-            build_url="${circle_api}/project/github/adobe/helix-cli/${backend_build_num}"
+            build_url="${circle_api}/project/github/adobe/helix-cli/${smoke_job_build_num}"
 
+            echo "Will wait now for smoke tests job execution. See build ${build_url}"
+            echo ""
             RUNNING=true
                 while [ $RUNNING == true ]; do
                 sleep 10;
@@ -76,7 +78,7 @@ jobs:
             echo 'fixed success' | grep --silent "$status"
             exit_code=$?
             echo ""
-            echo "Backend build https://circleci.com/gh/adobe/helix-cli/${backend_build_num} finished with status ${status}"
+            echo "Smoke tests ${build_url} finished with status ${status}"
 
             exit $exit_code
 
