@@ -120,7 +120,7 @@ jobs:
         path: junit
 
     - smoke_tests:
-        -SMOKE_TESTS_REPO: "adobe/helix-cli"
+        SMOKE_TESTS_REPO: "adobe/helix-cli"
 
   publish-pre-release:
     executor: node8
