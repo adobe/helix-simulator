@@ -28,7 +28,7 @@ commands:
         command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
   smoke_tests:
     steps:
-    - run
+    - run:
         name: Call helix-cli smoke tests
         command: |
             curl \
