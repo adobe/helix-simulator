@@ -95,7 +95,7 @@ jobs:
                 echo "Smoke test error message:"
                 echo ""
 
-                if [ -z "$output_url" ]
+                if [ ! -z "$output_url" ]
                 then
                     # call the output url to fetch the error message and display it
                     error_message=$(curl --silent --compressed --header "Accept: application/json" "${output_url}" | jq -r '.[0].message');
