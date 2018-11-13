@@ -75,12 +75,13 @@ jobs:
                 echo 'running queued scheduled not_running' | grep --silent "$status" || RUNNING=false;
                 echo -n "."
             done
+            echo "end of the loop: $status"
             echo 'fixed success' | grep --silent "$status"
             exit_code=$?
             echo ""
             echo "Smoke tests ${build_url} finished with status ${status}"
             echo ""
-            echo "exit_code: '$exit_code'"
+            echo "exit_code: $exit_code"
             echo ""
             if (($exit_code != 0));
             then
