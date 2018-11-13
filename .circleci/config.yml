@@ -70,7 +70,6 @@ jobs:
             smoke_step_name="Running Smoke Tests"
 
             echo "Will wait now for smoke tests job execution. See build ${build_url}."
-            echo ""
             RUNNING=true
                 while [ $RUNNING == true ]; do
                 sleep 10;
@@ -92,7 +91,7 @@ jobs:
                 output_url=$(jq -r '.steps[] | select(.name == ("${smoke_step_name}")) | .actions[0].output_url' ${smoke_result_file});
 
                 echo ""
-                echo "Smoke test error message:"
+                echo "Smoke tests error message:"
                 echo ""
 
                 if [ ! -z "$output_url" ]
@@ -104,8 +103,6 @@ jobs:
                     # no output_url, unknown error
                     echo "Unknown error. Check the smoke test job execution logs for more details."
                 fi
-                echo ""
-
             fi
 
             exit $exit_code
