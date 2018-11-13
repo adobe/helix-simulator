@@ -51,7 +51,7 @@ jobs:
         path: junit
 
     - run:
-        name: Call helix-cli smoke test
+        name: Call helix-cli smoke tests
         command: |
             curl \
             --user ${SMOKE_TEST_TOKEN}: \
@@ -60,43 +60,52 @@ jobs:
             --request POST "https://circleci.com/api/v1.1/project/github/adobe/helix-cli/tree/issues/289" > smoke_job.json
 
     - run:
-        name: Wait for smoke job to complete and fetch job exit code
+        name: Wait for smoke job to complete and report status here
         command: |
             smoke_job_build_num=$(jq '.build_num' < smoke_job.json)
-            circle_api=https://circleci.com/api/v1.1
-            build_url="${circle_api}/project/github/adobe/helix-cli/${smoke_job_build_num}"
 
-            echo "Will wait now for smoke tests job execution. See build ${build_url}"
+            build_url="https://circleci.com/api/v1.1/project/github/adobe/helix-cli/${smoke_job_build_num}"
+
+            smoke_result_file="smoke_result.json"
+            smoke_step_name="Running Smoke Tests"
+
+            echo "Will wait now for smoke tests job execution. See build ${build_url}."
             echo ""
             RUNNING=true
                 while [ $RUNNING == true ]; do
                 sleep 10;
-                status=$(curl --silent --header "Accept: application/json" "${build_url}?circle-token=$SMOKE_TEST_TOKEN" | tee smoke_result.json | jq -r '.status');
+                status=$(curl --silent --header "Accept: application/json" "${build_url}?circle-token=$SMOKE_TEST_TOKEN" | tee ${smoke_result_file} | jq -r '.status');
                 echo 'running queued scheduled not_running' | grep --silent "$status" || RUNNING=false;
                 echo -n "."
             done
-            echo "end of the loop: ${status}"
             
+            echo ""
+            echo "Smoke tests ${build_url} finished with status ${status}"
+
             if [[ $status == 'fixed success' ]]
             then
                 exit_code=0
             else
                 exit_code=1
-            fi
 
-            echo ""
-            echo "Smoke tests ${build_url} finished with status ${status}"
-            echo ""
-            echo "exit_code: ${exit_code}"
-            echo ""
-            if (($exit_code != 0));
-            then
-                output_url=$(jq -r '.steps[] | select(.name == ("Running Smoke Tests")) | .actions[0].output_url' smoke_result.json);
-                echo "Error output_url: ${output_url}"
-                error_message=$(curl --silent --compressed --header "Accept: application/json" "${output_url}" | jq -r '.[0].message');
-                echo "Smoke test error message: \n"
-                echo "${error_message}"
+                # get the output_url property from the "Running Smoke Tests" job in the json response
+                output_url=$(jq -r '.steps[] | select(.name == ("${smoke_step_name}")) | .actions[0].output_url' ${smoke_result_file});
+
                 echo ""
+                echo "Smoke test error message:"
+                echo ""
+
+                if [ -z "$output_url" ];
+                then
+                    # call the output url to fetch the error message and display it
+                    error_message=$(curl --silent --compressed --header "Accept: application/json" "${output_url}" | jq -r '.[0].message');
+                    echo "${error_message}"
+                else
+                    # no output_url, unknown error
+                    echo "Unknown error. Check the smoke test job execution logs for more details."
+                fi
+                echo ""
+
             fi
 
             exit $exit_code
