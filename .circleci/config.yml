@@ -47,6 +47,7 @@ commands:
             smoke_step_name="Running Smoke Tests"
 
             echo "Waiting now for smoke tests job execution. See build ${build_url}."
+
             RUNNING=true
                 while [ $RUNNING == true ]; do
                 sleep 10;
