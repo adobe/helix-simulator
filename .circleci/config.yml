@@ -26,44 +26,16 @@ commands:
     - run:
         name: prepare test git user
         command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
-
-jobs:
-  build:
-    executor: node8
-
+  smoke_tests:
     steps:
-    - setup
-        # run tests!
-    - run: mkdir junit
-    - run:
-        name: prepare test git user
-        command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
-    - run:
-        name: Lint
-        command: npm run lint
-
-    # test & get code coverage
-    - run:
-        name: Getting Code Coverage
-        command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
-        environment:
-          MOCHA_FILE: junit/test-results.xml
-
-    - store_test_results:
-        path: junit
-
-    - store_artifacts:
-        path: junit
-
-    - run:
+    - run
         name: Call helix-cli smoke tests
         command: |
             curl \
             --user ${SMOKE_TEST_TOKEN}: \
             --header "Content-Type: application/json" \
-            --data "{\"build_parameters\": {\"CIRCLE_JOB\": \"smoke\", \"GDM_MODULE_BRANCHES\": { \"petridish\": \"${CIRCLE_BRANCH}\"}}}" \
+            --data "{\"build_parameters\": {\"CIRCLE_JOB\": \"smoke\", \"GDM_MODULE_BRANCHES\": { \"${CIRCLE_PROJECT_REPONAME}\": \"${CIRCLE_BRANCH}\"}}}" \
             --request POST "https://circleci.com/api/v1.1/project/github/adobe/helix-cli/tree/issues/289" > smoke_job.json
-
     - run:
         name: Wait for smoke job to complete and report status here
         command: |
@@ -74,7 +46,7 @@ jobs:
             smoke_result_file="smoke_result.json"
             smoke_step_name="Running Smoke Tests"
 
-            echo "Will wait now for smoke tests job execution. See build ${build_url}."
+            echo "Waiting now for smoke tests job execution. See build ${build_url}."
             RUNNING=true
                 while [ $RUNNING == true ]; do
                 sleep 10;
@@ -111,6 +83,37 @@ jobs:
                 echo ""
             fi
             exit $exit_code
+
+
+jobs:
+  build:
+    executor: node8
+
+    steps:
+    - setup
+        # run tests!
+    - run: mkdir junit
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+    - run:
+        name: Lint
+        command: npm run lint
+
+    # test & get code coverage
+    - run:
+        name: Getting Code Coverage
+        command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
+        environment:
+          MOCHA_FILE: junit/test-results.xml
+
+    - store_test_results:
+        path: junit
+
+    - store_artifacts:
+        path: junit
+
+    - smoke_tests
 
   publish-pre-release:
     executor: node8
