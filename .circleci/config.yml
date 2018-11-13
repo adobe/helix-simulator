@@ -80,7 +80,7 @@ jobs:
             echo ""
             echo "Smoke tests ${build_url} finished with status ${status}"
 
-            if (($exit_code != 0))
+            if (($exit_code != 0));
             then
                 output_url=$(jq -r '.steps[] | select(.name == ("Running Smoke Tests")) | .actions[0].output_url' smoke_result.json);
                 echo "Error output_url: ${output_url}"
