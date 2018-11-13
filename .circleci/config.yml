@@ -93,7 +93,7 @@ jobs:
             then
                 output_url=$(jq -r '.steps[] | select(.name == ("Running Smoke Tests")) | .actions[0].output_url' smoke_result.json);
                 echo "Error output_url: ${output_url}"
-                error_message=$(curl --silent --header "Accept: application/json" "${output_url}?circle-token=$SMOKE_TEST_TOKEN" | jq -r '.[0].message');
+                error_message=$(curl --silent --compressed --header "Accept: application/json" "${output_url}?circle-token=$SMOKE_TEST_TOKEN" | jq -r '.[0].message');
                 echo "Smoke test error message: \n"
                 echo "${error_message}"
                 echo ""
