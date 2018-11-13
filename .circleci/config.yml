@@ -27,21 +27,26 @@ commands:
         name: prepare test git user
         command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
   smoke_tests:
+    description: "Run smoke tests on a remote repository, wait for execution and report status"
+    parameters:
+      SMOKE_TESTS_REPO:
+        type: string
     steps:
     - run:
-        name: Call helix-cli smoke tests
+        name: Call remote smoke tests job
         command: |
             curl \
             --user ${SMOKE_TEST_TOKEN}: \
             --header "Content-Type: application/json" \
+            --silent \
             --data "{\"build_parameters\": {\"CIRCLE_JOB\": \"smoke\", \"GDM_MODULE_BRANCHES\": { \"${CIRCLE_PROJECT_REPONAME}\": \"${CIRCLE_BRANCH}\"}}}" \
-            --request POST "https://circleci.com/api/v1.1/project/github/adobe/helix-cli/tree/issues/289" > smoke_job.json
+            --request POST "https://circleci.com/api/v1.1/project/github/<< parameters.SMOKE_TESTS_REPO >>/tree/issues/289" > smoke_job.json
     - run:
-        name: Wait for smoke job to complete and report status here
+        name: Wait for smoke tests job to complete and report status
         command: |
             smoke_job_build_num=$(jq '.build_num' < smoke_job.json)
 
-            build_url="https://circleci.com/api/v1.1/project/github/adobe/helix-cli/${smoke_job_build_num}"
+            build_url="https://circleci.com/api/v1.1/project/github/<< parameters.SMOKE_TESTS_REPO >>/${smoke_job_build_num}"
 
             smoke_result_file="smoke_result.json"
             smoke_step_name="Running Smoke Tests"
@@ -114,7 +119,8 @@ jobs:
     - store_artifacts:
         path: junit
 
-    - smoke_tests
+    - smoke_tests:
+        -SMOKE_TESTS_REPO: "adobe/helix-cli"
 
   publish-pre-release:
     executor: node8
