@@ -37,6 +37,7 @@ commands:
         name: Call remote smoke tests job
         command: |
             curl \
+            --user ${SMOKE_TEST_TOKEN}: \
             --header "Content-Type: application/json" \
             --silent \
             --data "{\"build_parameters\": {\"CIRCLE_JOB\": \"smoke\", \"GDM_MODULE_BRANCHES\": { \"${CIRCLE_PROJECT_REPONAME}\": \"${CIRCLE_BRANCH}\"}}}" \
