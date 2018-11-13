@@ -25,7 +25,7 @@ const DEFAULT_PORT = 3000;
 
 const esi = new NodeESI({
   baseUrl: `http://localhost:${DEFAULT_PORT}`,
-  allowedHosts: [/^http.*/]
+  allowedHosts: [/^http.*/],
 });
 
 function safeCycles() {
