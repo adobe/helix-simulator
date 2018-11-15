@@ -122,6 +122,21 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver rendered json resource', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.json`, 200, 'expected_index.json');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver request headers', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
