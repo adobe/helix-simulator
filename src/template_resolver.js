@@ -40,7 +40,7 @@ class TemplateResolver {
   /**
    * Resolves the location of the template based on the metadata
    * @param {RequestContext} ctx Context
-   * @return {Promise} A promise that resolves to the request context.
+   * @return {Boolean} True if the template could be resolved, false otherwise.
    */
   resolve(ctx) {
     let templateName;
@@ -51,16 +51,13 @@ class TemplateResolver {
     templateName = templateName || 'default.html';
 
     const templatePath = path.resolve(ctx.config.buildDir, `${templateName}.js`);
-    return utils.isFile(templatePath).then(() => {
-      ctx.logger.debug(`found template at ${templatePath}`);
+    if (utils.isFile(templatePath)) {
       ctx.templatePath = templatePath;
       ctx.templateName = templateName;
-      return ctx;
-    }).catch((error) => {
-      const msg = `Unable to resolve template: ${error.message}`;
-      ctx.logger.error(msg);
-      throw Error(msg);
-    });
+      return true;
+    }
+
+    return false;
   }
 }
 

@@ -49,7 +49,7 @@ describe('Template Resolver', () => {
     });
 
     TESTS.forEach((t) => {
-      it(`resolves template script for ${t.url} correctly`, (done) => {
+      it(`resolves template script for ${t.url} correctly`, () => {
         const mockReq = {
           url: t.url,
         };
@@ -60,14 +60,12 @@ describe('Template Resolver', () => {
         const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
 
         const templatePath = path.resolve(BUILD_DIR, t.script);
-        res.resolve(ctx).then((cx) => {
-          assert.equal(cx.templatePath, templatePath, 'resolved template path');
-          done();
-        }).catch(done);
+        res.resolve(ctx);
+        assert.equal(ctx.templatePath, templatePath, 'resolved template path');
       });
     });
 
-    it('fails for non existent file', (done) => {
+    it('fails for non existent file', () => {
       const mockReq = {
         url: '/index.nonexistent.html',
       };
@@ -76,16 +74,10 @@ describe('Template Resolver', () => {
       });
       ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
-      res.resolve(ctx).then(() => {
-        done(Error('resolution for non existent file should fail.'));
-      }).catch((err) => {
-        const expected = 'Unable to resolve template: ENOENT: no such file or directory';
-        assert.equal(err.message.substring(0, expected.length), expected);
-        done();
-      }).catch(done);
+      assert.equal(false, res.resolve(ctx), 'Template does not resolve for a non existent file');
     });
 
-    it('fails for directory instead of file', (done) => {
+    it('fails for directory instead of file', () => {
       const mockReq = {
         url: '/index.wrong.html',
       };
@@ -94,13 +86,7 @@ describe('Template Resolver', () => {
       });
       ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
-      res.resolve(ctx).then(() => {
-        done(Error('resolution for non existent file should fail.'));
-      }).catch((err) => {
-        const expected = 'Unable to resolve template: no regular file';
-        assert.equal(err.message.substring(0, expected.length), expected);
-        done();
-      }).catch(done);
+      assert.equal(false, res.resolve(ctx), 'Template does not resolve for a directory');
     });
   });
 });
