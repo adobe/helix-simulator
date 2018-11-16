@@ -112,8 +112,7 @@ class HelixServer extends EventEmitter {
   init() {
     /* eslint-disable no-underscore-dangle */
     this._logger = this._project._logger || Logger.getLogger('hlx');
-    const boundResolver = this._templateResolver.resolve.bind(this._templateResolver);
-    this._app.get('*', (req, res) => {
+    this._app.get('*', async (req, res) => {
       const ctx = new RequestContext(req, this._project);
       this.emit('request', req, res, ctx);
       if (!ctx.valid) {
@@ -122,10 +121,10 @@ class HelixServer extends EventEmitter {
       }
       ctx.logger = this._logger;
 
-      if (ctx.extension === 'html' || ctx.extension === 'md') {
+      const isResolved = await this._templateResolver.resolve(ctx);
+      if (isResolved) {
         // md files to be transformed
         Promise.resolve(ctx)
-          .then(boundResolver)
           .then(executeTemplate)
           .then((result) => {
             if (!result) {
