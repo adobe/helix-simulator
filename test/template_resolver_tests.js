@@ -49,7 +49,7 @@ describe('Template Resolver', () => {
     });
 
     TESTS.forEach((t) => {
-      it(`resolves template script for ${t.url} correctly`, () => {
+      it(`resolves template script for ${t.url} correctly`, async () => {
         const mockReq = {
           url: t.url,
         };
@@ -60,12 +60,12 @@ describe('Template Resolver', () => {
         const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
 
         const templatePath = path.resolve(BUILD_DIR, t.script);
-        res.resolve(ctx);
+        assert.equal(true, await res.resolve(ctx), 'Template resolves for an existent file');
         assert.equal(ctx.templatePath, templatePath, 'resolved template path');
       });
     });
 
-    it('fails for non existent file', () => {
+    it('fails for non existent file', async () => {
       const mockReq = {
         url: '/index.nonexistent.html',
       };
@@ -74,10 +74,10 @@ describe('Template Resolver', () => {
       });
       ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
-      assert.equal(false, res.resolve(ctx), 'Template does not resolve for a non existent file');
+      assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a non existent file');
     });
 
-    it('fails for directory instead of file', () => {
+    it('fails for directory instead of file', async () => {
       const mockReq = {
         url: '/index.wrong.html',
       };
@@ -86,7 +86,7 @@ describe('Template Resolver', () => {
       });
       ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
-      assert.equal(false, res.resolve(ctx), 'Template does not resolve for a directory');
+      assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a directory');
     });
   });
 });

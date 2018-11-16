@@ -21,8 +21,12 @@ const utils = {
    * @param {String} filename Path to file
    * @returns {Promise} Returns promise that resolves with the filename or rejects if is not a file.
    */
-  isFile(filename) {
-    return fs.existsSync(filename) && fs.statSync(filename).isFile();
+  async isFile(filename) {
+    const stats = await fs.stat(filename);
+    if (!stats.isFile()) {
+      throw Error(`no regular file: ${filename}`);
+    }
+    return filename;
   },
 
   /**
