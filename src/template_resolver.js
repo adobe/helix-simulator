@@ -60,8 +60,7 @@ class TemplateResolver {
         return true;
       }
     } catch (error) {
-      // isFile fires an error when no file found
-      return false;
+      // isFile fires an error when no file found - we can skip it
     }
     return false;
   }
