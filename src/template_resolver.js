@@ -42,7 +42,7 @@ class TemplateResolver {
    * @param {RequestContext} ctx Context
    * @return {Promise} A promise that resolves to the request context.
    */
-  resolve(ctx) {
+  async resolve(ctx) {
     let templateName;
 
     for (let i = 0; !templateName && i < this._plugins.length; i += 1) {
@@ -51,16 +51,18 @@ class TemplateResolver {
     templateName = templateName || 'default.html';
 
     const templatePath = path.resolve(ctx.config.buildDir, `${templateName}.js`);
-    return utils.isFile(templatePath).then(() => {
-      ctx.logger.debug(`found template at ${templatePath}`);
-      ctx.templatePath = templatePath;
-      ctx.templateName = templateName;
-      return ctx;
-    }).catch((error) => {
-      const msg = `Unable to resolve template: ${error.message}`;
-      ctx.logger.error(msg);
-      throw Error(msg);
-    });
+    try {
+      const isFile = await utils.isFile(templatePath);
+
+      if (isFile) {
+        ctx.templatePath = templatePath;
+        ctx.templateName = templateName;
+        return true;
+      }
+    } catch (error) {
+      // isFile fires an error when no file found - we can skip it
+    }
+    return false;
   }
 }
 

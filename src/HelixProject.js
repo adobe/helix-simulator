@@ -304,7 +304,7 @@ class HelixProject {
     }
 
     this._logger.debug('Launching petridish server for development...');
-    this._server.init();
+    await this._server.init();
     await this._server.start(this);
     return this;
   }
