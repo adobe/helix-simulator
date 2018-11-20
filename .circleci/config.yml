@@ -36,6 +36,9 @@ commands:
         type: string
         default: "smoke"
     steps:
+    - run: 
+        name: Make scripts executable
+        command: chmod +x .circleci/*.sh
     - run:
         name: Call remote smoke tests job
         command: .circleci/call_remote_job.sh ${SMOKE_TEST_TOKEN} << parameters.remote_job >> ${CIRCLE_BRANCH} << parameters.repo >> issues/289 smoke_job.json
