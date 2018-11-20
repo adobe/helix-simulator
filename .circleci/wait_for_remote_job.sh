@@ -10,7 +10,8 @@ smoke_job_build_num=$(jq '.build_num' < $2)
 build_url="https://circleci.com/api/v1.1/project/github/$3/${smoke_job_build_num}"
 
 smoke_result_file="smoke_result.json"
-smoke_step_name=$4
+smoke_step_name="$4"
+echo "smoke_step_name=${smoke_step_name=}"
 
 echo "Waiting now for smoke tests job execution. See build ${build_url}."
 
