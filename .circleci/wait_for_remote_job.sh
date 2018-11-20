@@ -33,13 +33,13 @@ else
     exit_code=1
 
     # get the output_url property from the "Running Smoke Tests" job in the json response
-    output_url=$(jq -r '.steps[] | select(.name == ("${smoke_step_name}")) | .actions[0].output_url' ${smoke_result_file});
+    output_url=$(jq -r ".steps[] | select(.name == \"${smoke_step_name}\") | .actions[0].output_url" ${smoke_result_file});
 
     echo ""
     echo "Smoke tests error message:"
     echo ""
 
-    if [ ! -z "$output_url" ]
+    if [ ! -z "${output_url}" ]
     then
         # call the output url to fetch the error message and display it
         error_message=$(curl --silent --compressed --header "Accept: application/json" "${output_url}" | jq -r '.[0].message');
