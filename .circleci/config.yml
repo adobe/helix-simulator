@@ -38,13 +38,7 @@ commands:
     steps:
     - run:
         name: Call remote smoke tests job
-        command: |
-            curl \
-            --user ${SMOKE_TEST_TOKEN}: \
-            --header "Content-Type: application/json" \
-            --silent \
-            --data "{\"build_parameters\": {\"CIRCLE_JOB\": \"<< parameters.remote_job >>\", \"GDM_MODULE_BRANCHES\": { \"${CIRCLE_PROJECT_REPONAME}\": \"${CIRCLE_BRANCH}\"}}}" \
-            --request POST "https://circleci.com/api/v1.1/project/github/<< parameters.repo >>/tree/issues/289" > smoke_job.json
+        command: ./call_remote_job.sh ${SMOKE_TEST_TOKEN} << parameters.remote_job >> ${CIRCLE_BRANCH} << parameters.repo >> issues/289 smoke_job.json
     - run:
         name: Wait for smoke tests job to complete and report status
         command: |
