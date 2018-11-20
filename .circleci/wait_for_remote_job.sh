@@ -11,7 +11,6 @@ build_url="https://circleci.com/api/v1.1/project/github/$3/${smoke_job_build_num
 
 smoke_result_file="smoke_result.json"
 smoke_step_name="$4"
-echo "smoke_step_name=${smoke_step_name=}"
 
 echo "Waiting now for smoke tests job execution. See build ${build_url}."
 
@@ -43,7 +42,7 @@ else
     then
         # call the output url to fetch the error message and display it
         error_message=$(curl --silent --compressed --header "Accept: application/json" "${output_url}" | jq -r '.[0].message');
-        echo "${error_message}"
+        echo -n "${error_message}" | tr -d '\r'
     else
         # no output_url, unknown error
         echo "Unknown error. Check the smoke test job execution logs for more details."
