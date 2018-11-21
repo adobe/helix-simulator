@@ -28,17 +28,15 @@ commands:
         command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
 orbs:
-    helix_smoke_tests:
+    helixSmokeTests:
         executors:
             node8:
                 docker:
                     - image: circleci/node:8
         jobs:
-            run_tests:
+            runTests:
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
                 parameters:
-                    token:
-                        type: string
                     repo:
                         type: string
                     remote_job:
@@ -83,7 +81,7 @@ jobs:
     - store_artifacts:
         path: junit
 
-    - helix_smoke_tests/run_tests:
+    - helixSmokeTests/runTests:
         name: helix-simulator runs smoke tests
         repo: adobe/helix-cli
 
