@@ -32,10 +32,8 @@ orbs:
         executors:
             node8:
                 docker:
-                - image: circleci/node:8
-                environment:
-                NPM_CONFIG_PREFIX: ~/.npm-global
-        commands:
+                    - image: circleci/node:8
+        jobs:
             run_tests:
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
                 parameters:
@@ -86,7 +84,8 @@ jobs:
         path: junit
 
     - helix_smoke_tests/run_tests:
-        repo: "adobe/helix-cli"
+        name: helix-simulator runs smoke tests
+        repo: adobe/helix-cli
 
   publish-pre-release:
     executor: node8
