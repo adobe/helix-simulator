@@ -27,24 +27,35 @@ commands:
         name: prepare test git user
         command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
-  smoke_tests:
-    description: "Run smoke tests on a remote repository, wait for execution and report status"
-    parameters:
-      repo:
-        type: string
-      remote_job:
-        type: string
-        default: "smoke"
-    steps:
-    - run: 
-        name: Make scripts executable
-        command: chmod +x .circleci/*.sh
-    - run:
-        name: Call remote smoke tests job
-        command: .circleci/call_remote_job.sh ${SMOKE_TEST_TOKEN} << parameters.remote_job >> ${CIRCLE_BRANCH} << parameters.repo >> issues/289 smoke_job.json
-    - run:
-        name: Wait for smoke tests job to complete and report status
-        command: .circleci/wait_for_remote_job.sh ${SMOKE_TEST_TOKEN} smoke_job.json << parameters.repo >> "Running Smoke Tests"
+orbs:
+    helix_smoke_tests:
+        executors:
+            node8:
+                docker:
+                - image: circleci/node:8
+                environment:
+                NPM_CONFIG_PREFIX: ~/.npm-global
+        commands:
+            run_tests:
+                description: "Run smoke tests on a remote repository, wait for execution and report status"
+                parameters:
+                    token:
+                        type: string
+                    repo:
+                        type: string
+                    remote_job:
+                        type: string
+                        default: "smoke"
+                steps:
+                    - run: 
+                        name: Make scripts executable
+                        command: chmod +x .circleci/*.sh
+                    - run:
+                        name: Call remote smoke tests job
+                        command: .circleci/call_remote_job.sh ${SMOKE_TEST_TOKEN} << parameters.remote_job >> ${CIRCLE_BRANCH} << parameters.repo >> issues/289 smoke_job.json
+                    - run:
+                        name: Wait for smoke tests job to complete and report status
+                        command: .circleci/wait_for_remote_job.sh ${SMOKE_TEST_TOKEN} smoke_job.json << parameters.repo >> "Running Smoke Tests"
 
 jobs:
   build:
@@ -74,7 +85,7 @@ jobs:
     - store_artifacts:
         path: junit
 
-    - smoke_tests:
+    - helix_smoke_tests/run_tests:
         repo: "adobe/helix-cli"
 
   publish-pre-release:
