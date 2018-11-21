@@ -5,6 +5,11 @@
 # $3 = << parameters.repo >>
 # $4 = step name ("Running Smoke Tests")
 
+cat run_tests_cmd_job.json 
+
+echo "file name: $2"
+
+
 smoke_job_build_num=$(jq '.build_num' < $2)
 
 build_url="https://circleci.com/api/v1.1/project/github/$3/${smoke_job_build_num}"
