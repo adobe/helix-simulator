@@ -28,13 +28,43 @@ commands:
         command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
 orbs:
-    helixSmokeTests:
+    inline_example:
+        jobs:
+            my_inline_job:
+                parameters:
+                greeting_name:
+                    description: # a helpful description
+                    type: string
+                    default: olleh
+                executor: my_inline_executor
+                steps:
+                - my_inline_command:
+                    name: <<parameters.greeting_name>>
+        commands:
+            my_inline_command:
+                parameters:
+                greeting_name:
+                    type: string
+                steps:
+                - run: echo "hello <<parameters.greeting_name>>, from the inline command"
+        executors:
+            my_inline_executor:
+                parameters:
+                version:
+                    type: string
+                    default: "2.4"
+                docker:
+                - image: circleci/ruby:<<parameters.version>>
+
+    helix_smoke_tests:
         executors:
             node8:
                 docker:
                     - image: circleci/node:8
         jobs:
-            runTests:
+            run_tests:
+                executor: node8
+
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
                 parameters:
                     repo:
@@ -81,8 +111,8 @@ jobs:
     - store_artifacts:
         path: junit
 
-    - helixSmokeTests/runTests:
-        name: helix-simulator runs smoke tests
+    - helix_smoke_tests/run_tests:
+        # name: helix-simulator runs smoke tests
         repo: adobe/helix-cli
 
   publish-pre-release:
