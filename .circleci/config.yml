@@ -82,7 +82,6 @@ orbs:
                             build_url="https://circleci.com/api/v1.1/project/github/<< parameters.remote_repo >>/${smoke_job_build_num}"
 
                             smoke_result_file="smoke_result.json"
-                            smoke_step_name="Running Smoke Tests"
 
                             echo "Waiting now for smoke tests job execution. See build ${build_url}."
 
@@ -103,8 +102,8 @@ orbs:
                             else
                                 exit_code=1
 
-                                # get the output_url property from the "Running Smoke Tests" job in the json response
-                                output_url=$(jq -r ".steps[] | select(.name == \"${smoke_step_name}\") | .actions[0].output_url" ${smoke_result_file});
+                                # get the output_url property from the first failing task
+                                output_url=$(jq -r "[.steps[] | select(.actions[0].failed == true)][0] | .actions[0].output_url" ${smoke_result_file});
 
                                 echo ""
                                 echo "Smoke tests error message:"
