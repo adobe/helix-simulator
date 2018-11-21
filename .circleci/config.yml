@@ -72,6 +72,7 @@ orbs:
                     - run:
                         name: Call remote smoke tests job
                         command: |
+                            echo "project: << parameters.remote_repo >>"
                             curl \
                                 --user << parameters.token>>: \
                                 --header "Content-Type: application/json" \
