@@ -58,6 +58,7 @@ orbs:
                         type: string
                         default: "smoke"
                 steps:
+                    - checkout
                     - run: 
                         name: Make scripts executable
                         command: chmod +x .circleci/*.sh
