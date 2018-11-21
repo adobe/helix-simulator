@@ -68,7 +68,7 @@ orbs:
                         command: chmod +x .circleci/*.sh
                     - run:
                         name: Call remote smoke tests job
-                        command: 
+                        command: |
                             curl \
                                 --user << parameters.token >>: \
                                 --header "Content-Type: application/json" \
@@ -77,7 +77,7 @@ orbs:
                                 --request POST "https://circleci.com/api/v1.1/project/github/<< parameters.remote_repo >>/tree/<< parameters.remote_branch >>" > run_tests_cmd_job.json
                     - run:
                         name: Wait for smoke tests job to complete and report status
-                        command: .circleci/wait_for_remote_job.sh ${SMOKE_TEST_TOKEN} run_tests_cmd_job.json << parameters.repo >> "Running Smoke Tests"
+                        command: .circleci/wait_for_remote_job.sh ${SMOKE_TEST_TOKEN} run_tests_cmd_job.json << parameters.remote_repo >> "Running Smoke Tests"
             
 
 jobs:
