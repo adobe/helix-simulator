@@ -58,10 +58,6 @@ orbs:
                         type: string
                         default: "smoke"
                 steps:
-                    - checkout
-                    - run: 
-                        name: Make scripts executable
-                        command: chmod +x .circleci/*.sh
                     - run:
                         name: Call remote smoke tests job
                         command: .circleci/call_remote_job.sh ${SMOKE_TEST_TOKEN} << parameters.remote_job >> ${CIRCLE_BRANCH} << parameters.repo >> issues/289 smoke_job.json
@@ -144,4 +140,4 @@ workflows:
   smoke:
     jobs:
         - helix_smoke_tests/run_tests:
-            repo: adobe/helix-cli
+            repo: adobe/helix-continuous
