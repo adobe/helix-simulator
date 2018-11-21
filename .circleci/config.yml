@@ -68,7 +68,7 @@ orbs:
                         command: |
                             curl \
                                 --header "Content-Type: application/json" \
-                                # --silent \
+                                --silent \
                                 --data "{\"build_parameters\": {\"GDM_MODULE_BRANCHES\": { \"${CIRCLE_PROJECT_REPONAME}\": \"${CIRCLE_BRANCH}\"}}}" \
                                 --request POST "https://circleci.com/api/v1.1/project/github/<< parameters.remote_repo >>/tree/<< parameters.remote_branch >>?circle-token=<<parameters.token>>" > run_tests_cmd_job.json
                     - run:
