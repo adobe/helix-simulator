@@ -43,7 +43,6 @@ orbs:
                         type: string
                 steps:
                     - run_tests_cmd:
-                        token: << parameters.token >>
                         remote_repo: << parameters.remote_repo >>
         commands:
             run_tests_cmd:
