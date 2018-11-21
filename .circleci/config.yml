@@ -28,34 +28,6 @@ commands:
         command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
 orbs:
-    inline_example:
-        jobs:
-            my_inline_job:
-                parameters:
-                greeting_name:
-                    description: # a helpful description
-                    type: string
-                    default: olleh
-                executor: my_inline_executor
-                steps:
-                - my_inline_command:
-                    name: <<parameters.greeting_name>>
-        commands:
-            my_inline_command:
-                parameters:
-                greeting_name:
-                    type: string
-                steps:
-                - run: echo "hello <<parameters.greeting_name>>, from the inline command"
-        executors:
-            my_inline_executor:
-                parameters:
-                version:
-                    type: string
-                    default: "2.4"
-                docker:
-                - image: circleci/ruby:<<parameters.version>>
-
     helix_smoke_tests:
         executors:
             node8:
@@ -73,6 +45,19 @@ orbs:
                         type: string
                         default: "smoke"
                 steps:
+                    - run_tests_cmd:
+                        repo: << parameters.repo >>
+                        remote_job: << parameters.remote_job >>
+        commands:
+            run_tests_cmd:
+                description: "Run smoke tests on a remote repository, wait for execution and report status"
+                parameters:
+                    repo:
+                        type: string
+                    remote_job:
+                        type: string
+                        default: "smoke"
+                steps:
                     - run: 
                         name: Make scripts executable
                         command: chmod +x .circleci/*.sh
@@ -82,6 +67,7 @@ orbs:
                     - run:
                         name: Wait for smoke tests job to complete and report status
                         command: .circleci/wait_for_remote_job.sh ${SMOKE_TEST_TOKEN} smoke_job.json << parameters.repo >> "Running Smoke Tests"
+            
 
 jobs:
   build:
@@ -110,10 +96,6 @@ jobs:
 
     - store_artifacts:
         path: junit
-
-    - helix_smoke_tests/run_tests:
-        # name: helix-simulator runs smoke tests
-        repo: adobe/helix-cli
 
   publish-pre-release:
     executor: node8
@@ -158,3 +140,7 @@ workflows:
           branches:
             only: master
     - build
+  smoke:
+    jobs:
+        - helix_smoke_tests/run_tests:
+            repo: adobe/helix-cli
