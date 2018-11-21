@@ -39,8 +39,6 @@ orbs:
 
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
                 parameters:
-                    token:
-                        type: string
                     remote_repo:
                         type: string
                 steps:
@@ -51,8 +49,6 @@ orbs:
             run_tests_cmd:
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
                 parameters:
-                    token:
-                        type: string
                     local_repo:
                         type: string
                         default: ${CIRCLE_PROJECT_REPONAME}
@@ -72,9 +68,8 @@ orbs:
                     - run:
                         name: Call remote smoke tests job
                         command: |
-                            echo "project: << parameters.remote_repo >>"
                             curl \
-                                --user << parameters.token>>: \
+                                --user ${SMOKE_TEST_TOKEN}: \
                                 --header "Content-Type: application/json" \
                                 --silent \
                                 --data "{\"build_parameters\": {\"GDM_MODULE_BRANCHES\": { \"<< parameters.local_repo >>\": \"<< parameters.local_branch >>\"}}}" \
@@ -158,5 +153,4 @@ workflows:
   smoke:
     jobs:
         - helix_smoke_tests/run_tests:
-            token: ${SMOKE_TEST_TOKEN}
             remote_repo: adobe/helix-continuous
