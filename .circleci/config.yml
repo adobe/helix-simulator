@@ -64,7 +64,7 @@ orbs:
                         command: chmod +x .circleci/*.sh
                     - run:
                         name: Call remote smoke tests job
-                        command: .circleci/call_remote_job.sh ${SMOKE_TEST_TOKEN} << parameters.remote_job >> ${CIRCLE_BRANCH} << parameters.repo >> issues/289 smoke_job.json
+                        command: .circleci/call_remote_job.sh ${SMOKE_TEST_TOKEN} << parameters.remote_job >> ${CIRCLE_BRANCH} << parameters.repo >> master smoke_job.json
                     - run:
                         name: Wait for smoke tests job to complete and report status
                         command: .circleci/wait_for_remote_job.sh ${SMOKE_TEST_TOKEN} smoke_job.json << parameters.repo >> "Running Smoke Tests"
