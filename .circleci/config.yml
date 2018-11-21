@@ -28,13 +28,13 @@ commands:
         command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
 orbs:
-    helix_smoke_tests:
+    adobe:
         executors:
             node8:
                 docker:
                     - image: circleci/node:8
         jobs:
-            run_tests:
+            helix_smoke_tests:
                 executor: node8
 
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
@@ -44,11 +44,11 @@ orbs:
                     remote_repo:
                         type: string
                 steps:
-                    - run_tests_cmd:
+                    - run_helix_smoke_tests_cmd:
                         token: << parameters.token >>
                         remote_repo: << parameters.remote_repo >>
         commands:
-            run_tests_cmd:
+            run_helix_smoke_tests_cmd:
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
                 parameters:
                     token:
@@ -196,6 +196,6 @@ workflows:
     - build
   smoke:
     jobs:
-        - helix_smoke_tests/run_tests:
+        - adobe/helix_smoke_tests:
             token: ${SMOKE_TEST_TOKEN}
             remote_repo: adobe/helix-continuous
