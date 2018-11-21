@@ -53,9 +53,6 @@ orbs:
                 parameters:
                     token:
                         type: string
-                    local_branch: 
-                        type: string
-                        default: ${CIRCLE_BRANCH}
                     remote_repo:
                         type: string
                     remote_branch:
@@ -70,10 +67,11 @@ orbs:
                         name: Call remote smoke tests job
                         command: |
                             curl \
+                                --request POST \
                                 --header "Content-Type: application/json" \
-                                --silent \
-                                --data "{\"build_parameters\": {\"GDM_MODULE_BRANCHES\": { \"${CIRCLE_PROJECT_REPONAME}\": \"<< parameters.local_branch>>\"}}}" \
-                                --request POST "https://circleci.com/api/v1.1/project/github/<< parameters.remote_repo >>/tree/<< parameters.remote_branch >>?circle-token=<<parameters.token>>" > run_tests_cmd_job.json
+                                # --silent \
+                                --data "{\"build_parameters\": {\"GDM_MODULE_BRANCHES\": { \"${CIRCLE_PROJECT_REPONAME}\": \"${CIRCLE_BRANCH}\"}}}" \
+                                "https://circleci.com/api/v1.1/project/github/<< parameters.remote_repo >>/tree/<< parameters.remote_branch >>?circle-token=<<parameters.token>>" > run_tests_cmd_job.json
                     - run:
                         name: Wait for smoke tests job to complete and report status
                         command: .circleci/wait_for_remote_job.sh ${SMOKE_TEST_TOKEN} run_tests_cmd_job.json << parameters.remote_repo >> "Running Smoke Tests"
