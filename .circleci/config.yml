@@ -39,15 +39,26 @@ orbs:
 
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
                 parameters:
+                    token:
+                        type: string
                     remote_repo:
                         type: string
                 steps:
                     - run_tests_cmd:
+                        token: << parameters.token >>
                         remote_repo: << parameters.remote_repo >>
         commands:
             run_tests_cmd:
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
                 parameters:
+                    token:
+                        type: string
+                    local_repo:
+                        type: string
+                        default: ${CIRCLE_PROJECT_REPONAME}
+                    local_branch:
+                        type: string
+                        default: ${CIRCLE_BRANCH}
                     remote_repo:
                         type: string
                     remote_branch:
@@ -62,10 +73,10 @@ orbs:
                         name: Call remote smoke tests job
                         command: |
                             curl \
-                                --user ${SMOKE_TEST_TOKEN}: \
+                                --user << parameters.token>>: \
                                 --header "Content-Type: application/json" \
                                 --silent \
-                                --data "{\"build_parameters\": {\"GDM_MODULE_BRANCHES\": { \"${CIRCLE_PROJECT_REPONAME}\": \"${CIRCLE_BRANCH}\"}}}" \
+                                --data "{\"build_parameters\": {\"GDM_MODULE_BRANCHES\": { \"<< parameters.local_repo >>\": \"<< parameters.local_branch >>\"}}}" \
                                 --request POST "https://circleci.com/api/v1.1/project/github/<< parameters.remote_repo >>/tree/<< parameters.remote_branch >>" > run_tests_cmd_job.json
                     - run:
                         name: Wait for smoke tests job to complete and report status
@@ -146,4 +157,5 @@ workflows:
   smoke:
     jobs:
         - helix_smoke_tests/run_tests:
+            token: ${SMOKE_TEST_TOKEN}
             remote_repo: adobe/helix-continuous
