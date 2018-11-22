@@ -34,7 +34,7 @@ orbs:
                 docker:
                     - image: circleci/node:8
         jobs:
-            helix_smoke_tests:
+            helix-smoke-tests:
                 executor: node8
 
                 description: "Run smoke tests on a remote repository, wait for execution and report status"
@@ -196,6 +196,6 @@ workflows:
     - build
   smoke:
     jobs:
-        - adobe/helix_smoke_tests:
+        - adobe/helix-smoke-tests:
             token: ${SMOKE_TEST_TOKEN}
             remote_repo: adobe/helix-continuous
