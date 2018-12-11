@@ -52,6 +52,8 @@ function executeTemplate(ctx) {
   // invalidate script
   // todo: use watcher to invalidate automatically
   delete require.cache[require.resolve(ctx.templatePath)];
+  // temporary workaround: invalidate the pre.js too
+  delete require.cache[require.resolve(ctx.templatePath.replace('.js', '.pre.js'))];
 
   // the compiled script does not bundle the modules that are required for execution, since it
   // expects them to be provided by the runtime. We tweak the module loader here in order to
