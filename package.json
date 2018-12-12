@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-simulator",
-  "version": "2.7.1-pre.0",
+  "version": "2.7.2-pre.0",
   "description": "Helix Testing Environment",
   "repository": "https://github.com/adobe/helix-simulator",
   "main": "src/index.js",
@@ -16,8 +16,8 @@
     "delete-git-tag": "git tag -d v$npm_package_version && git push origin :v$npm_package_version"
   },
   "dependencies": {
-    "@adobe/git-server": "0.9.10",
-    "@adobe/helix-shared": "^0.0.5",
+    "@adobe/git-server": "0.9.11",
+    "@adobe/helix-shared": "^0.2.1",
     "colors": "^1.3.0",
     "express": "^4.16.3",
     "fs-extra": "^7.0.0",
@@ -26,7 +26,7 @@
     "nodesi": "^1.8.0",
     "request": "^2.85.0",
     "request-promise-native": "^1.0.5",
-    "snyk": "^1.88.1",
+    "snyk": "^1.112.0",
     "winston": "^3.0.0"
   },
   "devDependencies": {
