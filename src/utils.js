@@ -38,7 +38,7 @@ const utils = {
   async fetch(uri, logger) {
     if (uri.charAt(0) === '/') {
       try {
-        return await fs.readFile(uri);
+        return await fs.readFile(uri.replace(/\?.*$/, ''));
       } catch (e) {
         if (e.code === 'ENOENT') {
           return null;

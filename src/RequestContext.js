@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
+const {parse} = require('url');
 const utils = require('./utils.js');
 
 /**
@@ -22,7 +23,7 @@ module.exports = class RequestContext {
     const { url } = req;
     this._cfg = cfg || {};
     this._url = url;
-    this._path = url || '/';
+    this._path = parse(url).pathname || '/'; //get the path name without query string
     this._selector = '';
     this._extension = '';
     this._headers = req.headers || {};
