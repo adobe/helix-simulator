@@ -76,7 +76,7 @@ async function assertHttp(url, status, spec, subst) {
                 expected = expected.replace(reg, repl[k]);
               });
               if (/\/json/.test(res.headers['content-type'])) {
-                assert.deepEqual(JSON.parse(dat), JSON.parse(expected));
+                assert.equal(JSON.parse(dat).params, JSON.parse(expected).params);
               } else if (/octet-stream/.test(res.headers['content-type'])) {
                 expected = JSON.parse(expected).data;
                 const actual = dat.toString('hex');
@@ -157,6 +157,21 @@ describe('Helix Server', () => {
         X_REQUEST_ID: reqCtx._requestId,
         X_CDN_REQUEST_ID: reqCtx._cdnRequestId,
       }));
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('deliver request parameters', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.dump.html?foo=bar&test=me`, 200, 'expected_dump_params.json');
     } finally {
       await project.stop();
     }

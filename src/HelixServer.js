@@ -15,6 +15,7 @@ const { Module } = require('module');
 const express = require('express');
 const NodeESI = require('nodesi');
 const { Logger } = require('@adobe/helix-shared');
+const querystring = require('querystring');
 const utils = require('./utils.js');
 
 const RequestContext = require('./RequestContext.js');
@@ -85,8 +86,7 @@ function executeTemplate(ctx) {
   });
 
   Module._nodeModulePaths = nodeModulePathsFn;
-  /* eslint-enable no-underscore-dangle */
-  return Promise.resolve(mod.main({
+  const actionArgs = {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
@@ -96,7 +96,14 @@ function executeTemplate(ctx) {
     path: `${ctx.resourcePath}.md`,
     REPO_RAW_ROOT: `${ctx.config.contentRepo.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.config.contentRepo.apiRoot}/`,
-  }));
+  };
+
+  if (ctx._params && Object.keys(ctx._params).length) {
+    actionArgs.params = querystring.stringify(ctx._params);
+  }
+  /* eslint-enable no-underscore-dangle */
+
+  return Promise.resolve(mod.main(actionArgs));
 }
 
 class HelixServer extends EventEmitter {
