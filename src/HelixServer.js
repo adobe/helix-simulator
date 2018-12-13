@@ -202,7 +202,7 @@ class HelixServer extends EventEmitter {
   }
 
   async start() {
-    this._logger.info('stating project');
+    this._logger.info('starting project');
     return new Promise((resolve, reject) => {
       this._server = this._app.listen(this._port, (err) => {
         if (err) {
