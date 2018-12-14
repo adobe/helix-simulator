@@ -1,4 +1,4 @@
-# Contributing to Petridish
+# Contributing to Helix Simulator
 
 This project is an Open Development/Inner Source project and welcomes contributions from everyone who finds it useful or lacking.
 
@@ -34,14 +34,10 @@ In your pull request, outline:
 * If (and what) they breaks
 * Start the pull request with the GitHub issue ID, e.g. #123
 
-Lastly, please follow the [pull request template](PULL_REQUEST_TEMPLATE.md) when submitting a pull request!
-
 Each commit message that is not part of a pull request:
 
 * Should contain the issue ID like `#123`
 * Can contain the tag `[trivial]` for trivial changes that don't relate to an issue
-
-
 
 ## Coding Styleguides
 
@@ -56,7 +52,7 @@ Feedback on the pull request will be given in writing, in GitHub.
 # Release Management
 
 The project's committers will release to the [Adobe organization on npmjs.org](https://www.npmjs.com/org/adobe).
-Please contact the [Adobe Open Source Advisory Board](https://git.corp.adobe.com/OpenSourceAdvisoryBoard/discuss/issues) to get access to the npmjs organization.
+Please contact the [Adobe Open Source Advisory Board](mailto:grp-opensourceoffice@adobe.com), or join us on corporate slack under #guild-opensource, to get access to the npmjs organization.
 Then, you can release using:
 
 ### Versioning
