@@ -11,6 +11,7 @@
  */
 
 const EventEmitter = require('events');
+const url = require('url');
 const { Module } = require('module');
 const express = require('express');
 const NodeESI = require('nodesi');
@@ -86,14 +87,40 @@ function executeTemplate(ctx) {
   });
 
   Module._nodeModulePaths = nodeModulePathsFn;
+  // for helix configs with multiple strains and different content repos, we
+  // want the server to pull content from the appropriate repo, so we parse the
+  // config strains and if the request URL matches the strain URL conditions, we
+  // override the content repo configurations
+  let { owner, repo, ref } = ctx.config.contentRepo;
+  let path = `${ctx.resourcePath}.md`;
+  const strains = ctx.config.config.strains;
+  if (strains && strains.size) {
+    for (const strainConfig of strains.values()) {
+      if (strainConfig.url) {
+        // TODO: is there a better way than parsing the URLs from the config on every request?
+        // maybe on construction instead? can the config change on the fly after
+        // construction?
+        const urlMatch = url.parse(strainConfig.url);
+        if (ctx.resourcePath.startsWith(urlMatch.path)) {
+          owner = strainConfig.content.owner;
+          repo = strainConfig.content.repo;
+          ref = strainConfig.content.ref;
+          path = `${ctx.resourcePath.substring(urlMatch.path.length)}.md`;
+          break;
+        }
+      }
+    }
+  }
+  // TODO: do the raw root / api root properties below need overriding for the
+  // separate content repo case?
   const actionArgs = {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
-    owner: ctx.config.contentRepo.owner,
-    repo: ctx.config.contentRepo.repo,
-    ref: ctx.config.contentRepo.ref || 'master',
-    path: `${ctx.resourcePath}.md`,
+    owner,
+    repo,
+    ref: ref || 'master',
+    path,
     REPO_RAW_ROOT: `${ctx.config.contentRepo.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.config.contentRepo.apiRoot}/`,
   };

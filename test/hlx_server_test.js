@@ -34,6 +34,7 @@ const SPEC_ROOT = path.resolve(__dirname, 'specs');
 
 const SPECS_WITH_GIT = [
   path.join(SPEC_ROOT, 'local'),
+  path.join(SPEC_ROOT, 'remote_multi_strain'),
 ];
 
 function initRepository(dir) {
@@ -262,6 +263,22 @@ describe('Helix Server', () => {
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/notfound.css`, 404);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('delivers strain content if content repo is different from default, and urls match', async () => {
+    const cwd = path.join(SPEC_ROOT, 'remote_multi_strain');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index_repo.html');
+      await assertHttp(`http://localhost:${project.server.port}/docs/xd/README.html`, 200, 'expected_docs_xd.html');
     } finally {
       await project.stop();
     }
