@@ -49,7 +49,7 @@ const utils = {
     try {
       const response = await request({
         method: 'GET',
-        uriOrPath,
+        uri: uriOrPath,
         resolveWithFullResponse: true,
         encoding: null,
       });
@@ -72,8 +72,13 @@ const utils = {
    * @return {Promise} A promise that resolves to the request context.
    */
   async fetchStatic(ctx) {
+    // this is a bit a hack, since the webroot is an absolute path, but it should be relative to
+    // the static/code repository. this will be cleaned up in: #110
+    // eslint-disable-next-line
+    const webroot = path.relative(ctx.config._cwd, ctx.config.webRootDir);
+
     const uriOrPaths = [
-      ctx.config.contentRepo.raw + ctx.path,
+      `${ctx.config.contentRepo.raw}/${webroot}${ctx.path}`,
       path.resolve(ctx.config.webRootDir, ctx.path.substring(1)),
     ];
     for (let i = 0; i < uriOrPaths.length; i += 1) {

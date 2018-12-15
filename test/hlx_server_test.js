@@ -17,6 +17,7 @@ const assert = require('assert');
 const fse = require('fs-extra');
 const http = require('http');
 const path = require('path');
+const uuidv4 = require('uuid/v4');
 const shell = require('shelljs');
 const HelixProject = require('../src/HelixProject.js');
 
@@ -35,6 +36,13 @@ const SPEC_ROOT = path.resolve(__dirname, 'specs');
 const SPECS_WITH_GIT = [
   path.join(SPEC_ROOT, 'local'),
 ];
+
+async function createTestRoot() {
+  const dir = path.resolve(__dirname, 'tmp', uuidv4());
+  await fse.ensureDir(dir);
+  return dir;
+}
+
 
 function initRepository(dir) {
   const pwd = shell.pwd();
@@ -222,11 +230,31 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver static content resource from git', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const testRoot = await createTestRoot();
+    await fse.copy(cwd, testRoot);
+    await fse.remove(path.resolve(testRoot, 'htdocs', 'dist', 'welcome.txt'));
+    const project = new HelixProject()
+      .withCwd(testRoot)
+      .withBuildDir('./build')
+      .withWebRootDir('./htdocs')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/dist/styles.css`, 200, 'expected_styles.css');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver static dist resource', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withWebRootDir('htdocs')
       .withHttpPort(0);
     await project.init();
     try {
