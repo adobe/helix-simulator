@@ -11,6 +11,7 @@
  */
 const fs = require('fs-extra');
 const request = require('request-promise-native');
+const path = require('path');
 const crypto = require('crypto');
 
 const utils = {
@@ -29,16 +30,26 @@ const utils = {
   },
 
   /**
-   * Fetches content from the given uri
-   * @param {String} ur URL
+   * Fetches content from the given uri or path.
+   * @param {String} uriOrPath Either filesystem path (starting with '/') or URL
    * @param {Logger} the logger
    * @returns {*} The requested content or NULL if not exists.
    */
-  async fetch(uri, logger) {
+  async fetch(uriOrPath, logger) {
+    if (uriOrPath.charAt(0) === '/') {
+      try {
+        return await fs.readFile(uriOrPath.replace(/\?.*$/, ''));
+      } catch (e) {
+        if (e.code === 'ENOENT') {
+          return null;
+        }
+        throw e;
+      }
+    }
     try {
       const response = await request({
         method: 'GET',
-        uri,
+        uri: uriOrPath,
         resolveWithFullResponse: true,
         encoding: null,
       });
@@ -46,11 +57,11 @@ const utils = {
     } catch (e) {
       if (e.response && e.response.statusCode) {
         if (e.response.statusCode !== 404) {
-          logger.error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
+          logger.error(`resource at ${uriOrPath} does not exist. got ${e.response.statusCode} from server`);
         }
         return null;
       }
-      logger.error(`resource at ${uri} does not exist. ${e.message}`);
+      logger.error(`resource at ${uriOrPath} does not exist. ${e.message}`);
       return null;
     }
   },
@@ -61,15 +72,25 @@ const utils = {
    * @return {Promise} A promise that resolves to the request context.
    */
   async fetchStatic(ctx) {
-    const uri = ctx.config.contentRepo.raw + ctx.path;
-    ctx.logger.debug(`fetching static resource from ${uri}`);
-    // eslint-disable-next-line no-await-in-loop
-    const data = await utils.fetch(uri, ctx.logger);
-    if (data != null) {
-      ctx.content = Buffer.from(data, 'utf8');
-      return ctx;
-    }
+    // this is a bit a hack, since the webroot is an absolute path, but it should be relative to
+    // the static/code repository. this will be cleaned up in: #110
+    // eslint-disable-next-line
+    const webroot = path.relative(ctx.config._cwd, ctx.config.webRootDir);
 
+    const uriOrPaths = [
+      `${ctx.config.contentRepo.raw}/${webroot}${ctx.path}`,
+      path.resolve(ctx.config.webRootDir, ctx.path.substring(1)),
+    ];
+    for (let i = 0; i < uriOrPaths.length; i += 1) {
+      const uriOrPath = uriOrPaths[i];
+      ctx.logger.debug(`fetching static resource from ${uriOrPath}`);
+      // eslint-disable-next-line no-await-in-loop
+      const data = await utils.fetch(uriOrPath, ctx.logger);
+      if (data != null) {
+        ctx.content = Buffer.from(data, 'utf8');
+        return ctx;
+      }
+    }
     const error = new Error('Resource not found.');
     error.code = 404;
     throw error;
