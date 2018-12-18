@@ -12,6 +12,7 @@
   "repo": "content",
   "ref": "master",
   "path": "/index.md",
+  "params": "",
   "REPO_RAW_ROOT": "http://127.0.0.1:GIT_PORT/raw/",
   "REPO_API_ROOT": "http://127.0.0.1:GIT_PORT/api/"
 }

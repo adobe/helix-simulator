@@ -86,7 +86,8 @@ function executeTemplate(ctx) {
   });
 
   Module._nodeModulePaths = nodeModulePathsFn;
-  const actionArgs = {
+
+  return Promise.resolve(mod.main({
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
@@ -94,16 +95,13 @@ function executeTemplate(ctx) {
     repo: ctx.config.contentRepo.repo,
     ref: ctx.config.contentRepo.ref || 'master',
     path: `${ctx.resourcePath}.md`,
+    selector: ctx._selector,
+    extension: ctx._extension,
+    params: querystring.stringify(ctx._params),
     REPO_RAW_ROOT: `${ctx.config.contentRepo.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.config.contentRepo.apiRoot}/`,
-  };
-
-  if (ctx._params && Object.keys(ctx._params).length) {
-    actionArgs.params = querystring.stringify(ctx._params);
-  }
+  }));
   /* eslint-enable no-underscore-dangle */
-
-  return Promise.resolve(mod.main(actionArgs));
 }
 
 class HelixServer extends EventEmitter {
