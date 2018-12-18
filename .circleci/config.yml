@@ -64,6 +64,9 @@ jobs:
 
     steps:
     - setup
+    - add_ssh_keys:
+        fingerprints:
+          - "c3:cc:4e:ec:21:9b:64:b5:61:fb:ba:61:62:cf:62:96"
     - run:
         name: revert changes to package-lock.json
         command: git checkout -- package-lock.json

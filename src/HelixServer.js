@@ -145,7 +145,7 @@ class HelixServer extends EventEmitter {
               // full response is an error: engine error
               throw result;
             }
-            if (result && result.error && result.error instanceof Error) {
+            if (result.error && result.error instanceof Error) {
               throw result.error;
             }
             let body = result.body || '';
