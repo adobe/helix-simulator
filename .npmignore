@@ -1,0 +1,15 @@
+.circleci
+.eslint*
+.github
+.gitignore
+.nyc_output
+.snyk
+.vscode
+adobe-helix-*
+examples
+docs
+logs
+greenkeeper.json
+test
+test-results.xml
+
