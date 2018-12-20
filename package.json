@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-simulator",
-  "version": "2.7.5-pre.4",
+  "version": "2.7.5-pre.5",
   "description": "Helix Testing Environment",
   "repository": "https://github.com/adobe/helix-simulator",
   "main": "src/index.js",
