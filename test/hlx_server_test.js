@@ -215,7 +215,7 @@ describe('Helix Server', () => {
     }
   });
 
-  it.only('deliver static content resource', async () => {
+  it('deliver static content resource', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
@@ -230,7 +230,7 @@ describe('Helix Server', () => {
     }
   });
 
-  it.only('deliver static content resource (and webroot)', async () => {
+  it('deliver static content resource (and webroot)', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
