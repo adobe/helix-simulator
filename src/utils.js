@@ -78,6 +78,7 @@ const utils = {
     const webroot = path.relative(ctx.config._cwd, ctx.config.webRootDir);
 
     const uriOrPaths = [
+      `${ctx.config.contentRepo.raw}${ctx.path}`,
       `${ctx.config.contentRepo.raw}/${webroot}${ctx.path}`,
       path.resolve(ctx.config.webRootDir, ctx.path.substring(1)),
     ];

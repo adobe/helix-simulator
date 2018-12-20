@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "node src/run.js",
-    "test": "nyc mocha",
+    "test": "nyc mocha --exit",
     "lint": "./node_modules/.bin/eslint .",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect",
@@ -40,8 +40,8 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.11.1",
     "istanbul": "^1.1.0-alpha.1",
-    "mocha": "^5.0.5",
-    "mocha-junit-reporter": "^1.17.0",
+    "mocha": "5.2.0",
+    "mocha-junit-reporter": "1.17.0",
     "nyc": "^13.0.1",
     "shelljs": "^0.8.2",
     "uuid": "^3.3.2"
