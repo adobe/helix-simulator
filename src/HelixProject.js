@@ -245,7 +245,9 @@ class HelixProject {
     }
 
     // if strains has default content repo we need to start git server
-    if (this.contentRepo.toString() === 'http://localhost/local/default.git') {
+    if (this.contentRepo.hostname === 'localhost'
+      && this.contentRepo.owner === 'local'
+      && this.contentRepo.repo === 'default') {
       if (this._indexMd) {
         if (!this._repoPath) {
           throw new Error('Local README.md or index.md must be inside a valid git repository.');
