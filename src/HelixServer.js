@@ -93,6 +93,7 @@ function executeTemplate(ctx) {
     __ow_logger: ctx.logger,
     owner: ctx.config.contentRepo.owner,
     repo: ctx.config.contentRepo.repo,
+    // todo: use current branch if `ctx.config.contentRepo.isLocal`
     ref: ctx.config.contentRepo.ref || 'master',
     path: `${ctx.resourcePath}.md`,
     selector: ctx._selector,
