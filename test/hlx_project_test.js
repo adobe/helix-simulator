@@ -38,7 +38,6 @@ const SPECS_WITH_FAKE_GIT = [
   path.join(SPEC_ROOT, 'invalid_no_content'),
   path.join(SPEC_ROOT, 'local'),
   path.join(SPEC_ROOT, 'remote'),
-  path.join(SPEC_ROOT, 'emptycfg'),
   path.join(SPEC_ROOT, 'which_index'),
   path.join(SPEC_ROOT, 'index_is_readme'),
 ];
@@ -73,46 +72,37 @@ describe('Helix Project', () => {
     SPECS_WITH_GIT.forEach(removeRepository);
   });
 
-  it('throws error with no repository', (done) => {
-    new HelixProject()
-      .withCwd(path.join(SPEC_ROOT, 'invalid_no_git'))
-      .init()
-      .then(() => {
-        done('expected error');
-      })
-      .catch((e) => {
-        assert.equal(e.toString(), 'Error: Local README.md or index.md must be inside a valid git repository.');
-        done();
-      })
-      .catch(done);
+  it('throws error with no repository', async () => {
+    try {
+      await new HelixProject()
+        .withCwd(path.join(SPEC_ROOT, 'invalid_no_git'))
+        .init();
+      assert.fail('expected to fail.');
+    } catch (e) {
+      assert.equal(e.toString(), 'Error: Local README.md or index.md must be inside a valid git repository.');
+    }
   });
 
-  it('throws error with no src directory', (done) => {
-    new HelixProject()
-      .withCwd(path.join(SPEC_ROOT, 'invalid_no_src'))
-      .init()
-      .then(() => {
-        done('expected error');
-      })
-      .catch((e) => {
-        assert.equal(e.toString(), 'Error: Invalid config. No "src" directory.');
-        done();
-      })
-      .catch(done);
+  it('throws error with no src directory', async () => {
+    try {
+      await new HelixProject()
+        .withCwd(path.join(SPEC_ROOT, 'invalid_no_src'))
+        .init();
+      assert.fail('expected to fail.');
+    } catch (e) {
+      assert.equal(e.toString(), 'Error: Invalid config. No "src" directory.');
+    }
   });
 
-  it('throws error with no README.md', (done) => {
-    new HelixProject()
-      .withCwd(path.join(SPEC_ROOT, 'invalid_no_content'))
-      .init()
-      .then(() => {
-        done('expected error');
-      })
-      .catch((e) => {
-        assert.equal(e.toString(), 'Error: Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
-        done();
-      })
-      .catch(done);
+  it('throws error with no README.md', async () => {
+    try {
+      await new HelixProject()
+        .withCwd(path.join(SPEC_ROOT, 'invalid_no_content'))
+        .init();
+      assert.fail('expected to fail.');
+    } catch (e) {
+      assert.equal(e.toString(), 'Error: Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
+    }
   });
 
   it('Logs to custom logger', async () => {
@@ -127,16 +117,15 @@ describe('Helix Project', () => {
       getLogger: () => logger,
     };
 
-    const cwd = path.join(SPEC_ROOT, 'emptycfg');
+    const cwd = path.join(SPEC_ROOT, 'local');
     await new HelixProject()
       .withLogger(logger)
       .withCwd(cwd)
       .init();
-
     assert.ok(count > 0, 'custom logger should have been invoked.');
   });
 
-  it('detects local src and readme', (done) => {
+  it('detects local src and readme', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
 
     const GIT_CONFIG = {
@@ -171,124 +160,76 @@ describe('Helix Project', () => {
       },
     };
 
-    new HelixProject()
+    const project = await new HelixProject()
       .withCwd(cwd)
-      .init()
-      .then((cfg) => {
-        assert.equal(cfg.contentRepo.toString(), 'http://localhost/local/default.git');
-        assert.equal(cfg._needLocalServer, true);
-        assert.deepEqual(cfg.gitConfig, GIT_CONFIG);
-        done();
-      })
-      .catch(done);
+      .init();
+    assert.equal(project.contentRepo.toString(), 'http://localhost/local/default.git');
+    assert.equal(project._needLocalServer, true);
+    assert.deepEqual(project.gitConfig, GIT_CONFIG);
   });
 
-  it('local code and content with empty config', (done) => {
-    const cwd = path.join(SPEC_ROOT, 'emptycfg');
-    new HelixProject()
-      .withCwd(cwd)
-      .init()
-      .then((cfg) => {
-        assert.equal(cfg.contentRepo.toString(), 'http://localhost/local/default.git');
-        assert.equal(cfg._needLocalServer, true);
-        done();
-      })
-      .catch(done);
-  });
-
-  it('remote code and content', (done) => {
+  it('remote code and content', async () => {
     const cwd = path.join(SPEC_ROOT, 'remote');
-    new HelixProject()
+    const project = await new HelixProject()
       .withCwd(cwd)
-      .init()
-      .then((cfg) => {
-        assert.equal(cfg.contentRepo.raw, 'https://raw.github.com/Adobe-Marketing-Cloud/reactor-user-docs/master');
-        assert.equal(cfg._needLocalServer, false);
-        done();
-      })
-      .catch(done);
+      .init();
+    assert.equal(project.contentRepo.raw, 'https://raw.github.com/Adobe-Marketing-Cloud/reactor-user-docs/master');
+    assert.equal(project._needLocalServer, false);
   });
 
-  it('can set relative build dir', (done) => {
+  it('can set relative build dir', async () => {
     const cwd = path.join(SPEC_ROOT, 'remote');
-    new HelixProject()
+    const project = await new HelixProject()
       .withCwd(cwd)
       .withBuildDir('tmp/mybuild')
-      .init()
-      .then((cfg) => {
-        assert.equal(cfg.buildDir, path.resolve(cwd, 'tmp/mybuild'));
-        done();
-      })
-      .catch(done);
+      .init();
+    assert.equal(project.buildDir, path.resolve(cwd, 'tmp/mybuild'));
   });
 
-  it('can set absolute build dir', (done) => {
+  it('can set absolute build dir', async () => {
     const cwd = path.join(SPEC_ROOT, 'remote');
-    new HelixProject()
+    const project = await new HelixProject()
       .withCwd(cwd)
       .withBuildDir('/tmp/helix-build')
-      .init()
-      .then((cfg) => {
-        assert.equal(cfg.buildDir, path.resolve('/tmp/helix-build'));
-        done();
-      })
-      .catch(done);
+      .init();
+    assert.equal(project.buildDir, path.resolve('/tmp/helix-build'));
   });
 
-  it('can set port', (done) => {
+  it('can set port', async () => {
     const cwd = path.join(SPEC_ROOT, 'remote');
-    new HelixProject()
+    const project = await new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .init()
-      .then(cfg => cfg.start())
-      .then((cfg) => {
-        assert.equal(true, cfg.started);
-        assert.notEqual(cfg.server.port, 0);
-        assert.notEqual(cfg.server.port, 3000);
-        return cfg.stop();
-      })
-      .then((cfg) => {
-        assert.equal(false, cfg.started);
-        done();
-      })
-      .catch(done);
+      .init();
+
+    await project.start();
+    assert.equal(true, project.started);
+    assert.notEqual(project.server.port, 0);
+    assert.notEqual(project.server.port, 3000);
+    await project.stop();
+    assert.equal(false, project.started);
   });
 
-  it('can start and stop local project', (done) => {
+  it('can start and stop local project', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
-    const project = new HelixProject()
+    const project = await new HelixProject()
       .withCwd(cwd)
-      .withHttpPort(0);
-    project
-      .init()
-      .then(cfg => cfg.start())
-      .then((cfg) => {
-        assert.equal(true, cfg.started);
-        assert.ok(/http:\/\/127.0.0.1:\d+\/raw\/helix\/content\/master/.test(cfg.contentRepo.raw));
-        return cfg.stop();
-      })
-      .then((cfg) => {
-        assert.equal(false, cfg.started);
-        done();
-      })
-      .catch((err) => {
-        project.stop().then(() => {
-          done(err);
-        });
-      })
-      .catch(done);
+      .withHttpPort(0)
+      .init();
+
+    await project.start();
+    assert.equal(true, project.started);
+    assert.ok(/http:\/\/127.0.0.1:\d+\/raw\/helix\/content\/master/.test(project.contentRepo.raw));
+    await project.stop();
+    assert.equal(false, project.started);
   });
 
-  it('computes correct index: finds index', (done) => {
+  it('computes correct index: finds index', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
-    new HelixProject()
+    const project = await new HelixProject()
       .withCwd(cwd)
-      .init()
-      .then((cfg) => {
-        assert.equal(cfg.directoryIndex, 'index.html');
-        done();
-      })
-      .catch(done);
+      .init();
+
+    assert.equal(project.directoryIndex, 'index.html');
   });
 });

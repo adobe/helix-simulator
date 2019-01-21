@@ -7,5 +7,14 @@
 # the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
 # OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
+version: 1
 
-#content: https://github.com/Adobe-Marketing-Cloud/reactor-user-docs
+definitions:
+  defaults:
+    - &localRepo "http://localhost/local/default.git"
+
+strains:
+  default:
+    code: *localRepo
+    content: *localRepo
+    static: *localRepo
