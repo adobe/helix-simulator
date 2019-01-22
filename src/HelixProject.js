@@ -139,8 +139,8 @@ class HelixProject {
     return this;
   }
 
-  withLogger(winstonlogger) {
-    this._logger = winstonlogger;
+  withLogger(logger) {
+    this._logger = logger;
     return this;
   }
 
