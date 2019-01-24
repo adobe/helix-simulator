@@ -11,6 +11,7 @@
  */
 
 const fs = require('fs-extra');
+const { URL } = require('url');
 const path = require('path');
 const _ = require('lodash');
 const gitServer = require('@adobe/git-server/lib/server.js');
@@ -223,6 +224,24 @@ class HelixProject {
     if (await isDirectory(dotGitPath)) {
       this._repoPath = path.resolve(dotGitPath, '../');
     }
+  }
+
+  selectStrain(request) {
+    // todo: use strain conditions, once implemented. for now, just use request.headers.host
+    const host = request && request.headers ? request.headers.host : '';
+    const strains = this.config.strains.getByFilter(s => s.urls.find((url) => {
+      try {
+        const uri = new URL(url);
+        return uri.host === host;
+      } catch (e) {
+        // ignore
+        return false;
+      }
+    }));
+    if (strains.length > 0) {
+      return strains[0];
+    }
+    return this.config.strains.get('default');
   }
 
   async init() {
