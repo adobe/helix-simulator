@@ -27,8 +27,6 @@ const SRC_DIR = 'src';
 
 const DEFAULT_BUILD_DIR = '.hlx/build';
 
-const DEFAULT_WEB_ROOT = './';
-
 const GIT_DIR = '.git';
 
 const GIT_LOCAL_HOST = '127.0.0.1';
@@ -93,11 +91,9 @@ class HelixProject {
     this._gitUrl = null;
     this._buildDir = DEFAULT_BUILD_DIR;
     this._runtimePaths = module.paths;
-    this._webRootDir = DEFAULT_WEB_ROOT;
     this._server = new HelixServer(this);
     this._displayVersion = packageJson.version;
     this._logger = null;
-    this._strainName = 'default';
   }
 
   withCwd(cwd) {
@@ -118,16 +114,6 @@ class HelixProject {
   withHelixConfig(cfg) {
     this._cfg = cfg;
     return this.withLogger(cfg.log);
-  }
-
-  withStrainName(name) {
-    this._strainName = name;
-    return this;
-  }
-
-  withWebRootDir(dir) {
-    this._webRootDir = dir;
-    return this;
   }
 
   withDisplayVersion(v) {
@@ -161,16 +147,8 @@ class HelixProject {
     return this._buildDir;
   }
 
-  get webRootDir() {
-    return this._webRootDir;
-  }
-
   get runtimeModulePaths() {
     return this._runtimePaths;
-  }
-
-  get strain() {
-    return this.config.strains.get(this._strainName);
   }
 
   get started() {
@@ -183,10 +161,6 @@ class HelixProject {
    */
   get server() {
     return this._server;
-  }
-
-  get directoryIndex() {
-    return this.strain.directoryIndex;
   }
 
   /*
@@ -214,7 +188,6 @@ class HelixProject {
     }
 
     this._buildDir = path.resolve(this._cwd, this._buildDir);
-    this._webRootDir = path.resolve(this._cwd, this._webRootDir);
 
     const dotGitPath = path.join(this._cwd, GIT_DIR);
     if (await isDirectory(dotGitPath)) {

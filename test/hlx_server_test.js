@@ -130,6 +130,23 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver resource at /', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      // hack in correct port for hostname matching
+      project.config.strains.get('dev').urls = [`http://127.0.0.1:${project.server.port}`];
+      await assertHttp(`http://127.0.0.1:${project.server.port}/`, 200, 'expected_index_dev.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver rendered resource with long URL', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
@@ -253,7 +270,6 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withWebRootDir('./htdocs')
       .withHttpPort(0);
     await project.init();
     try {
@@ -272,7 +288,6 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(testRoot)
       .withBuildDir('./build')
-      .withWebRootDir('./htdocs')
       .withHttpPort(0);
     await project.init();
     try {
@@ -288,7 +303,6 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withWebRootDir('htdocs')
       .withHttpPort(0);
     await project.init();
     try {

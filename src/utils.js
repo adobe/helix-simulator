@@ -11,7 +11,6 @@
  */
 const fs = require('fs-extra');
 const request = require('request-promise-native');
-const path = require('path');
 const crypto = require('crypto');
 
 const utils = {
@@ -72,22 +71,16 @@ const utils = {
    * @return {Promise} A promise that resolves to the request context.
    */
   async fetchStatic(ctx) {
-    // this is a bit a hack, since the webroot is an absolute path, but it should be relative to
-    // the static/code repository. this will be cleaned up in: #110
-    // eslint-disable-next-line
-    const webroot = path.relative(ctx.config._cwd, ctx.config.webRootDir);
-
     const staticUrl = ctx.strain.static.url;
-    const uriOrPaths = [
-      `${staticUrl.raw}${ctx.path}`,
-      `${staticUrl.raw}/${webroot}${ctx.path}`,
-      path.resolve(ctx.config.webRootDir, ctx.path.substring(1)),
+    const uris = [
+      `${ctx.strain.content.raw}${ctx.path}`,
+      `${staticUrl.raw}${staticUrl.path}${ctx.path}`,
     ];
-    for (let i = 0; i < uriOrPaths.length; i += 1) {
-      const uriOrPath = uriOrPaths[i];
-      ctx.logger.debug(`fetching static resource from ${uriOrPath}`);
+    for (let i = 0; i < uris.length; i += 1) {
+      const uri = uris[i];
+      ctx.logger.debug(`fetching static resource from ${uri}`);
       // eslint-disable-next-line no-await-in-loop
-      const data = await utils.fetch(uriOrPath, ctx.logger);
+      const data = await utils.fetch(uri, ctx.logger);
       if (data != null) {
         ctx.content = Buffer.from(data, 'utf8');
         return ctx;

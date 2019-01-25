@@ -11,8 +11,8 @@
  */
 
 /* eslint-disable */
-module.exports.main = function main() {
+module.exports.main = function main(params) {
   return {
-    body: '<html><head>Test</head><body>Hello, world.</body></html>',
+    body: `<html><head>Test</head><body>Hello, world. path=${params.path}</body></html>`,
   }
 };

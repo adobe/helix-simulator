@@ -172,13 +172,4 @@ describe('Helix Project', () => {
     await project.stop();
     assert.equal(false, project.started);
   });
-
-  it('computes correct index: finds index', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
-    const project = await new HelixProject()
-      .withCwd(cwd)
-      .init();
-
-    assert.equal(project.directoryIndex, 'index.html');
-  });
 });

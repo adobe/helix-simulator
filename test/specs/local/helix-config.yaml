@@ -24,3 +24,4 @@ strains:
     code: *localRepo
     content: *localRepo
     static: *localRepo
+    directoryIndex: /readme.html

@@ -32,12 +32,13 @@ module.exports = class RequestContext {
     this._wskActivationId = utils.randomChars(32, true);
     this._requestId = utils.randomChars(32);
     this._cdnRequestId = utils.uuid();
+    this._strain = cfg.selectStrain(req);
 
     const lastSlash = this._path.lastIndexOf('/');
     let lastDot = this._path.lastIndexOf('.');
     if (lastDot <= lastSlash) {
       // no extension means a folder request
-      const index = this._cfg.directoryIndex || 'index.html';
+      const index = this._strain.directoryIndex || 'index.html';
       this._path = `${this._path}/${index}`;
       // remove multiple slashes
       this._path = this._path.replace(/\/+/g, '/');
@@ -58,7 +59,6 @@ module.exports = class RequestContext {
       relPath = relPath.substring(0, selDot);
     }
     this._resourcePath = relPath;
-    this._strain = cfg.selectStrain(req);
 
     // generate headers
     this._wskHeaders = Object.assign({
