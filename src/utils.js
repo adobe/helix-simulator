@@ -29,26 +29,16 @@ const utils = {
   },
 
   /**
-   * Fetches content from the given uri or path.
-   * @param {String} uriOrPath Either filesystem path (starting with '/') or URL
-   * @param {Logger} the logger
+   * Fetches content from the given uri
+   * @param {String} uri URL to fetch
+   * @param {Logger} logger the logger
    * @returns {*} The requested content or NULL if not exists.
    */
-  async fetch(uriOrPath, logger) {
-    if (uriOrPath.charAt(0) === '/') {
-      try {
-        return await fs.readFile(uriOrPath.replace(/\?.*$/, ''));
-      } catch (e) {
-        if (e.code === 'ENOENT') {
-          return null;
-        }
-        throw e;
-      }
-    }
+  async fetch(uri, logger) {
     try {
       const response = await request({
         method: 'GET',
-        uri: uriOrPath,
+        uri,
         resolveWithFullResponse: true,
         encoding: null,
       });
@@ -56,11 +46,11 @@ const utils = {
     } catch (e) {
       if (e.response && e.response.statusCode) {
         if (e.response.statusCode !== 404) {
-          logger.error(`resource at ${uriOrPath} does not exist. got ${e.response.statusCode} from server`);
+          logger.error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
         }
         return null;
       }
-      logger.error(`resource at ${uriOrPath} does not exist. ${e.message}`);
+      logger.error(`resource at ${uri} does not exist. ${e.message}`);
       return null;
     }
   },

@@ -138,7 +138,6 @@ class HelixServer extends EventEmitter {
         ctx.strain.static.url = ctx.config.gitUrl;
       }
 
-
       this.emit('request', req, res, ctx);
       if (!ctx.valid) {
         res.status(404).send();
