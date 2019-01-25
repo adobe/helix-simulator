@@ -19,7 +19,13 @@ const utils = require('./utils.js');
  * @type {module.RequestContext}
  */
 module.exports = class RequestContext {
-  constructor(req, cfg) {
+  constructor(request, cfg) {
+    // todo: consider using lodash.defaultsDeep
+    const req = Object.assign({}, request, cfg.requestOverride);
+    if (cfg.requestOverride && cfg.requestOverride.headers) {
+      req.headers = Object.assign({}, request.headers, cfg.requestOverride.headers);
+    }
+
     const { url } = req;
     this._cfg = cfg || {};
     this._url = url;

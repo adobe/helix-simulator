@@ -94,6 +94,7 @@ class HelixProject {
     this._server = new HelixServer(this);
     this._displayVersion = packageJson.version;
     this._logger = null;
+    this._requestOverride = null;
   }
 
   withCwd(cwd) {
@@ -131,6 +132,11 @@ class HelixProject {
     return this;
   }
 
+  withRequestOverride(value) {
+    this._requestOverride = value;
+    return this;
+  }
+
   get config() {
     return this._cfg;
   }
@@ -153,6 +159,10 @@ class HelixProject {
 
   get started() {
     return this._server.isStarted();
+  }
+
+  get requestOverride() {
+    return this._requestOverride;
   }
 
   /**
