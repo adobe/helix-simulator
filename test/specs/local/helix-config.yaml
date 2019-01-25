@@ -18,3 +18,9 @@ strains:
     code: *localRepo
     content: *localRepo
     static: *localRepo
+
+  dev:
+    url: http://127.0.0.1/
+    code: *localRepo
+    content: *localRepo
+    static: *localRepo

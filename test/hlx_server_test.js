@@ -160,6 +160,24 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver rendered json resource from alternate strain', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      // hack in correct port for hostname matching
+      project.config.strains.get('dev').urls = [`http://127.0.0.1:${project.server.port}`];
+      await assertHttp(`http://127.0.0.1:${project.server.port}/index.json`, 200, 'expected_index_dev.json');
+    } finally {
+      await project.stop();
+    }
+  });
+
+
   it('deliver request headers', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()

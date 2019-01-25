@@ -39,7 +39,7 @@ module.exports = class RequestContext {
       // no extension means a folder request
       const index = this._cfg.directoryIndex || 'index.html';
       this._path = `${this._path}/${index}`;
-      // remove multipe slashes
+      // remove multiple slashes
       this._path = this._path.replace(/\/+/g, '/');
       lastDot = this._path.lastIndexOf('.');
     }
@@ -57,8 +57,8 @@ module.exports = class RequestContext {
       this._selector = relPath.substring(selDot + 1);
       relPath = relPath.substring(0, selDot);
     }
-
     this._resourcePath = relPath;
+    this._strain = cfg.selectStrain(req);
 
     // generate headers
     this._wskHeaders = Object.assign({
@@ -66,6 +66,7 @@ module.exports = class RequestContext {
       'X-Request-Id': this._requestId,
       'X-Backend-Name': 'localhost--F_Petridish',
       'X-CDN-Request-ID': this._cdnRequestId,
+      'X-Strain': this._strain.name,
     }, this._headers);
   }
 
@@ -116,6 +117,10 @@ module.exports = class RequestContext {
 
   get params() {
     return this._params;
+  }
+
+  get strain() {
+    return this._strain;
   }
 
   get json() {

@@ -91,16 +91,15 @@ function executeTemplate(ctx) {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
-    owner: ctx.config.contentRepo.owner,
-    repo: ctx.config.contentRepo.repo,
-    // todo: use current branch if `ctx.config.contentRepo.isLocal`
-    ref: ctx.config.contentRepo.ref || 'master',
+    owner: ctx.strain.content.owner,
+    repo: ctx.strain.content.repo,
+    ref: ctx.strain.content.ref || 'master',
     path: `${ctx.resourcePath}.md`,
     selector: ctx._selector,
     extension: ctx._extension,
     params: querystring.stringify(ctx._params),
-    REPO_RAW_ROOT: `${ctx.config.contentRepo.rawRoot}/`, // the pipeline needs the final slash here
-    REPO_API_ROOT: `${ctx.config.contentRepo.apiRoot}/`,
+    REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
+    REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
   }));
   /* eslint-enable no-underscore-dangle */
 }
@@ -124,14 +123,28 @@ class HelixServer extends EventEmitter {
   init() {
     /* eslint-disable no-underscore-dangle */
     this._logger = this._project._logger || Logger.getLogger('hlx');
+    const log = this._logger;
     this._app.get('*', async (req, res) => {
       const ctx = new RequestContext(req, this._project);
+
+      log.debug(`current strain: ${ctx.strain.name}: ${JSON.stringify(ctx.strain.toJSON({ minimal: true, keepFormat: true }), null, 2)}`);
+      // start git server if needed and adjust content and static url
+      if (ctx.strain.content.isLocal) {
+        await ctx.config.startGitServer();
+        ctx.strain.content = ctx.config.gitUrl;
+      }
+      if (ctx.strain.static.url.isLocal) {
+        await ctx.config.startGitServer();
+        ctx.strain.static.url = ctx.config.gitUrl;
+      }
+
+
       this.emit('request', req, res, ctx);
       if (!ctx.valid) {
         res.status(404).send();
         return;
       }
-      ctx.logger = this._logger;
+      ctx.logger = log;
 
       const isResolved = await this._templateResolver.resolve(ctx);
       if (isResolved) {

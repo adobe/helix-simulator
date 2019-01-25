@@ -90,7 +90,7 @@ class HelixProject {
     this._cfg = null;
     this._gitConfig = _.cloneDeep(GIT_SERVER_CONFIG);
     this._gitState = null;
-    this._needLocalServer = false;
+    this._gitUrl = null;
     this._buildDir = DEFAULT_BUILD_DIR;
     this._runtimePaths = module.paths;
     this._webRootDir = DEFAULT_WEB_ROOT;
@@ -153,6 +153,10 @@ class HelixProject {
     return this._gitConfig;
   }
 
+  get gitUrl() {
+    return this._gitUrl;
+  }
+
   get buildDir() {
     return this._buildDir;
   }
@@ -163,14 +167,6 @@ class HelixProject {
 
   get runtimeModulePaths() {
     return this._runtimePaths;
-  }
-
-  /**
-   * Location of the content repo.
-   * @returns {null|GitUrl}
-   */
-  get contentRepo() {
-    return this.strain.content;
   }
 
   get strain() {
@@ -263,21 +259,6 @@ class HelixProject {
       throw new Error('Invalid config. No "src" directory.');
     }
 
-    // if strains has default content repo we need to start git server
-    if (this.contentRepo.isLocal) {
-      if (this._indexMd) {
-        if (!this._repoPath) {
-          throw new Error('Local README.md or index.md must be inside a valid git repository.');
-        }
-        this._gitConfig.virtualRepos[GIT_LOCAL_OWNER][GIT_LOCAL_CONTENT_REPO] = {
-          path: this._repoPath,
-        };
-        this._needLocalServer = true;
-      } else {
-        throw new Error('Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
-      }
-    }
-
     const log = this._logger;
     log.info('    __ __    ___         ');
     log.info('   / // /__ / (_)_ __    ');
@@ -285,55 +266,65 @@ class HelixProject {
     log.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
     log.info('                         ');
     log.debug('Initialized helix-config with: ');
-    log.debug(`      strain: ${this.strain.name}`);
-    log.debug(` contentRepo: ${this.contentRepo}`);
     log.debug(`     srcPath: ${this._srcDir}`);
     log.debug(`    buildDir: ${this._buildDir}`);
     return this;
   }
 
   async startGitServer() {
+    if (this._gitState) {
+      return;
+    }
+
+    if (this._indexMd) {
+      if (!this._repoPath) {
+        throw new Error('Local README.md or index.md must be inside a valid git repository.');
+      }
+      this._gitConfig.virtualRepos[GIT_LOCAL_OWNER][GIT_LOCAL_CONTENT_REPO] = {
+        path: this._repoPath,
+      };
+    } else {
+      throw new Error('Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
+    }
+
     this._logger.debug('Launching local git server for development...');
     this._gitConfig.logger = this._logger.getLogger('git');
     this._gitState = await gitServer.start(this._gitConfig);
+
+    // #65 consider currently checked out branch
+    const { currentBranch } = await gitServer.getRepoInfo(
+      this._gitConfig, GIT_LOCAL_OWNER, GIT_LOCAL_CONTENT_REPO,
+    );
+    this._gitUrl = new GitUrl({
+      protocol: 'http',
+      hostname: GIT_LOCAL_HOST,
+      port: this._gitState.httpPort,
+      owner: GIT_LOCAL_OWNER,
+      repo: GIT_LOCAL_CONTENT_REPO,
+      ref: currentBranch,
+    });
   }
 
   async stopGitServer() {
+    if (!this._gitState) {
+      return;
+    }
     this._logger.debug('Stopping local git server..');
     await gitServer.stop();
     this._gitState = null;
   }
 
   async start() {
-    if (this._needLocalServer) {
-      await this.startGitServer();
-      // #65 consider currently checked out branch
-      const { currentBranch } = await gitServer.getRepoInfo(
-        this._gitConfig, GIT_LOCAL_OWNER, GIT_LOCAL_CONTENT_REPO,
-      );
-      this.strain.content = new GitUrl({
-        protocol: 'http',
-        hostname: GIT_LOCAL_HOST,
-        port: this._gitState.httpPort,
-        owner: GIT_LOCAL_OWNER,
-        repo: GIT_LOCAL_CONTENT_REPO,
-        ref: currentBranch,
-      });
-    }
-
-    this._logger.debug('Launching petridish server for development...');
+    this._logger.debug('Launching helix simulation server for development...');
     await this._server.init();
     await this._server.start(this);
     return this;
   }
 
   async stop() {
-    this._logger.debug('Stopping petridish server..');
+    this._logger.debug('Stopping helix simulation server..');
     await this._server.stop();
-
-    if (this._needLocalServer) {
-      await this.stopGitServer();
-    }
+    await this.stopGitServer();
     return this;
   }
 }

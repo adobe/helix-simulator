@@ -77,9 +77,10 @@ const utils = {
     // eslint-disable-next-line
     const webroot = path.relative(ctx.config._cwd, ctx.config.webRootDir);
 
+    const staticUrl = ctx.strain.static.url;
     const uriOrPaths = [
-      `${ctx.config.contentRepo.raw}${ctx.path}`,
-      `${ctx.config.contentRepo.raw}/${webroot}${ctx.path}`,
+      `${staticUrl.raw}${ctx.path}`,
+      `${staticUrl.raw}/${webroot}${ctx.path}`,
       path.resolve(ctx.config.webRootDir, ctx.path.substring(1)),
     ];
     for (let i = 0; i < uriOrPaths.length; i += 1) {
