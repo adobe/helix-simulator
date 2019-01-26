@@ -7,21 +7,22 @@
 # the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
 # OF ANY KIND, either express or implied. See the License for the specific language
 # governing permissions and limitations under the License.
-version: 1
-
 definitions:
-  defaults:
-    - &localRepo "http://localhost/local/default.git"
+  default: &default
+    code: https://github.com/adobe/project-helix.io.git
+    content: https://github.com/adobe/project-helix.io.git
+    static: https://github.com/adobe/project-helix.io.git
 
 strains:
   default:
-    code: *localRepo
-    content: *localRepo
-    static: *localRepo
+    <<: *default
 
-  dev:
-    url: http://127.0.0.1/
-    code: *localRepo
-    content: *localRepo
-    static: *localRepo
-    directoryIndex: /readme.html
+  local:
+    <<: *default
+    url: http://localhost:3000/
+
+  website:
+    <<: *default
+    urls:
+      - http://www.project-helix.io/
+      - http://project-helix.io/

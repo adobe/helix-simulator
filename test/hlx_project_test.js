@@ -74,9 +74,10 @@ describe('Helix Project', () => {
 
   it('throws error with no repository', async () => {
     try {
-      await new HelixProject()
+      const p = await new HelixProject()
         .withCwd(path.join(SPEC_ROOT, 'invalid_no_git'))
         .init();
+      await p.startGitServer();
       assert.fail('expected to fail.');
     } catch (e) {
       assert.equal(e.toString(), 'Error: Local README.md or index.md must be inside a valid git repository.');
@@ -96,9 +97,10 @@ describe('Helix Project', () => {
 
   it('throws error with no README.md', async () => {
     try {
-      await new HelixProject()
+      const p = await new HelixProject()
         .withCwd(path.join(SPEC_ROOT, 'invalid_no_content'))
         .init();
+      await p.startGitServer();
       assert.fail('expected to fail.');
     } catch (e) {
       assert.equal(e.toString(), 'Error: Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
@@ -123,58 +125,6 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .init();
     assert.ok(count > 0, 'custom logger should have been invoked.');
-  });
-
-  it('detects local src and readme', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
-
-    const GIT_CONFIG = {
-      configPath: '<internal>',
-      listen: {
-        http: {
-          port: 0,
-          host: '0.0.0.0',
-        },
-      },
-      logs: {
-        level: 'info',
-        logsDir: './logs',
-        reqLogFormat: 'short',
-      },
-      repoRoot: '.',
-      subdomainMapping: {
-        baseDomains: [
-          'localtest.me',
-          'lvh.me',
-          'vcap.me',
-          'lacolhost.com',
-        ],
-        enable: true,
-      },
-      virtualRepos: {
-        helix: {
-          content: {
-            path: cwd,
-          },
-        },
-      },
-    };
-
-    const project = await new HelixProject()
-      .withCwd(cwd)
-      .init();
-    assert.equal(project.contentRepo.toString(), 'http://localhost/local/default.git');
-    assert.equal(project._needLocalServer, true);
-    assert.deepEqual(project.gitConfig, GIT_CONFIG);
-  });
-
-  it('remote code and content', async () => {
-    const cwd = path.join(SPEC_ROOT, 'remote');
-    const project = await new HelixProject()
-      .withCwd(cwd)
-      .init();
-    assert.equal(project.contentRepo.raw, 'https://raw.github.com/Adobe-Marketing-Cloud/reactor-user-docs/master');
-    assert.equal(project._needLocalServer, false);
   });
 
   it('can set relative build dir', async () => {
@@ -219,17 +169,7 @@ describe('Helix Project', () => {
 
     await project.start();
     assert.equal(true, project.started);
-    assert.ok(/http:\/\/127.0.0.1:\d+\/raw\/helix\/content\/master/.test(project.contentRepo.raw));
     await project.stop();
     assert.equal(false, project.started);
-  });
-
-  it('computes correct index: finds index', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
-    const project = await new HelixProject()
-      .withCwd(cwd)
-      .init();
-
-    assert.equal(project.directoryIndex, 'index.html');
   });
 });

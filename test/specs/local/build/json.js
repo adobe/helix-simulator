@@ -11,8 +11,11 @@
  */
 
 /* eslint-disable */
-module.exports.main = function main() {
+module.exports.main = function main(params) {
   return {
-    body: '{ "json": "json" }'
+    body: JSON.stringify({
+      "json": "json",
+      "strain": params.__ow_headers['x-strain']
+    })
   }
 };

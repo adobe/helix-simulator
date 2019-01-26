@@ -14,10 +14,21 @@
 
 const assert = require('assert');
 const path = require('path');
+const { Strain } = require('@adobe/helix-shared');
 const { TemplateResolver, Plugins: TemplateResolverPlugins } = require('../src/template_resolver');
 const RequestContext = require('../src/RequestContext.js');
 
 const BUILD_DIR = path.resolve(__dirname, 'specs', 'builddir');
+
+const mockConfig = {
+  selectStrain() {
+    return new Strain('default', {
+      code: 'https://localhost/helix/local.git',
+      content: 'https://localhost/helix/local.git',
+      static: 'https://localhost/helix/local.git',
+    });
+  },
+};
 
 describe('Template Resolver', () => {
   describe('Simple', () => {
@@ -41,7 +52,7 @@ describe('Template Resolver', () => {
         const mockReq = {
           url: t.url,
         };
-        const ctx = new RequestContext(mockReq);
+        const ctx = new RequestContext(mockReq, mockConfig);
         ctx.logger = console;
         const template = TemplateResolverPlugins.simple(ctx);
         assert.equal(template, t.template, 'resolved template');
@@ -53,9 +64,9 @@ describe('Template Resolver', () => {
         const mockReq = {
           url: t.url,
         };
-        const ctx = new RequestContext(mockReq, {
+        const ctx = new RequestContext(mockReq, Object.assign({
           buildDir: BUILD_DIR,
-        });
+        }, mockConfig));
         ctx.logger = console;
         const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
 
@@ -69,9 +80,9 @@ describe('Template Resolver', () => {
       const mockReq = {
         url: '/index.nonexistent.html',
       };
-      const ctx = new RequestContext(mockReq, {
+      const ctx = new RequestContext(mockReq, Object.assign({
         buildDir: BUILD_DIR,
-      });
+      }, mockConfig));
       ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
       assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a non existent file');
@@ -81,9 +92,9 @@ describe('Template Resolver', () => {
       const mockReq = {
         url: '/index.wrong.html',
       };
-      const ctx = new RequestContext(mockReq, {
+      const ctx = new RequestContext(mockReq, Object.assign({
         buildDir: BUILD_DIR,
-      });
+      }, mockConfig));
       ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
       assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a directory');

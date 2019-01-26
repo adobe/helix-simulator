@@ -13,8 +13,19 @@
 /* global describe, it */
 
 const assert = require('assert');
+const { Strain } = require('@adobe/helix-shared');
 const RequestContext = require('../src/RequestContext.js');
 const utils = require('../src/utils.js');
+
+const mockConfig = {
+  selectStrain() {
+    return new Strain('default', {
+      code: 'https://localhost/helix/local.git',
+      content: 'https://localhost/helix/local.git',
+      static: 'https://localhost/helix/local.git',
+    });
+  },
+};
 
 describe('Utils Test', () => {
   describe('Request context', () => {
@@ -70,7 +81,7 @@ describe('Utils Test', () => {
           query: t.query,
           headers: t.headers,
         };
-        const p = new RequestContext(mockReq);
+        const p = new RequestContext(mockReq, mockConfig);
         assert.equal(p.valid, t.valid, 'valid');
         if (p.valid) {
           assert.equal(p.url, t.url);

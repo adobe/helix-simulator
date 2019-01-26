@@ -19,7 +19,13 @@ const utils = require('./utils.js');
  * @type {module.RequestContext}
  */
 module.exports = class RequestContext {
-  constructor(req, cfg) {
+  constructor(request, cfg) {
+    // todo: consider using lodash.defaultsDeep
+    const req = Object.assign({}, request, cfg.requestOverride);
+    if (cfg.requestOverride && cfg.requestOverride.headers) {
+      req.headers = Object.assign({}, request.headers, cfg.requestOverride.headers);
+    }
+
     const { url } = req;
     this._cfg = cfg || {};
     this._url = url;
@@ -32,14 +38,15 @@ module.exports = class RequestContext {
     this._wskActivationId = utils.randomChars(32, true);
     this._requestId = utils.randomChars(32);
     this._cdnRequestId = utils.uuid();
+    this._strain = cfg.selectStrain(req);
 
     const lastSlash = this._path.lastIndexOf('/');
     let lastDot = this._path.lastIndexOf('.');
     if (lastDot <= lastSlash) {
       // no extension means a folder request
-      const index = this._cfg.directoryIndex || 'index.html';
+      const index = this._strain.directoryIndex || 'index.html';
       this._path = `${this._path}/${index}`;
-      // remove multipe slashes
+      // remove multiple slashes
       this._path = this._path.replace(/\/+/g, '/');
       lastDot = this._path.lastIndexOf('.');
     }
@@ -57,7 +64,6 @@ module.exports = class RequestContext {
       this._selector = relPath.substring(selDot + 1);
       relPath = relPath.substring(0, selDot);
     }
-
     this._resourcePath = relPath;
 
     // generate headers
@@ -66,6 +72,7 @@ module.exports = class RequestContext {
       'X-Request-Id': this._requestId,
       'X-Backend-Name': 'localhost--F_Petridish',
       'X-CDN-Request-ID': this._cdnRequestId,
+      'X-Strain': this._strain.name,
     }, this._headers);
   }
 
@@ -116,6 +123,10 @@ module.exports = class RequestContext {
 
   get params() {
     return this._params;
+  }
+
+  get strain() {
+    return this._strain;
   }
 
   get json() {
