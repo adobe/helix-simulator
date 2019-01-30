@@ -19,6 +19,13 @@ strains:
     content: *localRepo
     static: *localRepo
 
+  docs:
+    url: http://127.0.0.1/docs
+    code: *localRepo
+    content: *localRepo
+    static: *localRepo
+    directoryIndex: /readme.html
+
   dev:
     url: http://127.0.0.1/
     code: *localRepo
@@ -26,9 +33,3 @@ strains:
     static: *localRepo
     directoryIndex: /readme.html
 
-  docs:
-    url: http://127.0.0.1/docs
-    code: *localRepo
-    content: *localRepo
-    static: *localRepo
-    directoryIndex: /readme.html

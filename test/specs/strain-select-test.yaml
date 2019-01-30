@@ -17,10 +17,6 @@ strains:
   default:
     <<: *default
 
-  local:
-    <<: *default
-    url: http://localhost:3000/
-
   localdocs-api:
     <<: *default
     url: http://localhost:3000/docs/api
@@ -28,6 +24,10 @@ strains:
   localdocs:
     <<: *default
     url: http://localhost:3000/docs
+
+  local:
+    <<: *default
+    url: http://localhost:3000/
 
   website:
     <<: *default
