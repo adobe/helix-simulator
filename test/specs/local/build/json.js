@@ -14,8 +14,9 @@
 module.exports.main = function main(params) {
   return {
     body: JSON.stringify({
+      "path": params.path,
       "json": "json",
-      "strain": params.__ow_headers['x-strain']
+      "strain": params.__ow_headers['x-strain'],
     })
   }
 };

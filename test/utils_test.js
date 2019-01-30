@@ -23,6 +23,7 @@ const mockConfig = {
       code: 'https://localhost/helix/local.git',
       content: 'https://localhost/helix/local.git',
       static: 'https://localhost/helix/local.git',
+      url: 'http://www.foo.com/docs',
     });
   },
 };
@@ -41,6 +42,9 @@ describe('Utils Test', () => {
       },
       {
         url: '/content/index.foo.html', valid: true, path: '/content/index.foo.html', resourcePath: '/content/index', selector: 'foo', extension: 'html',
+      },
+      {
+        url: '/docs/index.foo.html', valid: true, path: '/docs/index.foo.html', resourcePath: '/index', selector: 'foo', extension: 'html',
       },
       {
         url: '/content/index.foo.html',
@@ -89,6 +93,7 @@ describe('Utils Test', () => {
           assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
           assert.equal(p.selector, t.selector, 'selector');
           assert.equal(p.extension, t.extension, 'extension');
+          assert.equal(p.mount, '/docs', 'mount');
           assert.deepEqual(p.params, t.query || {}, 'params');
           assert.deepEqual(p.headers, t.headers || {}, 'headers');
 

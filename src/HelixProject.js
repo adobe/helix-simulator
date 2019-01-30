@@ -208,15 +208,18 @@ class HelixProject {
   selectStrain(request) {
     // todo: use strain conditions, once implemented. for now, just use request.headers.host
     const host = request && request.headers ? request.headers.host : '';
-    const strains = this.config.strains.getByFilter(s => s.urls.find((url) => {
-      try {
-        const uri = new URL(url);
-        return uri.host === host;
-      } catch (e) {
-        // ignore
+    const reqPath = `${request && request.path && request.path.replace(/\/+$/, '') ? request.path : ''}/`;
+    const strains = this.config.strains.getByFilter((strain) => {
+      if (strain.urls.length === 0) {
         return false;
       }
-    }));
+      const uri = new URL(strain.urls[0]);
+      if (uri.host !== host) {
+        return false;
+      }
+      const uriPath = `${uri.pathname.replace(/\/+$/, '')}/`;
+      return reqPath.indexOf(uriPath) === 0;
+    });
     if (strains.length > 0) {
       return strains[0];
     }

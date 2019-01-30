@@ -215,6 +215,26 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver rendered json resource from alternate strain with request override and path', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withRequestOverride({
+        headers: {
+          host: '127.0.0.1',
+        },
+      });
+    await project.init();
+    try {
+      await project.start();
+      // hack in correct port for hostname matching
+      await assertHttp(`http://localhost:${project.server.port}/docs/api/index.json`, 200, 'expected_index_docs.json');
+    } finally {
+      await project.stop();
+    }
+  });
 
   it('deliver request headers', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
