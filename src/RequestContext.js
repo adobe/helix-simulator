@@ -38,7 +38,14 @@ module.exports = class RequestContext {
     this._wskActivationId = utils.randomChars(32, true);
     this._requestId = utils.randomChars(32);
     this._cdnRequestId = utils.uuid();
-    this._strain = cfg.selectStrain(req);
+    this._strain = cfg.selectStrain(Object.assign({}, req, {
+      path: this._path,
+    }));
+    if (this._strain.urls.length > 0) {
+      this._mount = parse(this._strain.urls[0]).pathname.replace(/\/+$/, '');
+    } else {
+      this._mount = '';
+    }
 
     const lastSlash = this._path.lastIndexOf('/');
     let lastDot = this._path.lastIndexOf('.');
@@ -64,6 +71,14 @@ module.exports = class RequestContext {
       this._selector = relPath.substring(selDot + 1);
       relPath = relPath.substring(0, selDot);
     }
+    // remove mount root if needed
+    if (this._mount && this.mount !== '/') {
+      // strain selection should only select strains that match the url. but better check again
+      if (`${relPath}/`.startsWith(`${this._mount}/`)) {
+        relPath = relPath.substring(this._mount.length);
+      }
+    }
+
     this._resourcePath = relPath;
 
     // generate headers
@@ -127,6 +142,10 @@ module.exports = class RequestContext {
 
   get strain() {
     return this._strain;
+  }
+
+  get mount() {
+    return this._mount;
   }
 
   get json() {

@@ -21,8 +21,16 @@ strains:
     <<: *default
     url: http://localhost:3000/
 
+  localdocs-api:
+    <<: *default
+    url: http://localhost:3000/docs/api
+
+  localdocs:
+    <<: *default
+    url: http://localhost:3000/docs
+
   website:
     <<: *default
     urls:
-      - http://www.project-helix.io/
       - http://project-helix.io/
+      - http://www.project-helix.io/

@@ -43,6 +43,66 @@ describe('Helix Project - Strain Select', () => {
     }).name, 'local');
   });
 
+  it('selects local docs strain ', async () => {
+    const cfg = await new HelixConfig()
+      .withConfigPath(path.resolve(__dirname, 'specs', 'strain-select-test.yaml'))
+      .init();
+    const project = new HelixProject()
+      .withHelixConfig(cfg);
+
+    assert.equal(project.selectStrain({
+      path: '/docs',
+      headers: {
+        host: 'localhost:3000',
+      },
+    }).name, 'localdocs');
+  });
+
+  it('selects local docs api strain ', async () => {
+    const cfg = await new HelixConfig()
+      .withConfigPath(path.resolve(__dirname, 'specs', 'strain-select-test.yaml'))
+      .init();
+    const project = new HelixProject()
+      .withHelixConfig(cfg);
+
+    assert.equal(project.selectStrain({
+      path: '/docs/api',
+      headers: {
+        host: 'localhost:3000',
+      },
+    }).name, 'localdocs-api');
+  });
+
+  it('selects local docs api strain with slash', async () => {
+    const cfg = await new HelixConfig()
+      .withConfigPath(path.resolve(__dirname, 'specs', 'strain-select-test.yaml'))
+      .init();
+    const project = new HelixProject()
+      .withHelixConfig(cfg);
+
+    assert.equal(project.selectStrain({
+      path: '/docs/api',
+      headers: {
+        host: 'localhost:3000',
+      },
+    }).name, 'localdocs-api');
+  });
+
+  it('selects local docs api strain for deep', async () => {
+    const cfg = await new HelixConfig()
+      .withConfigPath(path.resolve(__dirname, 'specs', 'strain-select-test.yaml'))
+      .init();
+    const project = new HelixProject()
+      .withHelixConfig(cfg);
+
+    assert.equal(project.selectStrain({
+      path: '/docs/api/index.html',
+      headers: {
+        host: 'localhost:3000',
+      },
+    }).name, 'localdocs-api');
+  });
+
   it('selects website strain ', async () => {
     const cfg = await new HelixConfig()
       .withConfigPath(path.resolve(__dirname, 'specs', 'strain-select-test.yaml'))
