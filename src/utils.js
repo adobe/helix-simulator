@@ -87,7 +87,7 @@ const utils = {
    * @param {RequestContext} ctx Context
    * @param {Request} req The original express request
    * @param {Response} res The express response
-   * @return {Promise} A promise that resolves when the stream is done. ?
+   * @return {Promise} A promise that resolves when the stream is done.
    */
   async proxyRequest(ctx, req, res) {
     const { origin } = ctx.strain;
