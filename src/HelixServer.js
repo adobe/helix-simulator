@@ -126,8 +126,21 @@ class HelixServer extends EventEmitter {
     const log = this._logger;
     this._app.get('*', async (req, res) => {
       const ctx = new RequestContext(req, this._project);
+      ctx.logger = log;
 
       log.debug(`current strain: ${ctx.strain.name}: ${JSON.stringify(ctx.strain.toJSON({ minimal: true, keepFormat: true }), null, 2)}`);
+
+      // handle proxy requests if needed
+      if (ctx.strain.isProxy()) {
+        try {
+          await utils.proxyRequest(ctx, req, res);
+        } catch (err) {
+          this._logger.error(`Error during proxy: ${err.stack || err}`);
+          res.status(500).send();
+        }
+        return;
+      }
+
       // start git server if needed and adjust content and static url
       if (ctx.strain.content.isLocal) {
         await ctx.config.startGitServer();
@@ -143,7 +156,6 @@ class HelixServer extends EventEmitter {
         res.status(404).send();
         return;
       }
-      ctx.logger = log;
 
       const isResolved = await this._templateResolver.resolve(ctx);
       if (isResolved) {

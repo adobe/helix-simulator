@@ -11,6 +11,7 @@
  */
 const fs = require('fs-extra');
 const request = require('request-promise-native');
+const requestNative = require('request');
 const crypto = require('crypto');
 
 const utils = {
@@ -79,6 +80,27 @@ const utils = {
     const error = new Error('Resource not found.');
     error.code = 404;
     throw error;
+  },
+
+  /**
+   * Fetches the content from the proxy of the proxy-strain and streams it back to the response.
+   * @param {RequestContext} ctx Context
+   * @param {Request} req The original express request
+   * @param {Response} res The express response
+   * @return {Promise} A promise that resolves when the stream is done. ?
+   */
+  async proxyRequest(ctx, req, res) {
+    const { origin } = ctx.strain;
+    if (!origin) {
+      throw Error(`No proxy strain: ${ctx.strain.name}`);
+    }
+    const url = `${origin.useSSL ? 'https' : 'http'}://${origin.hostname}:${origin.port}${req.path}`;
+    ctx.logger.info(`Proxy ${req.method} request to ${url}`);
+    return new Promise((resolve, reject) => {
+      req.pipe(requestNative(url)
+        .on('error', reject)
+        .on('end', resolve)).pipe(res);
+    });
   },
 
   /**
