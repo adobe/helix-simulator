@@ -236,6 +236,95 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver resource from proxy strain', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withRequestOverride({
+        headers: {
+          host: 'proxy.local',
+        },
+      });
+    await project.init();
+
+    const proxyDir = path.join(SPEC_ROOT, 'proxy');
+    const proxyProject = new HelixProject()
+      .withCwd(proxyDir)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withRequestOverride({
+        headers: {
+          host: 'proxy.local',
+        },
+      });
+    await proxyProject.init();
+
+    try {
+      await project.start();
+      await proxyProject.start();
+      proxyProject.config.strains.get('proxy').origin._port = project.server.port;
+      await assertHttp(`http://localhost:${proxyProject.server.port}/docs/api/index.json`, 200, 'expected_proxy_docs.json');
+    } finally {
+      try {
+        await project.stop();
+      } catch (e) {
+        // ignore
+      }
+      try {
+        await proxyProject.stop();
+      } catch (e) {
+        // ignore
+      }
+    }
+  });
+
+  it('deliver resource from proxy strain can fail', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withRequestOverride({
+        headers: {
+          host: 'proxy.local',
+        },
+      });
+    await project.init();
+
+    const proxyDir = path.join(SPEC_ROOT, 'proxy');
+    const proxyProject = new HelixProject()
+      .withCwd(proxyDir)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withRequestOverride({
+        headers: {
+          host: 'proxy.local',
+        },
+      });
+    await proxyProject.init();
+
+    try {
+      await project.start();
+      await project.stop();
+      await proxyProject.start();
+      proxyProject.config.strains.get('proxy').origin._port = project.server.port;
+      await assertHttp(`http://localhost:${proxyProject.server.port}/docs/api/index.json`, 500);
+    } finally {
+      try {
+        await project.stop();
+      } catch (e) {
+        // ignore
+      }
+      try {
+        await proxyProject.stop();
+      } catch (e) {
+        // ignore
+      }
+    }
+  });
+
   it('deliver request headers', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
