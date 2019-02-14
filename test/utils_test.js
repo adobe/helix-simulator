@@ -13,6 +13,7 @@
 /* global describe, it */
 
 const assert = require('assert');
+const net = require('net');
 const { Strain } = require('@adobe/helix-shared');
 const RequestContext = require('../src/RequestContext.js');
 const utils = require('../src/utils.js');
@@ -126,6 +127,52 @@ describe('Utils Test', () => {
         assert.equal(s.length, i);
         assert.ok(!generated[s]);
         generated[s] = true;
+      }
+    });
+  });
+
+  describe('Port Check', () => {
+    it('detects an occupied port', (done) => {
+      const srv = net.createServer().listen();
+      srv.on('listening', async () => {
+        const inUse = await utils.checkPortInUse(srv.address().port);
+        assert.ok(inUse);
+        srv.close();
+      });
+      srv.on('close', async () => {
+        done();
+      });
+    });
+
+    it('detects a free port', (done) => {
+      const srv = net.createServer().listen();
+      let port = -1;
+      srv.on('listening', async () => {
+        // eslint-disable-next-line
+        port = srv.address().port;
+        srv.close();
+      });
+      srv.on('close', async () => {
+        const inUse = await utils.checkPortInUse(port);
+        assert.ok(!inUse);
+        done();
+      });
+    });
+
+    it('gives an error for illegal port', async () => {
+      try {
+        await utils.checkPortInUse(-1);
+      } catch (e) {
+        // node 8 and node 10 have different errors ....
+        assert.ok(e.toString().indexOf('should be >= 0 and < 65536') > 0);
+      }
+    });
+
+    it('gives an error for port not available', async () => {
+      try {
+        await utils.checkPortInUse(0);
+      } catch (e) {
+        assert.ok(e.toString().startsWith('Error: connect EADDRNOTAVAIL 127.0.0.1 - Local (0.0.0.0:'));
       }
     });
   });

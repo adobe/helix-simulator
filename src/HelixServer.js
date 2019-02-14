@@ -226,6 +226,12 @@ class HelixServer extends EventEmitter {
   }
 
   async start() {
+    if (this._port !== 0) {
+      const inUse = await utils.checkPortInUse(this._port);
+      if (inUse) {
+        throw new Error(`Port ${this._port} already in use by another process.`);
+      }
+    }
     this._logger.info('starting project');
     return new Promise((resolve, reject) => {
       this._server = this._app.listen(this._port, (err) => {

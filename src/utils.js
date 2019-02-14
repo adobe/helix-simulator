@@ -13,6 +13,7 @@ const fs = require('fs-extra');
 const request = require('request-promise-native');
 const requestNative = require('request');
 const crypto = require('crypto');
+const { Socket } = require('net');
 
 const utils = {
 
@@ -128,6 +129,44 @@ const utils = {
    */
   uuid() {
     return `${utils.randomChars(8, true)}-${utils.randomChars(4, true)}-${utils.randomChars(4, true)}-${utils.randomChars(4, true)}-${utils.randomChars(12, true)}`;
+  },
+
+  /**
+   * Checks if the given port is already in use on any addr. This is used to prevent starting a
+   * server on the same port with an existing socket bound to 0.0.0.0 and SO_REUSEADDR.
+   * @param port
+   * @return {Promise} that resolves `true` if the port is in use.
+   */
+  checkPortInUse(port) {
+    return new Promise((resolve, reject) => {
+      let socket;
+
+      const cleanUp = () => {
+        if (socket) {
+          socket.removeAllListeners('connect');
+          socket.removeAllListeners('error');
+          socket.end();
+          socket.destroy();
+          socket.unref();
+          socket = null;
+        }
+      };
+
+      socket = new Socket();
+      socket.once('error', (err) => {
+        if (err.code !== 'ECONNREFUSED') {
+          reject(err);
+        } else {
+          resolve(false);
+        }
+        cleanUp();
+      });
+
+      socket.connect(port, () => {
+        resolve(true);
+        cleanUp();
+      });
+    });
   },
 };
 
