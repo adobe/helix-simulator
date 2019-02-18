@@ -27,7 +27,7 @@
     "querystring": "^0.2.0",
     "request": "^2.85.0",
     "request-promise-native": "^1.0.5",
-    "snyk": "^1.132.2"
+    "snyk": "^1.134.0"
   },
   "devDependencies": {
     "ajv": "^6.5.3",
