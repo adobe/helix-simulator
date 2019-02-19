@@ -71,7 +71,8 @@ function executeTemplate(ctx) {
 
     // only tweak module path for scripts in build dir
     if (from === ctx.config.buildDir) {
-      paths = paths.concat(ctx.config.runtimeModulePaths);
+      // the runtime paths take precedence. see #147
+      paths = ctx.config.runtimeModulePaths.concat(paths);
     }
     return paths;
   };
