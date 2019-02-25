@@ -39,7 +39,7 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.12.2",
     "istanbul": "^1.1.0-alpha.1",
-    "mocha": "6.0.1",
+    "mocha": "6.0.2",
     "mocha-junit-reporter": "1.17.0",
     "nyc": "^13.3.0",
     "shelljs": "^0.8.2",
