@@ -425,7 +425,7 @@ describe('Helix Server', () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const pwd = shell.pwd();
     shell.cd(cwd);
-    shell.exec('git co -b foo/bar');
+    shell.exec('git checkout -b foo/bar');
     shell.cd(pwd);
     const project = new HelixProject()
       .withCwd(cwd)
@@ -438,7 +438,7 @@ describe('Helix Server', () => {
     } finally {
       await project.stop();
       shell.cd(cwd);
-      shell.exec('git co master');
+      shell.exec('git checkout master');
       shell.cd(pwd);
     }
   });
