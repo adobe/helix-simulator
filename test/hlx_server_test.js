@@ -421,6 +421,28 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver static content resource from different branch', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const pwd = shell.pwd();
+    shell.cd(cwd);
+    shell.exec('git co -b foo/bar');
+    shell.cd(pwd);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
+    } finally {
+      await project.stop();
+      shell.cd(cwd);
+      shell.exec('git co master');
+      shell.cd(pwd);
+    }
+  });
+
   it('deliver static content resource (and webroot)', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
