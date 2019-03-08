@@ -164,7 +164,8 @@ describe('Utils Test', () => {
         await utils.checkPortInUse(-1);
       } catch (e) {
         // node 8 and node 10 have different errors ....
-        assert.ok(e.toString().indexOf('should be >= 0 and < 65536') > 0);
+        assert.ok(e.toString().indexOf('should be >= 0 and < 65536') > 0 // node 8
+          || e.toString().indexOf('should be > 0 and < 65536') > 0); // node 10
       }
     });
 
