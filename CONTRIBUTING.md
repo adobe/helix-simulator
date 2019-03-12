@@ -1,4 +1,4 @@
-# Contributing to Helix Simulator
+# Contributing to Helix-CLI
 
 This project is an Open Development/Inner Source project and welcomes contributions from everyone who finds it useful or lacking.
 
@@ -34,39 +34,41 @@ In your pull request, outline:
 * If (and what) they breaks
 * Start the pull request with the GitHub issue ID, e.g. #123
 
+Lastly, please follow the [pull request template](.github/pull_request_template.md) when submitting a pull request!
+
 Each commit message that is not part of a pull request:
 
 * Should contain the issue ID like `#123`
 * Can contain the tag `[trivial]` for trivial changes that don't relate to an issue
 
+
+
 ## Coding Styleguides
 
-There are no coding style guides... yet.
+We enforce a coding styleguide using `eslint`. As part of your build, run `npm run lint` to check if your code is conforming to the style guide. We do the same for every PR in our CI, so PRs will get rejected if they don't follow the style guide.
+
+You can fix some of the issues automatically by running `npx eslint . --fix`.
+
+## Commit Message Format
+
+This project uses a structured commit changelog format that should be used for every commit. Use `npm run commit` instead of your usual `git commit` to generate commit messages using a wizard.
+
+```bash
+# either add all changed files
+$ git add -A
+# or selectively add files
+$ git add package.json
+# then commit using the wizard
+$ npm run commit
+```
 
 # How Contributions get Reviewed
 
-One of the maintainers will look at the pull request within one week. If you haven't heard back from the maintainers within a week, it is not impolite to send a reminder to [Grp-XDM-API-WGs](mailto:Grp-XDM-API-WGs@adobe.com).
-
-Feedback on the pull request will be given in writing, in GitHub.
+One of the maintainers will look at the pull request within one week. Feedback on the pull request will be given in writing, in GitHub.
 
 # Release Management
 
 The project's committers will release to the [Adobe organization on npmjs.org](https://www.npmjs.com/org/adobe).
-Please contact the [Adobe Open Source Advisory Board](mailto:grp-opensourceoffice@adobe.com), or join us on corporate slack under #guild-opensource, to get access to the npmjs organization.
-Then, you can release using:
+Please contact the [Adobe Open Source Advisory Board](https://git.corp.adobe.com/OpenSourceAdvisoryBoard/discuss/issues) to get access to the npmjs organization.
 
-### Versioning
-
-use `npm version` to set the new package version create the git tag. eg:
-
-```bash
-$ npm version 1.0.1-SNAPSHOT.30
-$ git push --tags
-```
-
-### Publishing
-
-```bash
-$ npm login
-$ npm publish --access public
-```
+The release process is fully automated using `semantic-release`, increasing the version numbers, etc. based on the contents of the commit messages found.
