@@ -1,4 +1,4 @@
-# Contributing to Helix-CLI
+# Contributing to Helix-Simulator
 
 This project is an Open Development/Inner Source project and welcomes contributions from everyone who finds it useful or lacking.
 
