@@ -117,14 +117,17 @@ class HelixServer extends EventEmitter {
     this._templateResolver = new TemplateResolver().with(TemplateResolverPlugins.simple);
   }
 
-  init() {
+  async init() {
     /* eslint-disable no-underscore-dangle */
     this._logger = this._project._logger || Logger.getLogger('hlx');
+  }
+
+  async setupApp() {
     const log = this._logger;
 
     // setup ESI as express middleware
     this._app.use(NodeESI.middleware({
-      baseUrl: `http://localhost:${DEFAULT_PORT}`,
+      baseUrl: `http://localhost:${this._port}`,
       allowedHosts: [/^http.*/],
       cache: false,
       httpClient: rp.defaults({
@@ -236,16 +239,17 @@ class HelixServer extends EventEmitter {
       }
     }
     this._logger.info('starting project');
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       this._server = this._app.listen(this._port, (err) => {
         if (err) {
           reject(new Error(`Error while starting http server: ${err}`));
         }
         this._port = this._server.address().port;
         this._logger.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
-        resolve(this._port);
+        resolve();
       });
     });
+    await this.setupApp();
   }
 
   async stop() {
