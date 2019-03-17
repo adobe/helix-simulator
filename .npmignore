@@ -5,8 +5,12 @@
 .nyc_output
 .snyk
 .vscode
+.idea
+.releaserc.js
 adobe-helix-*
 examples
 logs
 greenkeeper.json
 test
+coverage
+pipeline.log
