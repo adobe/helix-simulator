@@ -14,6 +14,7 @@ const EventEmitter = require('events');
 const { Module } = require('module');
 const express = require('express');
 const NodeESI = require('nodesi');
+const rp = require('request-promise-native');
 const { Logger } = require('@adobe/helix-shared');
 const querystring = require('querystring');
 const utils = require('./utils.js');
@@ -22,13 +23,6 @@ const RequestContext = require('./RequestContext.js');
 const { TemplateResolver, Plugins: TemplateResolverPlugins } = require('../src/template_resolver');
 
 const DEFAULT_PORT = 3000;
-
-
-const esi = new NodeESI({
-  baseUrl: `http://localhost:${DEFAULT_PORT}`,
-  allowedHosts: [/^http.*/],
-  cache: false,
-});
 
 function safeCycles() {
   const seen = [];
@@ -123,10 +117,23 @@ class HelixServer extends EventEmitter {
     this._templateResolver = new TemplateResolver().with(TemplateResolverPlugins.simple);
   }
 
-  init() {
+  async init() {
     /* eslint-disable no-underscore-dangle */
     this._logger = this._project._logger || Logger.getLogger('hlx');
+  }
+
+  async setupApp() {
     const log = this._logger;
+
+    // setup ESI as express middleware
+    this._app.use(NodeESI.middleware({
+      baseUrl: `http://localhost:${this._port}`,
+      allowedHosts: [/^http.*/],
+      cache: false,
+      httpClient: rp.defaults({
+        resolveWithFullResponse: true,
+      }),
+    }));
     this._app.get('*', async (req, res) => {
       const ctx = new RequestContext(req, this._project);
       ctx.logger = log;
@@ -185,10 +192,7 @@ class HelixServer extends EventEmitter {
             } else if (/.*\/octet-stream/.test(contentType) || /image\/.*/.test(contentType)) {
               body = Buffer.from(body, 'base64');
             }
-            res.set(headers);
-            esi.process(body).then((esiBody) => {
-              res.status(status).send(esiBody);
-            });
+            res.set(headers).status(status).send(body);
           })
           .catch((err) => {
             this._logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
@@ -235,16 +239,17 @@ class HelixServer extends EventEmitter {
       }
     }
     this._logger.info('starting project');
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       this._server = this._app.listen(this._port, (err) => {
         if (err) {
           reject(new Error(`Error while starting http server: ${err}`));
         }
         this._port = this._server.address().port;
         this._logger.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
-        resolve(this._port);
+        resolve();
       });
     });
+    await this.setupApp();
   }
 
   async stop() {

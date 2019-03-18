@@ -188,6 +188,36 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver rendered resource with esi', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.esi.html`, 200, 'expected_esi.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('deliver rendered resource with deep esi', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.esi1.html`, 200, 'expected_recesi.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver rendered json resource', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
