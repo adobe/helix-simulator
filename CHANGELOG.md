@@ -1,3 +1,10 @@
+## [2.10.9](https://github.com/adobe/helix-simulator/compare/v2.10.8...v2.10.9) (2019-03-20)
+
+
+### Bug Fixes
+
+* **release:** semantic-release now updates the package.json ([#167](https://github.com/adobe/helix-simulator/issues/167)) ([3b0be86](https://github.com/adobe/helix-simulator/commit/3b0be86))
+
 ## [2.10.8](https://github.com/adobe/helix-simulator/compare/v2.10.7...v2.10.8) (2019-03-18)
 
 
