@@ -22,7 +22,8 @@ const BUILD_DIR = path.resolve(__dirname, 'specs', 'builddir');
 
 const mockConfig = {
   selectStrain() {
-    return new Strain('default', {
+    return new Strain({
+      name: 'default',
       code: 'https://localhost/helix/local.git',
       content: 'https://localhost/helix/local.git',
       static: 'https://localhost/helix/local.git',
