@@ -20,8 +20,7 @@ const utils = require('../src/utils.js');
 
 const mockConfig = {
   selectStrain() {
-    return new Strain({
-      name: 'default',
+    return new Strain('default', {
       code: 'https://localhost/helix/local.git',
       content: 'https://localhost/helix/local.git',
       static: 'https://localhost/helix/local.git',
