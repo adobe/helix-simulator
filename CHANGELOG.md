@@ -1,3 +1,11 @@
+## [2.10.10](https://github.com/adobe/helix-simulator/compare/v2.10.9...v2.10.10) (2019-03-27)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-shared to version 0.9.0 ([2f1a07f](https://github.com/adobe/helix-simulator/commit/2f1a07f))
+* **tests:** Adapt new Strains constructor ([8da099d](https://github.com/adobe/helix-simulator/commit/8da099d))
+
 ## [2.10.9](https://github.com/adobe/helix-simulator/compare/v2.10.8...v2.10.9) (2019-03-20)
 
 
