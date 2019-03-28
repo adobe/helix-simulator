@@ -1,3 +1,10 @@
+## [2.10.11](https://github.com/adobe/helix-simulator/compare/v2.10.10...v2.10.11) (2019-03-28)
+
+
+### Bug Fixes
+
+* Loading content from `config` branch fails ([4a390e3](https://github.com/adobe/helix-simulator/commit/4a390e3)), closes [#158](https://github.com/adobe/helix-simulator/issues/158)
+
 ## [2.10.10](https://github.com/adobe/helix-simulator/compare/v2.10.9...v2.10.10) (2019-03-27)
 
 
