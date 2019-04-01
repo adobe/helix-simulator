@@ -1,3 +1,10 @@
+# [2.11.0](https://github.com/adobe/helix-simulator/compare/v2.10.11...v2.11.0) (2019-04-01)
+
+
+### Features
+
+* **project:** Add 'invalidateCache()' method that invalidates loaded modules from the cache ([73aa3ea](https://github.com/adobe/helix-simulator/commit/73aa3ea)), closes [#175](https://github.com/adobe/helix-simulator/issues/175)
+
 ## [2.10.11](https://github.com/adobe/helix-simulator/compare/v2.10.10...v2.10.11) (2019-03-28)
 
 
