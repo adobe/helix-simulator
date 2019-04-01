@@ -9,11 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const { utils } = require('./helper.js');
 
-/* eslint-disable */
-module.exports.main = function main(params) {
-  return {
-    body: `<html><head>Test</head><body>${utils.stamp()}, world. path=${params.path}</body></html>`,
-  }
+module.exports.utils = {
+  stamp: () => "Another Hello",
 };
