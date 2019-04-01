@@ -226,6 +226,19 @@ class HelixProject {
     return this.config.strains.get('default');
   }
 
+  /**
+   * Invalidates the node module cache of the file in the build directory.
+   */
+  invalidateCache() {
+    // we simple remove all entries from the node cache that fall below the build directory
+    Object.keys(require.cache).forEach((file) => {
+      if (file.startsWith(this._buildDir)) {
+        delete require.cache[file];
+        this._logger.debug(`evicted ${path.relative(this._buildDir, file)}`);
+      }
+    });
+  }
+
   async init() {
     if (!this._logger) {
       this._logger = Logger.getLogger('hlx');

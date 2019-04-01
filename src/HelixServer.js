@@ -45,16 +45,6 @@ function safeCycles() {
  * @return {Promise} A promise that resolves to generated output.
  */
 function executeTemplate(ctx) {
-  // invalidate script
-  // todo: use watcher to invalidate automatically
-  delete require.cache[require.resolve(ctx.templatePath)];
-  // temporary workaround: invalidate the pre.js too
-  try {
-    delete require.cache[require.resolve(ctx.templatePath.replace('.js', '.pre.js'))];
-  } catch (e) {
-    // no pre.js: require.resolve fires an exception if the module does not exist
-  }
-
   // the compiled script does not bundle the modules that are required for execution, since it
   // expects them to be provided by the runtime. We tweak the module loader here in order to
   // inject the project module paths.
