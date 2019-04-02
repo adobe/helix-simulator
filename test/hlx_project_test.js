@@ -17,6 +17,7 @@ const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
 const shell = require('shelljs'); // eslint-disable-line import/no-extraneous-dependencies
+const { Logger } = require('@adobe/helix-shared');
 const HelixProject = require('../src/HelixProject.js');
 
 if (!shell.which('git')) {
@@ -72,16 +73,17 @@ describe('Helix Project', () => {
     SPECS_WITH_GIT.forEach(removeRepository);
   });
 
-  it('throws error with no repository', async () => {
-    try {
-      const p = await new HelixProject()
-        .withCwd(path.join(SPEC_ROOT, 'invalid_no_git'))
-        .init();
-      await p.startGitServer();
-      assert.fail('expected to fail.');
-    } catch (e) {
-      assert.equal(e.toString(), 'Error: Local README.md or index.md must be inside a valid git repository.');
-    }
+  it('shows warning when starting outside git repository with local strains', async () => {
+    const logger = Logger.getTestLogger();
+    logger.getLogger = () => logger;
+    await new HelixProject()
+      .withCwd(path.join(SPEC_ROOT, 'invalid_no_git'))
+      .withLogger(logger)
+      .init();
+
+    const output = await logger.getOutput();
+    assert.ok(output.indexOf('Local GitURL in strain default.content invalid when running outside of a .git repository.') > 0);
+    assert.ok(output.indexOf('Local GitURL in strain default.static invalid when running outside of a .git repository.') > 0);
   });
 
   it('throws error with no src directory', async () => {
@@ -92,18 +94,6 @@ describe('Helix Project', () => {
       assert.fail('expected to fail.');
     } catch (e) {
       assert.equal(e.toString(), 'Error: Invalid config. No "src" directory.');
-    }
-  });
-
-  it('throws error with no README.md', async () => {
-    try {
-      const p = await new HelixProject()
-        .withCwd(path.join(SPEC_ROOT, 'invalid_no_content'))
-        .init();
-      await p.startGitServer();
-      assert.fail('expected to fail.');
-    } catch (e) {
-      assert.equal(e.toString(), 'Error: Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
     }
   });
 
