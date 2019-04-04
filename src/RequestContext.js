@@ -162,9 +162,11 @@ module.exports = class RequestContext {
       extension: this.extension,
       method: this.method,
       headers: this.headers,
-      body: this.body,
       params: this.params,
     };
+    if (this.body) {
+      o.body = this.body;
+    }
     return o;
   }
 };
