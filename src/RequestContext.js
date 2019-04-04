@@ -34,6 +34,7 @@ module.exports = class RequestContext {
     this._extension = '';
     this._headers = req.headers || {};
     this._method = req.method || 'GET';
+    this._body = JSON.stringify(req.body);
     this._params = req.query || {};
     this._wskActivationId = utils.randomChars(32, true);
     this._requestId = utils.randomChars(32);
@@ -112,6 +113,10 @@ module.exports = class RequestContext {
     return this._cfg;
   }
 
+  get body() {
+    return this._body;
+  }
+
   get resourcePath() {
     return this._resourcePath;
   }
@@ -157,6 +162,7 @@ module.exports = class RequestContext {
       extension: this.extension,
       method: this.method,
       headers: this.headers,
+      body: this.body,
       params: this.params,
     };
     return o;
