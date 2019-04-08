@@ -13,67 +13,16 @@
 const fs = require('fs-extra');
 const { URL } = require('url');
 const path = require('path');
-const _ = require('lodash');
-const gitServer = require('@adobe/git-server/lib/server.js');
-const { GitUrl, Logger, HelixConfig } = require('@adobe/helix-shared');
+const { Logger, HelixConfig } = require('@adobe/helix-shared');
 const HelixServer = require('./HelixServer.js');
+const GitManager = require('./GitManager.js');
 const packageJson = require('../package.json');
-
-const INDEX_MD = 'index.md';
-
-const README_MD = 'README.md';
 
 const SRC_DIR = 'src';
 
 const DEFAULT_BUILD_DIR = '.hlx/build';
 
 const GIT_DIR = '.git';
-
-const GIT_LOCAL_HOST = '127.0.0.1';
-
-const GIT_LOCAL_OWNER = 'helix';
-
-const GIT_LOCAL_CONTENT_REPO = 'content';
-
-const GIT_SERVER_CONFIG = {
-  configPath: '<internal>',
-  repoRoot: '.',
-  listen: {
-    http: {
-      port: 0,
-      host: '0.0.0.0',
-    },
-  },
-
-  subdomainMapping: {
-    // if enabled, <subdomain>.<baseDomain>/foo/bar/baz will be
-    // resolved/mapped to 127.0.0.1/<subdomain>/foo/bar/baz
-    enable: true,
-    baseDomains: [
-      // some wildcarded DNS domains resolving to 127.0.0.1
-      'localtest.me',
-      'lvh.me',
-      'vcap.me',
-      'lacolhost.com',
-    ],
-  },
-
-  // repository mapping. allows to 'mount' repositories outside the 'repoRoot' structure.
-  virtualRepos: {
-    [GIT_LOCAL_OWNER]: {
-    },
-  },
-
-  logs: {
-    level: 'info',
-    logsDir: './logs',
-    reqLogFormat: 'short', // used for morgan (request logging)
-  },
-};
-
-async function isFile(filePath) {
-  return fs.stat(filePath).then(stats => stats.isFile()).catch(() => false);
-}
 
 async function isDirectory(dirPath) {
   return fs.stat(dirPath).then(stats => stats.isDirectory()).catch(() => false);
@@ -83,18 +32,15 @@ class HelixProject {
   constructor() {
     this._cwd = process.cwd();
     this._srcDir = '';
-    this._indexMd = '';
     this._repoPath = '';
     this._cfg = null;
-    this._gitConfig = _.cloneDeep(GIT_SERVER_CONFIG);
-    this._gitState = null;
-    this._gitUrl = null;
     this._buildDir = DEFAULT_BUILD_DIR;
     this._runtimePaths = module.paths;
     this._server = new HelixServer(this);
     this._displayVersion = packageJson.version;
     this._logger = null;
     this._requestOverride = null;
+    this._gitMgr = null;
   }
 
   withCwd(cwd) {
@@ -137,16 +83,17 @@ class HelixProject {
     return this;
   }
 
+  registerGitRepository(repoPath, gitUrl) {
+    this._gitMgr.registerServer(repoPath, gitUrl);
+    return this;
+  }
+
+  get log() {
+    return this._logger;
+  }
+
   get config() {
     return this._cfg;
-  }
-
-  get gitConfig() {
-    return this._gitConfig;
-  }
-
-  get gitUrl() {
-    return this._gitUrl;
   }
 
   get buildDir() {
@@ -161,6 +108,10 @@ class HelixProject {
     return this._server.isStarted();
   }
 
+  get gitState() {
+    return this._gitMgr ? this._gitMgr.state : null;
+  }
+
   get requestOverride() {
     return this._requestOverride;
   }
@@ -173,25 +124,7 @@ class HelixProject {
     return this._server;
   }
 
-  /*
-   * Returns the git state
-   * @returns {Object}
-   */
-  get gitState() {
-    return this._gitState;
-  }
-
   async checkPaths() {
-    const readmePath = path.join(this._cwd, README_MD);
-    if (await isFile(readmePath)) {
-      this._indexMd = readmePath;
-    }
-
-    const idxPath = path.resolve(this._cwd, INDEX_MD);
-    if (await isFile(idxPath)) {
-      this._indexMd = idxPath;
-    }
-
     const srcPath = path.join(this._cwd, SRC_DIR);
     if (await isDirectory(srcPath)) {
       this._srcDir = srcPath;
@@ -234,17 +167,23 @@ class HelixProject {
     Object.keys(require.cache).forEach((file) => {
       if (file.startsWith(this._buildDir)) {
         delete require.cache[file];
-        this._logger.debug(`evicted ${path.relative(this._buildDir, file)}`);
+        this.log.debug(`evicted ${path.relative(this._buildDir, file)}`);
       }
     });
   }
 
   async init() {
     if (!this._logger) {
-      this._logger = Logger.getLogger('hlx');
+      this._logger = Logger.getLogger({
+        category: 'hlx',
+        level: 'debug',
+      });
     } else {
       this._logger = this._logger.getLogger('hlx');
     }
+    this._gitMgr = new GitManager()
+      .withCwd(this._cwd)
+      .withLogger(this._logger);
 
     if (!this._cfg) {
       this._cfg = await new HelixConfig()
@@ -258,6 +197,8 @@ class HelixProject {
       throw new Error('Invalid config. No "src" directory.');
     }
 
+    this.registerLocalStrains();
+
     const log = this._logger;
     log.info('    __ __    ___         ');
     log.info('   / // /__ / (_)_ __    ');
@@ -270,60 +211,58 @@ class HelixProject {
     return this;
   }
 
-  async startGitServer() {
-    if (this._gitState) {
-      return;
-    }
-
-    if (this._indexMd) {
-      if (!this._repoPath) {
-        throw new Error('Local README.md or index.md must be inside a valid git repository.');
+  /**
+   * the strains that have a local git url, need to be registered to server the local directory.
+   */
+  registerLocalStrains() {
+    this._cfg.strains.getRuntimeStrains().forEach((strain) => {
+      if (strain.content.isLocal) {
+        if (!this._repoPath) {
+          this.log.warn(`Local GitURL in strain ${strain.name}.content invalid when running outside of a .git repository.`);
+        } else {
+          this.registerGitRepository(this._repoPath, strain.content);
+        }
       }
-      this._gitConfig.virtualRepos[GIT_LOCAL_OWNER][GIT_LOCAL_CONTENT_REPO] = {
-        path: this._repoPath,
-      };
-    } else {
-      throw new Error('Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
-    }
-
-    this._logger.debug('Launching local git server for development...');
-    this._gitConfig.logger = this._logger.getLogger('git');
-    this._gitState = await gitServer.start(this._gitConfig);
-
-    // #65 consider currently checked out branch
-    const { currentBranch } = await gitServer.getRepoInfo(
-      this._gitConfig, GIT_LOCAL_OWNER, GIT_LOCAL_CONTENT_REPO,
-    );
-    this._gitUrl = new GitUrl({
-      protocol: 'http',
-      hostname: GIT_LOCAL_HOST,
-      port: this._gitState.httpPort,
-      owner: GIT_LOCAL_OWNER,
-      repo: GIT_LOCAL_CONTENT_REPO,
-      ref: currentBranch,
+      if (strain.static.url.isLocal) {
+        if (!this._repoPath) {
+          this.log.warn(`Local GitURL in strain ${strain.name}.static invalid when running outside of a .git repository.`);
+        } else {
+          this.registerGitRepository(this._repoPath, strain.static.url);
+        }
+      }
     });
   }
 
-  async stopGitServer() {
-    if (!this._gitState) {
-      return;
+  /**
+   * Checks if the given {@code strain} has content or static repositories that need local
+   * git emulation.
+   *
+   * @param {Strain} strain the strain.
+   */
+  async emulateGit(strain) {
+    const contentUrl = await this._gitMgr.resolve(strain.content);
+    if (contentUrl) {
+      // eslint-disable-next-line no-param-reassign
+      strain.content = contentUrl;
     }
-    this._logger.debug('Stopping local git server..');
-    await gitServer.stop();
-    this._gitState = null;
+    const staticUrl = await this._gitMgr.resolve(strain.static.url);
+    if (staticUrl) {
+      // eslint-disable-next-line no-param-reassign
+      strain.static.url = staticUrl;
+    }
   }
 
   async start() {
-    this._logger.debug('Launching helix simulation server for development...');
+    this.log.debug('Launching helix simulation server for development...');
     await this._server.init();
     await this._server.start(this);
     return this;
   }
 
   async stop() {
-    this._logger.debug('Stopping helix simulation server..');
+    this.log.debug('Stopping helix simulation server..');
     await this._server.stop();
-    await this.stopGitServer();
+    await this._gitMgr.stop();
     return this;
   }
 }

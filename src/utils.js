@@ -65,8 +65,8 @@ const utils = {
   async fetchStatic(ctx) {
     const staticUrl = ctx.strain.static.url;
     const uris = [
-      `${ctx.strain.content.raw}${ctx.path}`,
-      `${staticUrl.raw}${staticUrl.path}${ctx.path}`,
+      `${ctx.strain.content.raw}${ctx.relPath}`,
+      `${staticUrl.raw}${staticUrl.path}${ctx.relPath}`,
     ];
     for (let i = 0; i < uris.length; i += 1) {
       const uri = uris[i];

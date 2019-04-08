@@ -58,6 +58,7 @@ module.exports = class RequestContext {
       lastDot = this._path.lastIndexOf('.');
     }
 
+    // remove mount root if needed
     let relPath = this._path.substring(0, lastDot);
 
     const queryParamIndex = this._path.lastIndexOf('?');
@@ -71,11 +72,13 @@ module.exports = class RequestContext {
       this._selector = relPath.substring(selDot + 1);
       relPath = relPath.substring(0, selDot);
     }
+    this._relPath = this._path;
     // remove mount root if needed
     if (this._mount && this.mount !== '/') {
       // strain selection should only select strains that match the url. but better check again
       if (`${relPath}/`.startsWith(`${this._mount}/`)) {
         relPath = relPath.substring(this._mount.length);
+        this._relPath = this._relPath.substring(this._mount.length);
       }
     }
 
@@ -146,6 +149,10 @@ module.exports = class RequestContext {
 
   get mount() {
     return this._mount;
+  }
+
+  get relPath() {
+    return this._relPath;
   }
 
   get json() {

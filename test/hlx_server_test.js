@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-/* global describe, before, after, it */
+/* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
 
 const assert = require('assert');
@@ -19,6 +19,7 @@ const http = require('http');
 const path = require('path');
 const uuidv4 = require('uuid/v4');
 const shell = require('shelljs');
+const { GitUrl } = require('@adobe/helix-shared');
 const HelixProject = require('../src/HelixProject.js');
 
 if (!shell.which('git')) {
@@ -33,31 +34,26 @@ const _isFunction = fn => !!(fn && fn.constructor && fn.call && fn.apply);
 
 const SPEC_ROOT = path.resolve(__dirname, 'specs');
 
-const SPECS_WITH_GIT = [
-  path.join(SPEC_ROOT, 'local'),
-];
-
 async function createTestRoot() {
   const dir = path.resolve(__dirname, 'tmp', uuidv4());
   await fse.ensureDir(dir);
   return dir;
 }
 
-
-function initRepository(dir) {
-  const pwd = shell.pwd();
-  shell.cd(dir);
-  shell.exec('git init');
-  shell.exec('git add -A');
-  shell.exec('git commit -m"initial commit."');
-  shell.cd(pwd);
+async function setupProject(srcDir, root, initGit = true) {
+  const dir = path.resolve(root, path.basename(srcDir));
+  await fse.copy(srcDir, dir);
+  if (initGit) {
+    const pwd = shell.pwd();
+    shell.cd(dir);
+    shell.exec('git init');
+    shell.exec('git add -A');
+    shell.exec('git commit -m"initial commit."');
+    shell.cd(pwd);
+  }
+  return dir;
 }
 
-function removeRepository(dir) {
-  shell.rm('-rf', path.resolve(dir, '.git'));
-}
-
-// todo: use replay ?
 async function assertHttp(url, status, spec, subst) {
   return new Promise((resolve, reject) => {
     const data = [];
@@ -105,18 +101,18 @@ async function assertHttp(url, status, spec, subst) {
 }
 
 describe('Helix Server', () => {
-  before(() => {
-    // create git repos
-    SPECS_WITH_GIT.forEach(initRepository);
+  let testRoot;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
   });
 
-  after(() => {
-    // create fake git repos
-    SPECS_WITH_GIT.forEach(removeRepository);
+  afterEach(async () => {
+    await fse.remove(testRoot);
   });
 
   it('deliver rendered resource', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -131,18 +127,16 @@ describe('Helix Server', () => {
   });
 
   it('deliver modified helper', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
-    const testRoot = await createTestRoot();
-    await fse.copy(cwd, testRoot);
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
-      .withCwd(testRoot)
+      .withCwd(cwd)
       .withBuildDir('./build')
       .withHttpPort(0);
     await project.init();
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index.html');
-      await fse.copy(path.resolve(testRoot, 'build/helper2.js'), path.resolve(testRoot, 'build/helper.js'));
+      await fse.copy(path.resolve(cwd, 'build/helper2.js'), path.resolve(cwd, 'build/helper.js'));
       project.invalidateCache();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index2.html');
     } finally {
@@ -151,7 +145,7 @@ describe('Helix Server', () => {
   });
 
   it('does not start on occupied port', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -177,7 +171,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver resource at /', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -186,7 +180,7 @@ describe('Helix Server', () => {
     try {
       await project.start();
       // hack in correct port for hostname matching
-      project.config.strains.get('dev').urls = [`http://127.0.0.1:${project.server.port}`];
+      project.config.strains.get('default').urls = [`http://127.0.0.1:${project.server.port}`];
       await assertHttp(`http://127.0.0.1:${project.server.port}/`, 200, 'expected_index_dev.html');
     } finally {
       await project.stop();
@@ -194,7 +188,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver rendered resource with long URL', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -209,7 +203,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver rendered resource with esi', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -224,7 +218,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver rendered resource with deep esi', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -239,7 +233,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver rendered json resource', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -254,7 +248,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver rendered json resource from alternate strain', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -270,8 +264,31 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver content resource from secondary mapped git repo', async function test() {
+    this.timeout(4000);
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const apiRepo = await setupProject(path.join(SPEC_ROOT, 'api_repo'), testRoot);
+    const apiUrl = new GitUrl('http://github.com/adobe/helix-api.git');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    project.registerGitRepository(apiRepo, apiUrl);
+    try {
+      await project.start();
+      // hack in correct port for hostname matching
+      project.config.strains.get('default').urls = [`http://127.0.0.1:${project.server.port}`];
+      project.config.strains.get('api').urls = [`http://127.0.0.1:${project.server.port}/api`];
+      await assertHttp(`http://127.0.0.1:${project.server.port}/index.html`, 200, 'expected_index.html');
+      await assertHttp(`http://127.0.0.1:${project.server.port}/api/welcome.txt`, 200, 'expected_api_welcome.txt');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver rendered json resource from alternate strain with request override', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -292,7 +309,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver rendered json resource from alternate strain with request override and path', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -313,7 +330,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver resource from proxy strain', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -325,7 +342,7 @@ describe('Helix Server', () => {
       });
     await project.init();
 
-    const proxyDir = path.join(SPEC_ROOT, 'proxy');
+    const proxyDir = await setupProject(path.join(SPEC_ROOT, 'proxy'), testRoot, false);
     const proxyProject = new HelixProject()
       .withCwd(proxyDir)
       .withBuildDir('./build')
@@ -357,7 +374,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver resource from proxy strain can fail', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -369,7 +386,7 @@ describe('Helix Server', () => {
       });
     await project.init();
 
-    const proxyDir = path.join(SPEC_ROOT, 'proxy');
+    const proxyDir = await setupProject(path.join(SPEC_ROOT, 'proxy'), testRoot, false);
     const proxyProject = new HelixProject()
       .withCwd(proxyDir)
       .withBuildDir('./build')
@@ -402,7 +419,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver request headers', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -427,7 +444,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver request parameters', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -442,7 +459,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver binary data', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -457,7 +474,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver static content resource', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -472,7 +489,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver static content resource from different branch', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const pwd = shell.pwd();
     shell.cd(cwd);
     shell.exec('git checkout -b foo/bar');
@@ -487,14 +504,11 @@ describe('Helix Server', () => {
       await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
     } finally {
       await project.stop();
-      shell.cd(cwd);
-      shell.exec('git checkout master');
-      shell.cd(pwd);
     }
   });
 
   it('deliver static content resource (and webroot)', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -509,12 +523,10 @@ describe('Helix Server', () => {
   });
 
   it('deliver static content resource from git', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
-    const testRoot = await createTestRoot();
-    await fse.copy(cwd, testRoot);
-    await fse.remove(path.resolve(testRoot, 'htdocs', 'dist', 'welcome.txt'));
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    await fse.remove(path.resolve(cwd, 'htdocs', 'dist', 'welcome.txt'));
     const project = new HelixProject()
-      .withCwd(testRoot)
+      .withCwd(cwd)
       .withBuildDir('./build')
       .withHttpPort(0);
     await project.init();
@@ -527,7 +539,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver static dist resource', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -542,7 +554,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver 404 for static dist non existing', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
@@ -557,7 +569,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver 404 for static content non existing', async () => {
-    const cwd = path.join(SPEC_ROOT, 'local');
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
