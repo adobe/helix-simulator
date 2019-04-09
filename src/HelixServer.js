@@ -84,7 +84,7 @@ function executeTemplate(ctx) {
     selector: ctx._selector,
     extension: ctx._extension,
     rootPath: ctx._mount,
-    body: ctx._body,
+    content: ctx._content,
     params: querystring.stringify(ctx._params),
     REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
