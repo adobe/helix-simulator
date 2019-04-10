@@ -61,7 +61,7 @@ function removeRepository(dir) {
 
 async function assertHttp(config, status, spec, subst) {
   return new Promise((resolve, reject) => {
-    const resData = [];
+    const data = [];
     const requestHandler = (res) => {
       try {
         assert.equal(res.statusCode, status);
@@ -71,12 +71,12 @@ async function assertHttp(config, status, spec, subst) {
       }
       res
         .on('data', (chunk) => {
-          resData.push(chunk);
+          data.push(chunk);
         })
         .on('end', () => {
           try {
             if (spec) {
-              const dat = Buffer.concat(resData);
+              const dat = Buffer.concat(data);
               let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
               const repl = (_isFunction(subst) ? subst() : subst) || {};
               Object.keys(repl).forEach((k) => {
@@ -90,7 +90,7 @@ async function assertHttp(config, status, spec, subst) {
                 const actual = dat.toString('hex');
                 assert.equal(actual, expected);
               } else {
-                assert.equal(resData.toString().trim(), expected.trim());
+                assert.equal(data.toString().trim(), expected.trim());
               }
             }
             resolve();
