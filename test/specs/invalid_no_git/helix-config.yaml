@@ -14,7 +14,7 @@ definitions:
     - &localRepo "http://localhost/local/default.git"
 
 strains:
-  default:
+  - name: default
     code: *localRepo
     content: *localRepo
     static: *localRepo

@@ -1,3 +1,10 @@
+## [2.11.1](https://github.com/adobe/helix-simulator/compare/v2.11.0...v2.11.1) (2019-04-08)
+
+
+### Bug Fixes
+
+* **server:** Add option to map giturls to local git repositories ([ea4d59b](https://github.com/adobe/helix-simulator/commit/ea4d59b)), closes [#177](https://github.com/adobe/helix-simulator/issues/177)
+
 # [2.11.0](https://github.com/adobe/helix-simulator/compare/v2.10.11...v2.11.0) (2019-04-01)
 
 

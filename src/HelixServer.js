@@ -153,14 +153,7 @@ class HelixServer extends EventEmitter {
       }
 
       // start git server if needed and adjust content and static url
-      if (ctx.strain.content.isLocal) {
-        await ctx.config.startGitServer();
-        ctx.strain.content = ctx.config.gitUrl;
-      }
-      if (ctx.strain.static.url.isLocal) {
-        await ctx.config.startGitServer();
-        ctx.strain.static.url = ctx.config.gitUrl;
-      }
+      await ctx.config.emulateGit(ctx.strain);
 
       this.emit('request', req, res, ctx);
       if (!ctx.valid) {
