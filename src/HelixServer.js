@@ -73,7 +73,7 @@ function executeTemplate(ctx) {
 
   Module._nodeModulePaths = nodeModulePathsFn;
 
-  return Promise.resolve(mod.main({
+  const actionParams = {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
@@ -84,11 +84,17 @@ function executeTemplate(ctx) {
     selector: ctx._selector,
     extension: ctx._extension,
     rootPath: ctx._mount,
-    content: ctx._postContent,
     params: querystring.stringify(ctx._params),
     REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
-  }));
+  };
+  if (ctx.body) {
+    // add post params to action params
+    Object.keys(ctx.body).forEach((key) => {
+      actionParams[key] = ctx.body[key];
+    });
+  }
+  return Promise.resolve(mod.main(actionParams));
   /* eslint-enable no-underscore-dangle */
 }
 

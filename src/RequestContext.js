@@ -34,7 +34,7 @@ module.exports = class RequestContext {
     this._extension = '';
     this._headers = req.headers || {};
     this._method = req.method || 'GET';
-    this._postContent = req.body ? req.body.content : undefined;
+    this._body = req.body;
     this._params = req.query || {};
     this._wskActivationId = utils.randomChars(32, true);
     this._requestId = utils.randomChars(32);
@@ -113,8 +113,8 @@ module.exports = class RequestContext {
     return this._cfg;
   }
 
-  get postContent() {
-    return this._postContent;
+  get body() {
+    return this._body;
   }
 
   get resourcePath() {
@@ -164,8 +164,8 @@ module.exports = class RequestContext {
       headers: this.headers,
       params: this.params,
     };
-    if (this.content) {
-      o.content = this.content;
+    if (this.body) {
+      o.body = this.body;
     }
     return o;
   }
