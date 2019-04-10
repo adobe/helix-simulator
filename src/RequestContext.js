@@ -34,7 +34,6 @@ module.exports = class RequestContext {
     this._extension = '';
     this._headers = req.headers || {};
     this._method = req.method || 'GET';
-    this._body = req.body;
     this._params = req.query || {};
     this._wskActivationId = utils.randomChars(32, true);
     this._requestId = utils.randomChars(32);
@@ -46,6 +45,9 @@ module.exports = class RequestContext {
       this._mount = parse(this._strain.urls[0]).pathname.replace(/\/+$/, '');
     } else {
       this._mount = '';
+    }
+    if (req.body && Object.entries(req.body).length > 0) {
+      this._body = req.body;
     }
 
     const lastSlash = this._path.lastIndexOf('/');
