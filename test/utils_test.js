@@ -30,27 +30,47 @@ const mockConfig = {
   },
 };
 
+const mockConfigContentDir = {
+  selectStrain() {
+    return new Strain({
+      name: 'default',
+      code: 'https://localhost/helix/local.git',
+      content: 'https://localhost/helix/local.git/api',
+      static: 'https://localhost/helix/local.git',
+      url: 'http://www.foo.com/docs',
+    });
+  },
+};
+
 describe('Utils Test', () => {
   describe('Request context', () => {
     const TESTS = [
       {
-        url: '/', valid: true, path: '/index.html', resourcePath: '/index', selector: '', extension: 'html',
+        url: '/', path: '/index.html', resourcePath: '/index', selector: '', extension: 'html',
       },
       {
-        url: '/content', valid: true, path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
+        url: '/content', path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
       },
       {
-        url: '/content/index.html', valid: true, path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
+        url: '/content/index.html', path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
       },
       {
-        url: '/content/index.foo.html', valid: true, path: '/content/index.foo.html', resourcePath: '/content/index', selector: 'foo', extension: 'html',
+        url: '/content/index.foo.html', path: '/content/index.foo.html', resourcePath: '/content/index', selector: 'foo', extension: 'html',
       },
       {
-        url: '/docs/index.foo.html', valid: true, path: '/docs/index.foo.html', resourcePath: '/index', selector: 'foo', extension: 'html',
+        url: '/docs/index.foo.html', path: '/docs/index.foo.html', resourcePath: '/index', selector: 'foo', extension: 'html', relPath: '/index.foo.html',
+      },
+      {
+        url: '/docs/index.foo.html',
+        path: '/docs/index.foo.html',
+        resourcePath: '/api/index',
+        selector: 'foo',
+        extension: 'html',
+        relPath: '/index.foo.html',
+        config: mockConfigContentDir,
       },
       {
         url: '/content/index.foo.html',
-        valid: true,
         path: '/content/index.foo.html',
         resourcePath: '/content/index',
         selector: 'foo',
@@ -87,21 +107,19 @@ describe('Utils Test', () => {
           query: t.query,
           headers: t.headers,
         };
-        const p = new RequestContext(mockReq, mockConfig);
-        assert.equal(p.valid, t.valid, 'valid');
-        if (p.valid) {
-          assert.equal(p.url, t.url);
-          assert.equal(p.path, t.path, 'path');
-          assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
-          assert.equal(p.selector, t.selector, 'selector');
-          assert.equal(p.extension, t.extension, 'extension');
-          assert.equal(p.mount, '/docs', 'mount');
-          assert.deepEqual(p.params, t.query || {}, 'params');
-          assert.deepEqual(p.headers, t.headers || {}, 'headers');
+        const p = new RequestContext(mockReq, t.config || mockConfig);
+        assert.equal(p.url, t.url);
+        assert.equal(p.path, t.path, 'path');
+        assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
+        assert.equal(p.selector, t.selector, 'selector');
+        assert.equal(p.extension, t.extension, 'extension');
+        assert.equal(p.mount, '/docs', 'mount');
+        assert.equal(p.relPath, t.relPath || t.path, 'relPath');
+        assert.deepEqual(p.params, t.query || {}, 'params');
+        assert.deepEqual(p.headers, t.headers || {}, 'headers');
 
-          if (t.expectedJson) {
-            assert.deepEqual(p.json, t.expectedJson, 'json');
-          }
+        if (t.expectedJson) {
+          assert.deepEqual(p.json, t.expectedJson, 'json');
         }
       });
     });

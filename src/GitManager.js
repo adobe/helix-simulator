@@ -163,6 +163,11 @@ class GitManager {
       return null;
     }
     await this.start();
+    if (srv.localUrl.path !== giturl.path) {
+      const copy = srv.localUrl.toJSON();
+      copy.path = giturl.path;
+      return new GitUrl(copy);
+    }
     return srv.localUrl;
   }
 

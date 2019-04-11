@@ -12,21 +12,22 @@ version: 1
 definitions:
   defaults:
     - &localRepo "http://localhost/local/default.git"
-    - &apiRepo "http://github.com/adobe/helix-api.git"
+    - &apiRepo "http://github.com/adobe/helix-api.git/docs"
+    - &docsRepo "http://localhost/local/default.git/documentation"
 
 strains:
   - name: docs
     url: http://127.0.0.1/docs
     code: *localRepo
-    content: *localRepo
+    content: *docsRepo
     static: *localRepo
-    directoryIndex: /readme.html
+    directoryIndex: /introduction.html
 
   - name: api
     url: http://127.0.0.1/api
     code: *localRepo
     content: *apiRepo
-    static: *apiRepo
+    static: http://github.com/adobe/helix-api.git/htdocs
     directoryIndex: /readme.html
 
   - name: dev
