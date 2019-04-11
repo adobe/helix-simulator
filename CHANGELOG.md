@@ -1,3 +1,10 @@
+# [2.12.0](https://github.com/adobe/helix-simulator/compare/v2.11.3...v2.12.0) (2019-04-11)
+
+
+### Features
+
+* **server:** process post request body ([#180](https://github.com/adobe/helix-simulator/issues/180)), closes [#179](https://github.com/adobe/helix-simulator/issues/179) ([4292fc7](https://github.com/adobe/helix-simulator/commit/4292fc7))
+
 ## [2.11.3](https://github.com/adobe/helix-simulator/compare/v2.11.2...v2.11.3) (2019-04-11)
 
 
