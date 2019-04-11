@@ -60,8 +60,6 @@ module.exports = class RequestContext {
       this._path = this._path.replace(/\/+/g, '/');
       lastDot = this._path.lastIndexOf('.');
     }
-
-    // remove mount root if needed
     let relPath = this._path.substring(0, lastDot);
 
     const queryParamIndex = this._path.lastIndexOf('?');
@@ -76,6 +74,7 @@ module.exports = class RequestContext {
       relPath = relPath.substring(0, selDot);
     }
     this._relPath = this._path;
+
     // remove mount root if needed
     if (this._mount && this.mount !== '/') {
       // strain selection should only select strains that match the url. but better check again
@@ -83,6 +82,12 @@ module.exports = class RequestContext {
         relPath = relPath.substring(this._mount.length);
         this._relPath = this._relPath.substring(this._mount.length);
       }
+    }
+
+    // prepend any content repository path
+    const repoPath = this._strain.content ? this._strain.content.path : '';
+    if (repoPath && repoPath !== '/') {
+      relPath = repoPath + relPath;
     }
 
     this._resourcePath = relPath;
@@ -97,15 +102,17 @@ module.exports = class RequestContext {
     }, this._headers);
   }
 
+  /**
+   * the original request url
+   */
   get url() {
     return this._url;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  get valid() {
-    return true;
-  }
-
+  /**
+   * the request path, including any directoryIndex mapping.
+   * @returns {*|string}
+   */
   get path() {
     return this._path;
   }
@@ -118,46 +125,90 @@ module.exports = class RequestContext {
     return this._cfg;
   }
 
+  /**
+   * The request body.
+   * @returns {Object}
+   */
   get body() {
     return this._body;
   }
 
+  /**
+   * The path to the resource in the repository.
+   * @returns {string}
+   */
   get resourcePath() {
     return this._resourcePath;
   }
 
+  /**
+   * The file extension of the request path.
+   * @returns {string|*}
+   */
   get extension() {
     return this._extension;
   }
 
+  /**
+   * the selector of the request path.
+   * @returns {string|string}
+   */
   get selector() {
     return this._selector;
   }
 
+  /**
+   * The client request headers.
+   * @returns {any | {}}
+   */
   get headers() {
     return this._headers;
   }
 
+  /**
+   * extra headers that openwhisk / fastly would set.
+   * @returns {any | {}}
+   */
   get wskHeaders() {
     return this._wskHeaders;
   }
 
+  /**
+   * The request method
+   * @returns {*|string}
+   */
   get method() {
     return this._method;
   }
 
+  /**
+   * The request params (query)
+   * @returns {any | {}}
+   */
   get params() {
     return this._params;
   }
 
+  /**
+   * The currently selected strain.
+   * @returns {Strain}
+   */
   get strain() {
     return this._strain;
   }
 
+  /**
+   * The mount point of the strain.
+   * @returns {string}
+   */
   get mount() {
     return this._mount;
   }
 
+  /**
+   * The relative path. i.e. the request path without the mount path.
+   * @returns {*}
+   */
   get relPath() {
     return this._relPath;
   }

@@ -299,7 +299,7 @@ describe('Helix Server', () => {
       // hack in correct port for hostname matching
       project.config.strains.get('default').urls = [`http://127.0.0.1:${project.server.port}`];
       project.config.strains.get('api').urls = [`http://127.0.0.1:${project.server.port}/api`];
-      await assertHttp(`http://127.0.0.1:${project.server.port}/index.html`, 200, 'expected_index.html');
+      await assertHttp(`http://127.0.0.1:${project.server.port}/api/introduction.html`, 200, 'expected_api_introduction.html');
       await assertHttp(`http://127.0.0.1:${project.server.port}/api/welcome.txt`, 200, 'expected_api_welcome.txt');
     } finally {
       await project.stop();
@@ -342,7 +342,7 @@ describe('Helix Server', () => {
     try {
       await project.start();
       // hack in correct port for hostname matching
-      await assertHttp(`http://localhost:${project.server.port}/docs/api/index.json`, 200, 'expected_index_docs.json');
+      await assertHttp(`http://localhost:${project.server.port}/docs/general/index.json`, 200, 'expected_index_docs.json');
     } finally {
       await project.stop();
     }
