@@ -1,3 +1,10 @@
+## [2.11.2](https://github.com/adobe/helix-simulator/compare/v2.11.1...v2.11.2) (2019-04-11)
+
+
+### Bug Fixes
+
+* **server:** Content URL remapping doesn't work ([#187](https://github.com/adobe/helix-simulator/issues/187)) ([91504c4](https://github.com/adobe/helix-simulator/commit/91504c4)), closes [#186](https://github.com/adobe/helix-simulator/issues/186)
+
 ## [2.11.1](https://github.com/adobe/helix-simulator/compare/v2.11.0...v2.11.1) (2019-04-08)
 
 
