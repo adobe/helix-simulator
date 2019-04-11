@@ -73,7 +73,7 @@ function executeTemplate(ctx) {
 
   Module._nodeModulePaths = nodeModulePathsFn;
 
-  return Promise.resolve(mod.main({
+  const actionParams = {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
@@ -87,7 +87,14 @@ function executeTemplate(ctx) {
     params: querystring.stringify(ctx._params),
     REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
-  }));
+  };
+  if (ctx.body) {
+    // add post params to action params
+    Object.keys(ctx.body).forEach((key) => {
+      actionParams[key] = ctx.body[key];
+    });
+  }
+  return Promise.resolve(mod.main(actionParams));
   /* eslint-enable no-underscore-dangle */
 }
 
@@ -124,7 +131,11 @@ class HelixServer extends EventEmitter {
         resolveWithFullResponse: true,
       }),
     }));
-    this._app.get('*', async (req, res) => {
+
+    // read JSON request body
+    this._app.use(express.json());
+
+    const handler = async (req, res) => {
       const ctx = new RequestContext(req, this._project);
       ctx.logger = log;
 
@@ -194,7 +205,9 @@ class HelixServer extends EventEmitter {
             res.status(err.code || 500).send();
           });
       }
-    });
+    };
+    this._app.get('*', handler);
+    this._app.post('*', handler);
   }
 
   withPort(port) {

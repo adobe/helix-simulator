@@ -98,6 +98,35 @@ describe('Utils Test', () => {
           url: '/content/index.foo.html',
         },
       },
+      {
+        url: '/content/index.post.html',
+        valid: true,
+        path: '/content/index.post.html',
+        resourcePath: '/content/index',
+        selector: 'post',
+        extension: 'html',
+        method: 'POST',
+        body: {
+          content: {
+            body: 'Test',
+          },
+        },
+        expectedJson: {
+          extension: 'html',
+          headers: {},
+          params: {},
+          method: 'POST',
+          path: '/content/index.post.html',
+          resourcePath: '/content/index',
+          selector: 'post',
+          url: '/content/index.post.html',
+          body: {
+            content: {
+              body: 'Test',
+            },
+          },
+        },
+      },
     ];
 
     TESTS.forEach((t) => {
@@ -106,6 +135,8 @@ describe('Utils Test', () => {
           url: t.url,
           query: t.query,
           headers: t.headers,
+          body: t.body || undefined,
+          method: t.method || undefined,
         };
         const p = new RequestContext(mockReq, t.config || mockConfig);
         assert.equal(p.url, t.url);

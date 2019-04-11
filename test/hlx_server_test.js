@@ -54,17 +54,18 @@ async function setupProject(srcDir, root, initGit = true) {
   return dir;
 }
 
-async function assertHttp(url, status, spec, subst) {
+// todo: use replay ?
+
+async function assertHttp(config, status, spec, subst) {
   return new Promise((resolve, reject) => {
     const data = [];
-    http.get(url, (res) => {
+    const requestHandler = (res) => {
       try {
         assert.equal(res.statusCode, status);
       } catch (e) {
         res.resume();
         reject(e);
       }
-
       res
         .on('data', (chunk) => {
           data.push(chunk);
@@ -94,9 +95,27 @@ async function assertHttp(url, status, spec, subst) {
             reject(e);
           }
         });
-    }).on('error', (e) => {
+    };
+    const errorHandler = (e) => {
       reject(e);
-    });
+    };
+    if (typeof config === 'string') {
+      // use as URL and do GET
+      http.get(config, requestHandler).on('error', errorHandler);
+    } else {
+      // do POST
+      const postStr = config.postData ? JSON.stringify(config.postData) : '';
+      const { options } = config;
+      options.method = 'POST';
+      options.headers = {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postStr),
+      };
+      const req = http.request(options, requestHandler);
+      req.on('error', errorHandler);
+      req.write(postStr);
+      req.end();
+    }
   });
 }
 
@@ -578,6 +597,54 @@ describe('Helix Server', () => {
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/notfound.css`, 404);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('serve post request', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp({
+        options: {
+          hostname: 'localhost',
+          port: project.server.port,
+          path: '/index.html',
+        },
+        postData: {},
+      }, 200, 'expected_index.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('serve post with custom content.body', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp({
+        options: {
+          hostname: 'localhost',
+          port: project.server.port,
+          path: '/index.post.html',
+        },
+        postData: {
+          content: {
+            body: 'Hello, universe',
+          },
+        },
+      }, 200, 'expected_index_post.html');
     } finally {
       await project.stop();
     }

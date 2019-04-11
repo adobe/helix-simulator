@@ -46,6 +46,9 @@ module.exports = class RequestContext {
     } else {
       this._mount = '';
     }
+    if (req.body && Object.entries(req.body).length > 0) {
+      this._body = req.body;
+    }
 
     const lastSlash = this._path.lastIndexOf('/');
     let lastDot = this._path.lastIndexOf('.');
@@ -120,6 +123,14 @@ module.exports = class RequestContext {
    */
   get config() {
     return this._cfg;
+  }
+
+  /**
+   * The request body.
+   * @returns {Object}
+   */
+  get body() {
+    return this._body;
   }
 
   /**
@@ -213,6 +224,9 @@ module.exports = class RequestContext {
       headers: this.headers,
       params: this.params,
     };
+    if (this.body) {
+      o.body = this.body;
+    }
     return o;
   }
 };
