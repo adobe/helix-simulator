@@ -1,3 +1,3 @@
-# Helix API - Docs
+# Helix API 
 
 This is a test content repository.

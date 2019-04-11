@@ -145,10 +145,6 @@ class HelixServer extends EventEmitter {
       await ctx.config.emulateGit(ctx.strain);
 
       this.emit('request', req, res, ctx);
-      if (!ctx.valid) {
-        res.status(404).send();
-        return;
-      }
 
       const isResolved = await this._templateResolver.resolve(ctx);
       if (isResolved) {
