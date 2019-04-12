@@ -68,6 +68,12 @@ describe('Utils Test', () => {
         extension: 'html',
         relPath: '/index.foo.html',
         config: mockConfigContentDir,
+        wskHeaders: {
+          'X-Backend-Name': 'localhost--F_Petridish',
+          'X-Old-Url': '/docs/index.foo.html',
+          'X-Repo-Root-Path': '/api',
+          'X-Strain': 'default',
+        },
       },
       {
         url: '/content/index.foo.html',
@@ -96,6 +102,13 @@ describe('Utils Test', () => {
           resourcePath: '/content/index',
           selector: 'foo',
           url: '/content/index.foo.html',
+        },
+        wskHeaders: {
+          'X-Backend-Name': 'localhost--F_Petridish',
+          'X-Old-Url': '/content/index.foo.html',
+          'X-Repo-Root-Path': '',
+          'X-Strain': 'default',
+          h1: '1',
         },
       },
       {
@@ -151,6 +164,14 @@ describe('Utils Test', () => {
 
         if (t.expectedJson) {
           assert.deepEqual(p.json, t.expectedJson, 'json');
+        }
+
+        if (t.wskHeaders) {
+          const { wskHeaders } = p;
+          delete wskHeaders['X-CDN-Request-ID'];
+          delete wskHeaders['X-Openwhisk-Activation-Id'];
+          delete wskHeaders['X-Request-Id'];
+          assert.deepEqual(wskHeaders, t.wskHeaders);
         }
       });
     });
