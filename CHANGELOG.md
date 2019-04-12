@@ -1,3 +1,10 @@
+## [2.12.1](https://github.com/adobe/helix-simulator/compare/v2.12.0...v2.12.1) (2019-04-12)
+
+
+### Bug Fixes
+
+* **server:** add x-old-url and x-repo-root-path to __ow_headers ([#192](https://github.com/adobe/helix-simulator/issues/192)) ([4fd7762](https://github.com/adobe/helix-simulator/commit/4fd7762)), closes [#191](https://github.com/adobe/helix-simulator/issues/191)
+
 # [2.12.0](https://github.com/adobe/helix-simulator/compare/v2.11.3...v2.12.0) (2019-04-11)
 
 
