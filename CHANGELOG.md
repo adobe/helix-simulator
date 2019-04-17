@@ -1,3 +1,10 @@
+## [2.12.2](https://github.com/adobe/helix-simulator/compare/v2.12.1...v2.12.2) (2019-04-17)
+
+
+### Bug Fixes
+
+* **git-server:** fix for adobe/helix-cli[#614](https://github.com/adobe/helix-simulator/issues/614) ([ddd63e3](https://github.com/adobe/helix-simulator/commit/ddd63e3))
+
 ## [2.12.1](https://github.com/adobe/helix-simulator/compare/v2.12.0...v2.12.1) (2019-04-12)
 
 
