@@ -1,3 +1,10 @@
+## [2.12.3](https://github.com/adobe/helix-simulator/compare/v2.12.2...v2.12.3) (2019-04-19)
+
+
+### Bug Fixes
+
+* package.json & package-lock.json to reduce vulnerabilities ([#198](https://github.com/adobe/helix-simulator/issues/198)) ([c95295d](https://github.com/adobe/helix-simulator/commit/c95295d))
+
 ## [2.12.2](https://github.com/adobe/helix-simulator/compare/v2.12.1...v2.12.2) (2019-04-17)
 
 
