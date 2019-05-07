@@ -1,3 +1,10 @@
+## [2.12.4](https://github.com/adobe/helix-simulator/compare/v2.12.3...v2.12.4) (2019-05-07)
+
+
+### Bug Fixes
+
+* **release:** dummy commit to trigger release ([eaf61a9](https://github.com/adobe/helix-simulator/commit/eaf61a9))
+
 ## [2.12.3](https://github.com/adobe/helix-simulator/compare/v2.12.2...v2.12.3) (2019-04-19)
 
 
