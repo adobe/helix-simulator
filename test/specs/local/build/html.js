@@ -14,6 +14,6 @@ const { utils } = require('./helper.js');
 /* eslint-disable */
 module.exports.main = function main(params) {
   return {
-    body: `<html><head>Test</head><body>${utils.stamp()}, world. path=${params.path}, strain=${params.__ow_headers['x-strain']}</body></html>`,
+    body: `<html><head>Test</head><body>${utils.stamp()} path=${params.path}, strain=${params.__ow_headers['x-strain']}</body></html>`,
   }
 };
