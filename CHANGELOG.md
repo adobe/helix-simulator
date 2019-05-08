@@ -1,3 +1,10 @@
+## [2.12.6](https://github.com/adobe/helix-simulator/compare/v2.12.5...v2.12.6) (2019-05-08)
+
+
+### Bug Fixes
+
+* **project:** ensure modules in 'src' are also invalidated ([#211](https://github.com/adobe/helix-simulator/issues/211)) ([4bff4cd](https://github.com/adobe/helix-simulator/commit/4bff4cd)), closes [#210](https://github.com/adobe/helix-simulator/issues/210)
+
 ## [2.12.5](https://github.com/adobe/helix-simulator/compare/v2.12.4...v2.12.5) (2019-05-08)
 
 
