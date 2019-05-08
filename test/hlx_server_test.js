@@ -163,6 +163,24 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver modified module', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index.html');
+      await fse.copy(path.resolve(cwd, 'src/module2.js'), path.resolve(cwd, 'src/module.js'));
+      project.invalidateCache();
+      await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index3.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('does not start on occupied port', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()

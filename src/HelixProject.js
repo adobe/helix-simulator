@@ -163,11 +163,11 @@ class HelixProject {
    * Invalidates the node module cache of the file in the build directory.
    */
   invalidateCache() {
-    // we simple remove all entries from the node cache that fall below the build directory
+    // we simple remove all entries from the node cache that fall below the build or src directory
     Object.keys(require.cache).forEach((file) => {
-      if (file.startsWith(this._buildDir)) {
+      if (file.startsWith(this._buildDir) || (this._srcDir && file.startsWith(this._srcDir))) {
         delete require.cache[file];
-        this.log.debug(`evicted ${path.relative(this._buildDir, file)}`);
+        this.log.debug(`evicted ${path.relative(this._cwd, file)}`);
       }
     });
   }

@@ -9,7 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const mod = require('../src/module.js');
 
 module.exports.utils = {
-  stamp: () => "Another Hello",
+  stamp: () => "Another Hello, " + mod(),
 };
