@@ -21,25 +21,25 @@ strains:
     code: *localRepo
     content: *docsRepo
     static: *localRepo
-    directoryIndex: /introduction.html
+    directoryIndex: introduction.html
 
   - name: api
     url: http://127.0.0.1/api
     code: *localRepo
     content: *apiRepo
     static: http://github.com/adobe/helix-api.git/htdocs
-    directoryIndex: /readme.html
+    directoryIndex: readme.html
 
   - name: dev
     url: http://127.0.0.1
     code: *localRepo
     content: *localRepo
     static: *localRepo
-    directoryIndex: /readme.html
+    directoryIndex: readme.html
 
   - name: default
     code: *localRepo
     content: *localRepo
     static: *localRepo
-    directoryIndex: /readme.html
+    directoryIndex: readme.html
 
