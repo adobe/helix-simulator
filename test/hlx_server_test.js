@@ -254,6 +254,37 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver rendered resource with esi typo', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.esitypo.html`, 200, 'expected_esitypo.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('deliver rendered resource with relative esi', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      // todo: verify behaviour on edge
+      await assertHttp(`http://localhost:${project.server.port}/docs/api/index.esirel.html`, 200, 'expected_esirel.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver rendered resource with deep esi', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
@@ -371,12 +402,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0)
-      .withRequestOverride({
-        headers: {
-          host: 'proxy.local',
-        },
-      });
+      .withHttpPort(0);
     await project.init();
 
     const proxyDir = await setupProject(path.join(SPEC_ROOT, 'proxy'), testRoot, false);
@@ -396,6 +422,45 @@ describe('Helix Server', () => {
       await proxyProject.start();
       proxyProject.config.strains.get('proxy').origin._port = project.server.port;
       await assertHttp(`http://localhost:${proxyProject.server.port}/docs/api/index.json`, 200, 'expected_proxy_docs.json');
+    } finally {
+      try {
+        await project.stop();
+      } catch (e) {
+        // ignore
+      }
+      try {
+        await proxyProject.stop();
+      } catch (e) {
+        // ignore
+      }
+    }
+  });
+
+  it('deliver resource from proxy strain with chroot', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+
+    const proxyDir = await setupProject(path.join(SPEC_ROOT, 'proxy'), testRoot, false);
+    const proxyProject = new HelixProject()
+      .withCwd(proxyDir)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withRequestOverride({
+        headers: {
+          host: 'proxy.local',
+        },
+      });
+    await proxyProject.init();
+
+    try {
+      await project.start();
+      await proxyProject.start();
+      proxyProject.config.strains.get('proxy_help').origin._port = project.server.port;
+      await assertHttp(`http://localhost:${proxyProject.server.port}/help/docs/api/index.json`, 200, 'expected_proxy_docs_chroot.json');
     } finally {
       try {
         await project.stop();
@@ -585,6 +650,21 @@ describe('Helix Server', () => {
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/dist/styles.css`, 200, 'expected_styles.css');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('deliver static html from htdocs', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/404.html`, 200, 'expected_404.html');
     } finally {
       await project.stop();
     }

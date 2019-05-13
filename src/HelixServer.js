@@ -44,7 +44,7 @@ function safeCycles() {
  * @param {RequestContext} ctx Context
  * @return {Promise} A promise that resolves to generated output.
  */
-function executeTemplate(ctx) {
+async function executeTemplate(ctx) {
   // the compiled script does not bundle the modules that are required for execution, since it
   // expects them to be provided by the runtime. We tweak the module loader here in order to
   // inject the project module paths.
@@ -114,14 +114,116 @@ class HelixServer extends EventEmitter {
     this._templateResolver = new TemplateResolver().with(TemplateResolverPlugins.simple);
   }
 
+  /**
+   * Initializes the server
+   */
   async init() {
     /* eslint-disable no-underscore-dangle */
     this._logger = this._project._logger || Logger.getLogger('hlx');
   }
 
-  async setupApp() {
-    const log = this._logger;
+  /**
+   * Handles a dynamic request by resolving the template and then executing it.
+   * The processing is rejected, if the template returns a 404 status code.
+   * @param {RequestContext} ctx the request context
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   * @returns {@code true} if the request is processed, {@code false} otherwise.
+   */
+  async handleDynamic(ctx, req, res) {
+    const isResolved = await this._templateResolver.resolve(ctx);
+    if (!isResolved) {
+      return false;
+    }
 
+    const result = await executeTemplate(ctx);
+    if (!result) {
+      throw new Error('Response is empty, don\'t know what to do');
+    }
+    if (result instanceof Error) {
+      // full response is an error: engine error
+      throw result;
+    }
+    if (result.error && result.error instanceof Error) {
+      throw result.error;
+    }
+
+    const status = result.statusCode || 200;
+    if (status === 404) {
+      return false;
+    }
+
+    let body = result.body || '';
+    const headers = result.headers || {};
+    const contentType = headers['Content-Type'] || 'text/html';
+    if (/.*\/json/.test(contentType)) {
+      body = JSON.stringify(body, safeCycles());
+    } else if (/.*\/octet-stream/.test(contentType) || /image\/.*/.test(contentType)) {
+      body = Buffer.from(body, 'base64');
+    }
+    res.set(headers).status(status).send(body);
+    return true;
+  }
+
+  /**
+   * Handles the request to remote origin if the respective strains is a proxy strain.
+   * @param {RequestContext} ctx the request context
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   * @returns {@code true} if the request is processed, {@code false} otherwise.
+   */
+  async handleProxy(ctx, req, res) {
+    if (!ctx.strain.isProxy()) {
+      return false;
+    }
+    try {
+      await utils.proxyRequest(ctx, req, res);
+    } catch (err) {
+      this._logger.error(`Error during proxy: ${err.stack || err}`);
+      res.status(500).send();
+    }
+    return true;
+  }
+
+  /**
+   * Default route handler
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   */
+  async handleRequest(req, res) {
+    const ctx = new RequestContext(req, this._project);
+    ctx.logger = this._logger;
+
+    this._logger.debug(`current strain: ${ctx.strain.name}: ${JSON.stringify(ctx.strain.toJSON({ minimal: true, keepFormat: true }), null, 2)}`);
+
+    if (await this.handleProxy(ctx, req, res)) {
+      return;
+    }
+
+    // start git server if needed and adjust content and static url
+    await ctx.config.emulateGit(ctx.strain);
+
+    this.emit('request', req, res, ctx);
+
+    if (await this.handleDynamic(ctx, req, res)) {
+      return;
+    }
+
+    try {
+      const result = await utils.fetchStatic(ctx);
+      res.type(ctx.extension);
+      res.send(result.content);
+    } catch (err) {
+      if (err.code === 404) {
+        this._logger.error(`Resource not found: ${ctx.path}`);
+      } else {
+        this._logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
+      }
+      res.status(err.code || 500).send();
+    }
+  }
+
+  async setupApp() {
     // setup ESI as express middleware
     this._app.use(NodeESI.middleware({
       baseUrl: `http://localhost:${this._port}`,
@@ -132,80 +234,10 @@ class HelixServer extends EventEmitter {
       }),
     }));
 
-    // read JSON request body
+    // use json body parser
     this._app.use(express.json());
 
-    const handler = async (req, res) => {
-      const ctx = new RequestContext(req, this._project);
-      ctx.logger = log;
-
-      log.debug(`current strain: ${ctx.strain.name}: ${JSON.stringify(ctx.strain.toJSON({ minimal: true, keepFormat: true }), null, 2)}`);
-
-      // handle proxy requests if needed
-      if (ctx.strain.isProxy()) {
-        try {
-          await utils.proxyRequest(ctx, req, res);
-        } catch (err) {
-          this._logger.error(`Error during proxy: ${err.stack || err}`);
-          res.status(500).send();
-        }
-        return;
-      }
-
-      // start git server if needed and adjust content and static url
-      await ctx.config.emulateGit(ctx.strain);
-
-      this.emit('request', req, res, ctx);
-
-      const isResolved = await this._templateResolver.resolve(ctx);
-      if (isResolved) {
-        // md files to be transformed
-        Promise.resolve(ctx)
-          .then(executeTemplate)
-          .then((result) => {
-            if (!result) {
-              throw new Error('Response is empty, don\'t know what to do');
-            }
-            if (result instanceof Error) {
-              // full response is an error: engine error
-              throw result;
-            }
-            if (result.error && result.error instanceof Error) {
-              throw result.error;
-            }
-            let body = result.body || '';
-            const headers = result.headers || {};
-            const status = result.statusCode || 200;
-            const contentType = headers['Content-Type'] || 'text/html';
-            if (/.*\/json/.test(contentType)) {
-              body = JSON.stringify(body, safeCycles());
-            } else if (/.*\/octet-stream/.test(contentType) || /image\/.*/.test(contentType)) {
-              body = Buffer.from(body, 'base64');
-            }
-            res.set(headers).status(status).send(body);
-          })
-          .catch((err) => {
-            this._logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
-            res.status(500).send();
-          });
-      } else {
-        // all the other files (css, images...)
-        // for now, fetch from dist or content.
-        Promise.resolve(ctx)
-          .then(utils.fetchStatic)
-          .then((result) => {
-            res.type(ctx.extension);
-            res.send(result.content);
-          }).catch((err) => {
-            if (err.code === 404) {
-              this._logger.error(`Resource not found: ${ctx.path}`);
-            } else {
-              this._logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
-            }
-            res.status(err.code || 500).send();
-          });
-      }
-    };
+    const handler = this.handleRequest.bind(this);
     this._app.get('*', handler);
     this._app.post('*', handler);
   }

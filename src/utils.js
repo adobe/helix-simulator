@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 const fs = require('fs-extra');
+const path = require('path');
 const request = require('request-promise-native');
 const requestNative = require('request');
 const crypto = require('crypto');
@@ -95,7 +96,8 @@ const utils = {
     if (!origin) {
       throw Error(`No proxy strain: ${ctx.strain.name}`);
     }
-    const url = `${origin.useSSL ? 'https' : 'http'}://${origin.hostname}:${origin.port}${req.path}`;
+    const proxyPath = path.posix.join('/', origin.path, ctx.relPath);
+    const url = `${origin.useSSL ? 'https' : 'http'}://${origin.hostname}:${origin.port}${proxyPath}`;
     ctx.logger.info(`Proxy ${req.method} request to ${url}`);
     return new Promise((resolve, reject) => {
       req.pipe(requestNative(url)
