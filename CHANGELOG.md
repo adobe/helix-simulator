@@ -1,3 +1,12 @@
+## [2.12.8](https://github.com/adobe/helix-simulator/compare/v2.12.7...v2.12.8) (2019-05-13)
+
+
+### Bug Fixes
+
+* **esi:** use latest nodesi ([e7bfb2d](https://github.com/adobe/helix-simulator/commit/e7bfb2d)), closes [#212](https://github.com/adobe/helix-simulator/issues/212)
+* **server:** fallback to static resolution if template execution fails with 404 ([16f53cf](https://github.com/adobe/helix-simulator/commit/16f53cf)), closes [#216](https://github.com/adobe/helix-simulator/issues/216)
+* **server:** Proxy strains does not work on URL path ([a5f3f8e](https://github.com/adobe/helix-simulator/commit/a5f3f8e)), closes [#213](https://github.com/adobe/helix-simulator/issues/213)
+
 ## [2.12.7](https://github.com/adobe/helix-simulator/compare/v2.12.6...v2.12.7) (2019-05-13)
 
 
