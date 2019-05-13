@@ -166,6 +166,26 @@ class HelixServer extends EventEmitter {
   }
 
   /**
+   * Handles the request to remote origin if the respective strains is a proxy strain.
+   * @param {RequestContext} ctx the request context
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   * @returns {@code true} if the request is processed, {@code false} otherwise.
+   */
+  async handleProxy(ctx, req, res) {
+    if (!ctx.strain.isProxy()) {
+      return false;
+    }
+    try {
+      await utils.proxyRequest(ctx, req, res);
+    } catch (err) {
+      this._logger.error(`Error during proxy: ${err.stack || err}`);
+      res.status(500).send();
+    }
+    return true;
+  }
+
+  /**
    * Default route handler
    * @param {Express.Request} req request
    * @param {Express.Response} res response
@@ -176,14 +196,7 @@ class HelixServer extends EventEmitter {
 
     this._logger.debug(`current strain: ${ctx.strain.name}: ${JSON.stringify(ctx.strain.toJSON({ minimal: true, keepFormat: true }), null, 2)}`);
 
-    // handle proxy requests if needed
-    if (ctx.strain.isProxy()) {
-      try {
-        await utils.proxyRequest(ctx, req, res);
-      } catch (err) {
-        this._logger.error(`Error during proxy: ${err.stack || err}`);
-        res.status(500).send();
-      }
+    if (await this.handleProxy(ctx, req, res)) {
       return;
     }
 

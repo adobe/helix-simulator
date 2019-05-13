@@ -371,12 +371,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0)
-      .withRequestOverride({
-        headers: {
-          host: 'proxy.local',
-        },
-      });
+      .withHttpPort(0);
     await project.init();
 
     const proxyDir = await setupProject(path.join(SPEC_ROOT, 'proxy'), testRoot, false);
@@ -396,6 +391,45 @@ describe('Helix Server', () => {
       await proxyProject.start();
       proxyProject.config.strains.get('proxy').origin._port = project.server.port;
       await assertHttp(`http://localhost:${proxyProject.server.port}/docs/api/index.json`, 200, 'expected_proxy_docs.json');
+    } finally {
+      try {
+        await project.stop();
+      } catch (e) {
+        // ignore
+      }
+      try {
+        await proxyProject.stop();
+      } catch (e) {
+        // ignore
+      }
+    }
+  });
+
+  it('deliver resource from proxy strain with chroot', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+
+    const proxyDir = await setupProject(path.join(SPEC_ROOT, 'proxy'), testRoot, false);
+    const proxyProject = new HelixProject()
+      .withCwd(proxyDir)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withRequestOverride({
+        headers: {
+          host: 'proxy.local',
+        },
+      });
+    await proxyProject.init();
+
+    try {
+      await project.start();
+      await proxyProject.start();
+      proxyProject.config.strains.get('proxy_help').origin._port = project.server.port;
+      await assertHttp(`http://localhost:${proxyProject.server.port}/help/docs/api/index.json`, 200, 'expected_proxy_docs_chroot.json');
     } finally {
       try {
         await project.stop();
