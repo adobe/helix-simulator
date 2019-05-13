@@ -254,6 +254,22 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver rendered resource with relative esi', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      // todo: verify behaviour on edge
+      await assertHttp(`http://localhost:${project.server.port}/docs/api/index.esirel.html`, 200, 'expected_esirel.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver rendered resource with deep esi', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
