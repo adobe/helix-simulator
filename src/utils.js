@@ -96,7 +96,11 @@ const utils = {
     if (!origin) {
       throw Error(`No proxy strain: ${ctx.strain.name}`);
     }
-    const proxyPath = path.posix.join('/', origin.path, ctx.relPath);
+    let proxyPath = path.posix.relative(ctx.mount, req.path);
+    if (proxyPath.startsWith('/../')) {
+      proxyPath = req.path;
+    }
+    proxyPath = path.posix.join('/', origin.path, proxyPath);
     const url = `${origin.useSSL ? 'https' : 'http'}://${origin.hostname}:${origin.port}${proxyPath}`;
     ctx.logger.info(`Proxy ${req.method} request to ${url}`);
     return new Promise((resolve, reject) => {
