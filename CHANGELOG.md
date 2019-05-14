@@ -1,3 +1,11 @@
+## [2.12.9](https://github.com/adobe/helix-simulator/compare/v2.12.8...v2.12.9) (2019-05-14)
+
+
+### Bug Fixes
+
+* **proxy:** use original request path when processing proxy strains ([07e8848](https://github.com/adobe/helix-simulator/commit/07e8848))
+* **proxy:** use original request path when processing proxy strains ([25cca73](https://github.com/adobe/helix-simulator/commit/25cca73)), closes [#221](https://github.com/adobe/helix-simulator/issues/221)
+
 ## [2.12.8](https://github.com/adobe/helix-simulator/compare/v2.12.7...v2.12.8) (2019-05-13)
 
 
