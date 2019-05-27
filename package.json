@@ -23,7 +23,7 @@
     "fs-extra": "^8.0.0",
     "lodash": "^4.17.11",
     "moment": "^2.22.2",
-    "nodesi": "1.9.0",
+    "nodesi": "1.9.2",
     "querystring": "^0.2.0",
     "request": "^2.85.0",
     "request-promise-native": "^1.0.5",
