@@ -205,6 +205,11 @@ class HelixServer extends EventEmitter {
 
     this.emit('request', req, res, ctx);
 
+    // ensure that esi uses correct base url
+    req.esiOptions = {
+      baseUrl: `http://localhost:${this._port}${req.url}`,
+    };
+
     if (await this.handleDynamic(ctx, req, res)) {
       return;
     }
