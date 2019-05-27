@@ -1,3 +1,11 @@
+## [2.12.11](https://github.com/adobe/helix-simulator/compare/v2.12.10...v2.12.11) (2019-05-27)
+
+
+### Bug Fixes
+
+* **esi:** relative esi tags are not resolved relative to base document ([9c52b33](https://github.com/adobe/helix-simulator/commit/9c52b33)), closes [#220](https://github.com/adobe/helix-simulator/issues/220)
+* **package:** update nodesi to 1.9.2 ([7691634](https://github.com/adobe/helix-simulator/commit/7691634))
+
 ## [2.12.10](https://github.com/adobe/helix-simulator/compare/v2.12.9...v2.12.10) (2019-05-27)
 
 
