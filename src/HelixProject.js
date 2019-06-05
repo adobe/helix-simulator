@@ -16,7 +16,6 @@ const path = require('path');
 const { Logger, HelixConfig } = require('@adobe/helix-shared');
 const HelixServer = require('./HelixServer.js');
 const GitManager = require('./GitManager.js');
-const packageJson = require('../package.json');
 
 const SRC_DIR = 'src';
 
@@ -37,7 +36,6 @@ class HelixProject {
     this._buildDir = DEFAULT_BUILD_DIR;
     this._runtimePaths = module.paths;
     this._server = new HelixServer(this);
-    this._displayVersion = packageJson.version;
     this._logger = null;
     this._requestOverride = null;
     this._gitMgr = null;
@@ -63,6 +61,9 @@ class HelixProject {
     return this.withLogger(cfg.log);
   }
 
+  /**
+   * @deprecated
+   */
   withDisplayVersion(v) {
     this._displayVersion = v;
     return this;
@@ -200,11 +201,13 @@ class HelixProject {
     this.registerLocalStrains();
 
     const log = this._logger;
-    log.info('    __ __    ___         ');
-    log.info('   / // /__ / (_)_ __    ');
-    log.info('  / _  / -_) / /\\ \\ / ');
-    log.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
-    log.info('                         ');
+    if (this._displayVersion) {
+      log.info('    __ __    ___         ');
+      log.info('   / // /__ / (_)_ __    ');
+      log.info('  / _  / -_) / /\\ \\ / ');
+      log.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
+      log.info('                         ');
+    }
     log.debug('Initialized helix-config with: ');
     log.debug(`     srcPath: ${this._srcDir}`);
     log.debug(`    buildDir: ${this._buildDir}`);

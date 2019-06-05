@@ -117,6 +117,31 @@ describe('Helix Project', () => {
     assert.ok(count > 0, 'custom logger should have been invoked.');
   });
 
+  it('Shows banner with version', async () => {
+    const logger = Logger.getTestLogger();
+    logger.getLogger = () => logger;
+    const cwd = path.join(SPEC_ROOT, 'local');
+    await new HelixProject()
+      .withLogger(logger)
+      .withCwd(cwd)
+      .withDisplayVersion('1234')
+      .init();
+    const output = await logger.getOutput();
+    assert.ok(output.indexOf('/_//_/\\__/_/_//_\\_\\ v1234') > 0);
+  });
+
+  it('Shows no banner without version', async () => {
+    const logger = Logger.getTestLogger();
+    logger.getLogger = () => logger;
+    const cwd = path.join(SPEC_ROOT, 'local');
+    await new HelixProject()
+      .withLogger(logger)
+      .withCwd(cwd)
+      .init();
+    const output = await logger.getOutput();
+    assert.ok(output.indexOf('/_//_/\\__/_/_//_\\_\\') < 0);
+  });
+
   it('can set relative build dir', async () => {
     const cwd = path.join(SPEC_ROOT, 'remote');
     const project = await new HelixProject()

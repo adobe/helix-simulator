@@ -18,6 +18,7 @@ const rp = require('request-promise-native');
 const { Logger } = require('@adobe/helix-shared');
 const querystring = require('querystring');
 const utils = require('./utils.js');
+const packageJson = require('../package.json');
 
 const RequestContext = require('./RequestContext.js');
 const { TemplateResolver, Plugins: TemplateResolverPlugins } = require('../src/template_resolver');
@@ -267,7 +268,7 @@ class HelixServer extends EventEmitter {
         throw new Error(`Port ${this._port} already in use by another process.`);
       }
     }
-    this._logger.info('starting project');
+    this._logger.info(`Starting helix-simulator v${packageJson.version}`);
     await new Promise((resolve, reject) => {
       this._server = this._app.listen(this._port, (err) => {
         if (err) {
