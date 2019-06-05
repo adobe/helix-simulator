@@ -1,3 +1,11 @@
+## [2.12.12](https://github.com/adobe/helix-simulator/compare/v2.12.11...v2.12.12) (2019-06-05)
+
+
+### Bug Fixes
+
+* **project:** add setter for source directory ([471a82d](https://github.com/adobe/helix-simulator/commit/471a82d)), closes [#238](https://github.com/adobe/helix-simulator/issues/238)
+* **project:** only show banner if display version is set ([9f81024](https://github.com/adobe/helix-simulator/commit/9f81024)), closes [#237](https://github.com/adobe/helix-simulator/issues/237)
+
 ## [2.12.11](https://github.com/adobe/helix-simulator/compare/v2.12.10...v2.12.11) (2019-05-27)
 
 
