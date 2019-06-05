@@ -84,6 +84,11 @@ class HelixProject {
     return this;
   }
 
+  withSourceDir(value) {
+    this._srcDir = value;
+    return this;
+  }
+
   registerGitRepository(repoPath, gitUrl) {
     this._gitMgr.registerServer(repoPath, gitUrl);
     return this;
@@ -126,9 +131,11 @@ class HelixProject {
   }
 
   async checkPaths() {
-    const srcPath = path.join(this._cwd, SRC_DIR);
-    if (await isDirectory(srcPath)) {
-      this._srcDir = srcPath;
+    if (!this._srcDir) {
+      const srcPath = path.join(this._cwd, SRC_DIR);
+      if (await isDirectory(srcPath)) {
+        this._srcDir = srcPath;
+      }
     }
 
     this._buildDir = path.resolve(this._cwd, this._buildDir);
