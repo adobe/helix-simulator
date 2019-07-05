@@ -27,7 +27,7 @@
     "querystring": "^0.2.0",
     "request": "^2.85.0",
     "request-promise-native": "^1.0.5",
-    "snyk": "^1.186.0"
+    "snyk": "^1.192.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^3.0.4",
