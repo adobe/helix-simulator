@@ -13,6 +13,7 @@
 const fs = require('fs-extra');
 const { URL } = require('url');
 const path = require('path');
+const cookie = require('cookie');
 const { Logger, HelixConfig } = require('@adobe/helix-shared');
 const HelixServer = require('./HelixServer.js');
 const GitManager = require('./GitManager.js');
@@ -146,7 +147,19 @@ class HelixProject {
     }
   }
 
+  getStrainFromCookie(request) {
+    const cookies = request && request.headers ? cookie.parse(request.headers.cookie || '') : {};
+    if (Object.keys(cookies).length === 0) {
+      return null;
+    }
+    return this.config.strains.get(cookies['X-Strain']);
+  }
+
   selectStrain(request) {
+    const cstrain = this.getStrainFromCookie(request);
+    if (cstrain) {
+      return cstrain;
+    }
     // todo: use strain conditions, once implemented. for now, just use request.headers.host
     const host = request && request.headers ? request.headers.host : '';
     const reqPath = `${request && request.path && request.path.replace(/\/+$/, '') ? request.path : ''}/`;
