@@ -91,3 +91,5 @@ patch:
         patched: '2019-07-04T00:09:19.654Z'
     - '@adobe/git-server > snyk > @snyk/dep-graph > graphlib > lodash':
         patched: '2019-07-04T00:09:19.654Z'
+    - '@adobe/helix-shared > snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash':
+        patched: '2019-07-10T02:41:57.380Z'
