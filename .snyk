@@ -1,6 +1,128 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 version: v1.13.5
-ignore: {}
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JS-LODASH-450202:
+    - snyk > snyk-mvn-plugin > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.263Z'
+    - '@adobe/git-server > snyk > snyk-mvn-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > snyk-mvn-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - request-promise-native > request-promise-core > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > @snyk/dep-graph > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > snyk-nuget-plugin > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > snyk-nodejs-lockfile-parser > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > snyk-config > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > inquirer > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > snyk-nuget-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > snyk-config > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > inquirer > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > snyk-go-plugin > graphlib > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > inquirer > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > archiver > async > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > winston > async > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > snyk-config > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > snyk-nodejs-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > @snyk/dep-graph > graphlib > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > snyk-nodejs-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > @snyk/dep-graph > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > winston > async > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > snyk-nuget-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > snyk-php-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - snyk > snyk-nodejs-lockfile-parser > graphlib > lodash:
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > @snyk/dep-graph > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > snyk-go-plugin > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > snyk-nodejs-lockfile-parser > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/git-server > snyk > @snyk/dep-graph > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > snyk-nodejs-lockfile-parser > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > @snyk/dep-graph > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
+    - '@adobe/helix-shared > snyk > snyk-go-plugin > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T02:57:46.265Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   SNYK-JS-LODASH-450202:
