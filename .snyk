@@ -5,12 +5,12 @@ ignore: {}
 patch:
   SNYK-JS-LODASH-450202:
     - '@adobe/git-server > snyk > snyk-mvn-plugin > lodash':
-        patched: '2019-07-10T02:30:50.422Z'
+        patched: '2019-07-10T02:40:32.726Z'
     - '@adobe/helix-shared > snyk > snyk-mvn-plugin > lodash':
-        patched: '2019-07-10T02:30:50.422Z'
+        patched: '2019-07-10T02:40:32.726Z'
     - snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash:
-        patched: '2019-07-10T02:30:50.422Z'
+        patched: '2019-07-10T02:40:32.726Z'
     - '@adobe/helix-shared > snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash':
-        patched: '2019-07-10T02:30:50.422Z'
+        patched: '2019-07-10T02:40:32.726Z'
     - snyk > snyk-mvn-plugin > lodash:
-        patched: '2019-07-10T02:30:50.422Z'
+        patched: '2019-07-10T02:40:32.726Z'
