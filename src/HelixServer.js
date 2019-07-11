@@ -13,6 +13,7 @@
 const EventEmitter = require('events');
 const { Module } = require('module');
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const NodeESI = require('nodesi');
 const rp = require('request-promise-native');
 const { Logger } = require('@adobe/helix-shared');
@@ -239,6 +240,8 @@ class HelixServer extends EventEmitter {
         resolveWithFullResponse: true,
       }),
     }));
+
+    this._app.use(cookieParser());
 
     // use json body parser
     this._app.use(express.json());
