@@ -1,3 +1,10 @@
+## [2.12.15](https://github.com/adobe/helix-simulator/compare/v2.12.14...v2.12.15) (2019-07-12)
+
+
+### Bug Fixes
+
+* **server:** honor x-strain cookie ([#266](https://github.com/adobe/helix-simulator/issues/266)) ([505a5c5](https://github.com/adobe/helix-simulator/commit/505a5c5))
+
 ## [2.12.14](https://github.com/adobe/helix-simulator/compare/v2.12.13...v2.12.14) (2019-07-12)
 
 
