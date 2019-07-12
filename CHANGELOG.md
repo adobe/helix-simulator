@@ -1,3 +1,10 @@
+## [2.12.14](https://github.com/adobe/helix-simulator/compare/v2.12.13...v2.12.14) (2019-07-12)
+
+
+### Bug Fixes
+
+* **package:** update dependencies to address lodash security issues ([#267](https://github.com/adobe/helix-simulator/issues/267)) ([7d688da](https://github.com/adobe/helix-simulator/commit/7d688da))
+
 ## [2.12.13](https://github.com/adobe/helix-simulator/compare/v2.12.12...v2.12.13) (2019-06-20)
 
 
