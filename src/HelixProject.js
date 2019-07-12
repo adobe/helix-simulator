@@ -147,6 +147,13 @@ class HelixProject {
   }
 
   selectStrain(request) {
+    // look for X-Strain cookie first
+    if (request.cookies) {
+      const cstrain = this.config.strains.get(request.cookies['X-Strain']);
+      if (cstrain) {
+        return cstrain;
+      }
+    }
     // todo: use strain conditions, once implemented. for now, just use request.headers.host
     const host = request && request.headers ? request.headers.host : '';
     const reqPath = `${request && request.path && request.path.replace(/\/+$/, '') ? request.path : ''}/`;

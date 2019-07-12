@@ -116,4 +116,42 @@ describe('Helix Project - Strain Select', () => {
       },
     }).name, 'website');
   });
+
+  it('selects strain from cookie', async () => {
+    const cfg = await new HelixConfig()
+      .withConfigPath(path.resolve(__dirname, 'specs', 'strain-select-test.yaml'))
+      .init();
+    const project = new HelixProject()
+      .withHelixConfig(cfg);
+
+    assert.equal(project.selectStrain({
+      cookies: {
+        foo: 'bar',
+      },
+    }).name, 'default', 'returns default strain if no X-Strain cookie found');
+
+    assert.equal(project.selectStrain({
+      cookies: {
+        'X-Strain': 'foo',
+      },
+    }).name, 'default', 'returns default strain if X-Strain cookie invalid');
+
+    assert.equal(project.selectStrain({
+      headers: {
+        host: 'project-helix.io',
+      },
+      cookies: {
+        'X-Strain': 'foo',
+      },
+    }).name, 'website', 'returns host based strain if X-Strain cookie invalid');
+
+    assert.equal(project.selectStrain({
+      headers: {
+        host: 'project-helix.io',
+      },
+      cookies: {
+        'X-Strain': 'localdocs',
+      },
+    }).name, 'localdocs', 'returns X-Strain cookie instead of host based strain');
+  });
 });
