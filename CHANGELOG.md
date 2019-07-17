@@ -1,3 +1,10 @@
+## [2.12.16](https://github.com/adobe/helix-simulator/compare/v2.12.15...v2.12.16) (2019-07-16)
+
+
+### Bug Fixes
+
+* **package:** release ([e78ec2e](https://github.com/adobe/helix-simulator/commit/e78ec2e))
+
 ## [2.12.15](https://github.com/adobe/helix-simulator/compare/v2.12.14...v2.12.15) (2019-07-12)
 
 
