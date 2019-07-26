@@ -30,8 +30,39 @@ commands:
 
 orbs:
     helix-smoke-tests: adobe/helix-smoke-tests@0.0.7
+    win: circleci/windows-tools@0.0.4
 
 jobs:
+  build_win:
+    parallelism: 1
+    executor: win/preview-default
+    steps:
+      - run: git config --global core.autocrlf false
+      - run:
+          name: prepare test git user
+          command: git config --global user.email "you@example.com"
+      - run:
+          name: prepare test git user
+          command: git config --global user.name "Your Name"
+      - checkout
+      - run: choco install nodejs --version 8.16.0
+      - run: npm install
+      - run: mkdir junit
+
+      # test & get code coverage
+      - run:
+          name: Running Tests
+          command: ./node_modules/.bin/mocha --reporter xunit test --reporter-options output=junit/test.xml
+          environment:
+            MOCHA_FILE: junit/test-results.xml
+          when: always
+
+      - store_test_results:
+          path: junit
+
+      - store_artifacts:
+          path: junit  
+
   build:
     executor: node8
 
