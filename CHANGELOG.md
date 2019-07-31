@@ -1,3 +1,10 @@
+## [2.12.19](https://github.com/adobe/helix-simulator/compare/v2.12.18...v2.12.19) (2019-07-31)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/git-server to version 0.9.19 ([8540eac](https://github.com/adobe/helix-simulator/commit/8540eac))
+
 ## [2.12.18](https://github.com/adobe/helix-simulator/compare/v2.12.17...v2.12.18) (2019-07-24)
 
 
