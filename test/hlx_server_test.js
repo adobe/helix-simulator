@@ -348,7 +348,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver content resource from secondary mapped git repo', async function test() {
-    this.timeout(4000);
+    this.timeout(10000);
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const apiRepo = await setupProject(path.join(SPEC_ROOT, 'api_repo'), testRoot);
     const apiUrl = new GitUrl('http://github.com/adobe/helix-api.git');
