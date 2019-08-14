@@ -24,7 +24,7 @@ const DEFAULT_BUILD_DIR = '.hlx/build';
 const GIT_DIR = '.git';
 
 async function isDirectory(dirPath) {
-  return fs.stat(dirPath).then(stats => stats.isDirectory()).catch(() => false);
+  return fs.stat(dirPath).then((stats) => stats.isDirectory()).catch(() => false);
 }
 
 class HelixProject {

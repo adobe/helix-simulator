@@ -30,7 +30,7 @@ if (!shell.which('git')) {
 // throw a Javascript error when any shell.js command encounters an error
 shell.config.fatal = true;
 
-const _isFunction = fn => !!(fn && fn.constructor && fn.call && fn.apply);
+const _isFunction = (fn) => !!(fn && fn.constructor && fn.call && fn.apply);
 
 const SPEC_ROOT = path.resolve(__dirname, 'specs');
 

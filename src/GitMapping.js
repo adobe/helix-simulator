@@ -9,8 +9,35 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+class GitMapping {
+  /**
+   * Creates a new git mapping.
+   * @param {string} repoPath local directory
+   * @param {GitUrl} gitUrl the mapped git url
+   * @param {string} key the url this server will emulate
+   */
+  constructor(repoPath, gitUrl, key) {
+    this._key = key;
+    this._gitUrl = gitUrl;
+    this._repoPath = repoPath;
+    this._localUrl = null;
+  }
 
-module.exports = {
-  root: true,
-  extends: '@adobe/helix',
-};
+  get key() {
+    return this._key;
+  }
+
+  get gitUrl() {
+    return this._gitUrl;
+  }
+
+  get repoPath() {
+    return this._repoPath;
+  }
+
+  get localUrl() {
+    return this._localUrl;
+  }
+}
+
+module.exports = GitMapping;

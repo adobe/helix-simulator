@@ -14,6 +14,7 @@ const path = require('path');
 const _ = require('lodash');
 const gitServer = require('@adobe/git-server/lib/server.js');
 const { GitUrl } = require('@adobe/helix-shared');
+const GitMapping = require('./GitMapping.js');
 
 const GIT_LOCAL_HOST = '127.0.0.1';
 
@@ -64,37 +65,6 @@ const GIT_SERVER_CONFIG = {
  */
 function getServerKey(giturl) {
   return `${giturl.host}--${giturl.owner}--${giturl.repo}`;
-}
-
-class GitMapping {
-  /**
-   * Creates a new git mapping.
-   * @param {string} repoPath local directory
-   * @param {GitUrl} gitUrl the mapped git url
-   * @param {string} key the url this server will emulate
-   */
-  constructor(repoPath, gitUrl, key) {
-    this._key = key;
-    this._gitUrl = gitUrl;
-    this._repoPath = repoPath;
-    this._localUrl = null;
-  }
-
-  get key() {
-    return this._key;
-  }
-
-  get gitUrl() {
-    return this._gitUrl;
-  }
-
-  get repoPath() {
-    return this._repoPath;
-  }
-
-  get localUrl() {
-    return this._localUrl;
-  }
 }
 
 class GitManager {
