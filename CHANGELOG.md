@@ -1,3 +1,12 @@
+## [2.12.20](https://github.com/adobe/helix-simulator/compare/v2.12.19...v2.12.20) (2019-08-14)
+
+
+### Bug Fixes
+
+* force new release ([9836443](https://github.com/adobe/helix-simulator/commit/9836443))
+* **.circleci/config:** increase default timeout for tests on windows ([f8e8cb2](https://github.com/adobe/helix-simulator/commit/f8e8cb2))
+* **hlx_server_test:** increase timeout for failing test on windows ([869bd08](https://github.com/adobe/helix-simulator/commit/869bd08))
+
 ## [2.12.19](https://github.com/adobe/helix-simulator/compare/v2.12.18...v2.12.19) (2019-07-31)
 
 
