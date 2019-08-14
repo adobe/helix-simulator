@@ -21,9 +21,9 @@ const utils = require('./utils.js');
 module.exports = class RequestContext {
   constructor(request, cfg) {
     // todo: consider using lodash.defaultsDeep
-    const req = Object.assign({}, request, cfg.requestOverride);
+    const req = { ...request, ...cfg.requestOverride };
     if (cfg.requestOverride && cfg.requestOverride.headers) {
-      req.headers = Object.assign({}, request.headers, cfg.requestOverride.headers);
+      req.headers = { ...request.headers, ...cfg.requestOverride.headers };
     }
 
     const { url } = req;
@@ -38,9 +38,7 @@ module.exports = class RequestContext {
     this._wskActivationId = utils.randomChars(32, true);
     this._requestId = utils.randomChars(32);
     this._cdnRequestId = utils.uuid();
-    this._strain = cfg.selectStrain(Object.assign({}, req, {
-      path: this._path,
-    }));
+    this._strain = cfg.selectStrain({ ...req, path: this._path });
     if (this._strain.urls.length > 0) {
       this._mount = parse(this._strain.urls[0]).pathname.replace(/\/+$/, '');
     } else {
@@ -93,7 +91,7 @@ module.exports = class RequestContext {
     this._resourcePath = relPath;
 
     // generate headers
-    this._wskHeaders = Object.assign({
+    this._wskHeaders = {
       'X-Openwhisk-Activation-Id': this._wskActivationId,
       'X-Request-Id': this._requestId,
       'X-Backend-Name': 'localhost--F_Petridish',
@@ -101,7 +99,8 @@ module.exports = class RequestContext {
       'X-Strain': this._strain.name,
       'X-Old-Url': this._url,
       'X-Repo-Root-Path': repoPath,
-    }, this._headers);
+      ...this._headers,
+    };
   }
 
   /**

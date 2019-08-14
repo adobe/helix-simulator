@@ -65,9 +65,7 @@ describe('Template Resolver', () => {
         const mockReq = {
           url: t.url,
         };
-        const ctx = new RequestContext(mockReq, Object.assign({
-          buildDir: BUILD_DIR,
-        }, mockConfig));
+        const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
         ctx.logger = console;
         const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
 
@@ -81,9 +79,7 @@ describe('Template Resolver', () => {
       const mockReq = {
         url: '/index.nonexistent.html',
       };
-      const ctx = new RequestContext(mockReq, Object.assign({
-        buildDir: BUILD_DIR,
-      }, mockConfig));
+      const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
       ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
       assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a non existent file');
@@ -93,9 +89,7 @@ describe('Template Resolver', () => {
       const mockReq = {
         url: '/index.wrong.html',
       };
-      const ctx = new RequestContext(mockReq, Object.assign({
-        buildDir: BUILD_DIR,
-      }, mockConfig));
+      const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
       ctx.logger = console;
       const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
       assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a directory');
