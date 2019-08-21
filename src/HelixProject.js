@@ -35,7 +35,8 @@ class HelixProject {
     this._cfg = null;
     this._buildDir = DEFAULT_BUILD_DIR;
     this._runtimePaths = module.paths;
-    this._server = new HelixServer(this);
+    this._params = {};
+    this._server = null;
     this._logger = null;
     this._requestOverride = null;
     this._gitMgr = null;
@@ -89,6 +90,16 @@ class HelixProject {
     return this;
   }
 
+  withParams(value) {
+    this._params = value;
+    return this;
+  }
+
+  withServer() {
+    this._server = new HelixServer(this);
+    return this;
+  }
+
   registerGitRepository(repoPath, gitUrl) {
     this._gitMgr.registerServer(repoPath, gitUrl);
     return this;
@@ -100,6 +111,10 @@ class HelixProject {
 
   get config() {
     return this._cfg;
+  }
+
+  get params() {
+    return this._params;
   }
 
   get buildDir() {

@@ -135,6 +135,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -150,6 +151,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -168,6 +170,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -186,6 +189,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -194,6 +198,7 @@ describe('Helix Server', () => {
       const project2 = new HelixProject()
         .withCwd(cwd)
         .withBuildDir('./build')
+        .withServer()
         .withHttpPort(project.server.port);
       await project2.init();
       try {
@@ -212,6 +217,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -229,6 +235,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -244,6 +251,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -259,6 +267,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -274,6 +283,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -289,6 +299,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -305,6 +316,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -320,6 +332,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -335,6 +348,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -355,6 +369,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     project.registerGitRepository(apiRepo, apiUrl);
@@ -375,6 +390,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0)
       .withRequestOverride({
         headers: {
@@ -396,6 +412,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0)
       .withRequestOverride({
         headers: {
@@ -417,6 +434,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
 
@@ -424,6 +442,7 @@ describe('Helix Server', () => {
     const proxyProject = new HelixProject()
       .withCwd(proxyDir)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0)
       .withRequestOverride({
         headers: {
@@ -456,6 +475,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
 
@@ -463,6 +483,7 @@ describe('Helix Server', () => {
     const proxyProject = new HelixProject()
       .withCwd(proxyDir)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0)
       .withRequestOverride({
         headers: {
@@ -495,6 +516,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
 
@@ -502,6 +524,7 @@ describe('Helix Server', () => {
     const proxyProject = new HelixProject()
       .withCwd(proxyDir)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0)
       .withRequestOverride({
         headers: {
@@ -534,6 +557,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0)
       .withRequestOverride({
         headers: {
@@ -546,6 +570,7 @@ describe('Helix Server', () => {
     const proxyProject = new HelixProject()
       .withCwd(proxyDir)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0)
       .withRequestOverride({
         headers: {
@@ -579,6 +604,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -604,6 +630,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -619,6 +646,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -634,6 +662,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -653,6 +682,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -668,6 +698,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -684,6 +715,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -699,6 +731,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -714,6 +747,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -729,6 +763,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -744,6 +779,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -759,6 +795,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {
@@ -776,11 +813,31 @@ describe('Helix Server', () => {
     }
   });
 
+  it('user provided action parameters get passed to Server', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const fakeParams = { HTTP_TIMEOUT: 2000, FAKE_SECRET: 'shhhh keep it secret' };
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withParams(fakeParams)
+      .withServer()
+      .withHttpPort(0);
+
+    await project.init();
+    try {
+      await project.start();
+      assert.equal(project.server.project.params, fakeParams);
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('serve post with custom content.body', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
+      .withServer()
       .withHttpPort(0);
     await project.init();
     try {

@@ -96,6 +96,12 @@ async function executeTemplate(ctx) {
       actionParams[key] = ctx.body[key];
     });
   }
+  if (ctx._cfg._params) {
+    // add argument action params
+    Object.keys(ctx._cfg._params).forEach((key) => {
+      actionParams[key] = ctx._cfg._params[key];
+    });
+  }
   return Promise.resolve(mod.main(actionParams));
   /* eslint-enable no-underscore-dangle */
 }
@@ -114,6 +120,10 @@ class HelixServer extends EventEmitter {
 
     // todo: make configurable
     this._templateResolver = new TemplateResolver().with(TemplateResolverPlugins.simple);
+  }
+
+  get project() {
+    return this._project;
   }
 
   /**
