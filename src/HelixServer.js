@@ -90,6 +90,7 @@ async function executeTemplate(ctx) {
     REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
   };
+
   if (ctx.body) {
     // add post params to action params
     Object.keys(ctx.body).forEach((key) => {
@@ -99,7 +100,7 @@ async function executeTemplate(ctx) {
   if (ctx._cfg._params) {
     // add argument action params
     Object.keys(ctx._cfg._params).forEach((key) => {
-      actionParams[key] = ctx._cfg._params[key];
+      actionParams[key.toString()] = ctx._cfg._params[key];
     });
   }
   return Promise.resolve(mod.main(actionParams));

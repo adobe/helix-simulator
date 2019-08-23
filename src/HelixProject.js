@@ -36,7 +36,7 @@ class HelixProject {
     this._buildDir = DEFAULT_BUILD_DIR;
     this._runtimePaths = module.paths;
     this._params = {};
-    this._server = null;
+    this._server = new HelixServer(this);
     this._logger = null;
     this._requestOverride = null;
     this._gitMgr = null;
@@ -90,7 +90,7 @@ class HelixProject {
     return this;
   }
 
-  withParams(value) {
+  withActionParams(value) {
     this._params = value;
     return this;
   }
@@ -113,7 +113,7 @@ class HelixProject {
     return this._cfg;
   }
 
-  get params() {
+  get actionParams() {
     return this._params;
   }
 

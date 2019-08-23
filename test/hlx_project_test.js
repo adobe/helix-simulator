@@ -79,7 +79,6 @@ describe('Helix Project', () => {
     await new HelixProject()
       .withCwd(path.join(SPEC_ROOT, 'invalid_no_git'))
       .withLogger(logger)
-      .withServer()
       .init();
 
     const output = await logger.getOutput();
@@ -91,7 +90,6 @@ describe('Helix Project', () => {
     try {
       await new HelixProject()
         .withCwd(path.join(SPEC_ROOT, 'invalid_no_src'))
-        .withServer()
         .init();
       assert.fail('expected to fail.');
     } catch (e) {
@@ -115,7 +113,6 @@ describe('Helix Project', () => {
     await new HelixProject()
       .withLogger(logger)
       .withCwd(cwd)
-      .withServer()
       .init();
     assert.ok(count > 0, 'custom logger should have been invoked.');
   });
@@ -167,7 +164,6 @@ describe('Helix Project', () => {
     const cwd = path.join(SPEC_ROOT, 'remote');
     const project = await new HelixProject()
       .withCwd(cwd)
-      .withServer()
       .withHttpPort(0)
       .init();
 
@@ -183,7 +179,6 @@ describe('Helix Project', () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = await new HelixProject()
       .withCwd(cwd)
-      .withServer()
       .withHttpPort(0)
       .init();
 
@@ -198,14 +193,13 @@ describe('Helix Project', () => {
     const fakeParams = { FAKE_PARAM1: 'Faakee', FAKE_PARAM2: 'Faakee2' };
     const project = await new HelixProject()
       .withCwd(cwd)
-      .withParams(fakeParams)
-      .withServer()
+      .withActionParams(fakeParams)
       .withHttpPort(0)
       .init();
 
     await project.start();
     assert.equal(true, project.started);
-    assert.equal(fakeParams, project.params);
+    assert.equal(fakeParams, project.actionParams);
     await project.stop();
     assert.equal(false, project.started);
   });
