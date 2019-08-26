@@ -3,9 +3,8 @@
 
 ### Features
 
-* **HelixServer/HelixProject:** rename withActionParameters and fix cov ([f7fcba0](https://github.com/adobe/helix-simulator/commit/f7fcba0))
-* **sim:** Added test to verify param data response, added getters ([5f9790f](https://github.com/adobe/helix-simulator/commit/5f9790f))
-* **sim:** removed unused getter ([f32ecac](https://github.com/adobe/helix-simulator/commit/f32ecac))
+* **project** Add API to add custom action parameters to request via HelixProject.withActionParams()
+
 
 ## [2.12.20](https://github.com/adobe/helix-simulator/compare/v2.12.19...v2.12.20) (2019-08-14)
 
