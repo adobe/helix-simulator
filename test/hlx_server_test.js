@@ -741,12 +741,10 @@ describe('Helix Server', () => {
 
   it('deliver 404 for static content non existing', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
-    const actionParams = { HTTP_TIMEOUT: 2000 };
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0)
-      .withActionParams(actionParams);
+      .withHttpPort(0);
     await project.init();
     try {
       await project.start();
@@ -797,13 +795,30 @@ describe('Helix Server', () => {
     }
   });
 
+  it('read developer default action parameters and form http response', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const fakeParams = { MY_TEST: 50 };
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withActionParams(fakeParams);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.param.json`, 200, 'expected_params.json');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('serve post with custom content.body', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
 
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withActionParams()
       .withHttpPort(0);
     await project.init();
     try {

@@ -95,11 +95,6 @@ class HelixProject {
     return this;
   }
 
-  withServer() {
-    this._server = new HelixServer(this);
-    return this;
-  }
-
   registerGitRepository(repoPath, gitUrl) {
     this._gitMgr.registerServer(repoPath, gitUrl);
     return this;

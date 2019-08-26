@@ -97,10 +97,10 @@ async function executeTemplate(ctx) {
       actionParams[key] = ctx.body[key];
     });
   }
-  if (ctx._cfg._params) {
+  if (ctx.actionParams) {
     // add argument action params
-    Object.keys(ctx._cfg._params).forEach((key) => {
-      actionParams[key.toString()] = ctx._cfg._params[key];
+    Object.keys(ctx.actionParams).forEach((key) => {
+      actionParams[key] = ctx.actionParams[key];
     });
   }
   return Promise.resolve(mod.main(actionParams));
