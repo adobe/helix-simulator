@@ -123,10 +123,6 @@ class HelixServer extends EventEmitter {
     this._templateResolver = new TemplateResolver().with(TemplateResolverPlugins.simple);
   }
 
-  get project() {
-    return this._project;
-  }
-
   /**
    * Initializes the server
    */
