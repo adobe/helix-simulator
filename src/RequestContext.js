@@ -191,6 +191,15 @@ module.exports = class RequestContext {
   }
 
   /**
+   * Developer default request params.
+   * @returns {any | {}}
+   */
+
+  get actionParams() {
+    return this._cfg.actionParams;
+  }
+
+  /**
    * The currently selected strain.
    * @returns {Strain}
    */

@@ -187,4 +187,20 @@ describe('Helix Project', () => {
     await project.stop();
     assert.equal(false, project.started);
   });
+
+  it('can params be passed', async () => {
+    const cwd = path.join(SPEC_ROOT, 'remote');
+    const fakeParams = { FAKE_PARAM1: 'Faakee', FAKE_PARAM2: 'Faakee2' };
+    const project = await new HelixProject()
+      .withCwd(cwd)
+      .withActionParams(fakeParams)
+      .withHttpPort(0)
+      .init();
+
+    await project.start();
+    assert.equal(true, project.started);
+    assert.equal(fakeParams, project.actionParams);
+    await project.stop();
+    assert.equal(false, project.started);
+  });
 });

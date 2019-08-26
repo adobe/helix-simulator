@@ -776,8 +776,46 @@ describe('Helix Server', () => {
     }
   });
 
+  it('user provided action parameters get passed to Server', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const fakeParams = { HTTP_TIMEOUT: 2000, FAKE_SECRET: 'shhhh keep it secret' };
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withActionParams(fakeParams);
+
+    await project.init();
+    try {
+      await project.start();
+      assert.equal(project._server._project.actionParams, fakeParams);
+    } finally {
+      await project.stop();
+      assert.equal(false, project.started);
+    }
+  });
+
+  it('read developer default action parameters and form http response', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const fakeParams = { MY_TEST: 50 };
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withActionParams(fakeParams);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.param.json`, 200, 'expected_params.json');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('serve post with custom content.body', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
+
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
