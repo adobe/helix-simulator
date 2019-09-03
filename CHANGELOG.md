@@ -1,3 +1,10 @@
+## [2.13.4](https://github.com/adobe/helix-simulator/compare/v2.13.3...v2.13.4) (2019-09-03)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-shared to version 2.3.0 ([cad35d6](https://github.com/adobe/helix-simulator/commit/cad35d6))
+
 ## [2.13.3](https://github.com/adobe/helix-simulator/compare/v2.13.2...v2.13.3) (2019-09-02)
 
 
