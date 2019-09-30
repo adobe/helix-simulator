@@ -1,3 +1,10 @@
+## [2.13.5](https://github.com/adobe/helix-simulator/compare/v2.13.4...v2.13.5) (2019-09-30)
+
+
+### Bug Fixes
+
+* **package:** Tidelift and audit fix ([3a0c308](https://github.com/adobe/helix-simulator/commit/3a0c308))
+
 ## [2.13.4](https://github.com/adobe/helix-simulator/compare/v2.13.3...v2.13.4) (2019-09-03)
 
 
