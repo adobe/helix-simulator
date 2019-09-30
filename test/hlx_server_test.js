@@ -315,6 +315,36 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver rendered resource with esi and with no esi:remove', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.esiremove1.html`, 200, 'expected_esiremove1.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('deliver rendered resource without esi:remove', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.esiremove2.html`, 200, 'expected_esiremove2.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver rendered json resource', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
