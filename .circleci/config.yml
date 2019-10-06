@@ -29,8 +29,8 @@ commands:
         command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
 orbs:
-    helix-smoke-tests: adobe/helix-smoke-tests@0.0.9
-    win: circleci/windows-tools@0.0.4
+    helix-smoke-tests: adobe/helix-smoke-tests@0.0.10
+    win: circleci/windows-tools@0.1.0
 
 jobs:
   build_win:
