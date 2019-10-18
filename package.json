@@ -11,9 +11,7 @@
     "start": "node src/run.js",
     "test": "nyc --reporter=text --reporter=lcov --check-coverage --branches 78 --statements 94 --lines 94 mocha",
     "test-ci": "npm run lint && npm run test && codecov",
-    "lint": "./node_modules/.bin/eslint .",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "lint": "./node_modules/.bin/eslint ."
   },
   "dependencies": {
     "@adobe/git-server": "1.0.0",
@@ -27,8 +25,7 @@
     "nodesi": "^1.12.1",
     "querystring": "^0.2.0",
     "request": "^2.85.0",
-    "request-promise-native": "^1.0.5",
-    "snyk": "^1.216.4"
+    "request-promise-native": "^1.0.5"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.0",
@@ -51,7 +48,6 @@
     "shelljs": "0.8.3",
     "uuid": "3.3.3"
   },
-  "snyk": true,
   "lint-staged": {
     "*.js": "eslint"
   },
