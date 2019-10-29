@@ -1,3 +1,10 @@
+## [2.13.11](https://github.com/adobe/helix-simulator/compare/v2.13.10...v2.13.11) (2019-10-29)
+
+
+### Bug Fixes
+
+* **deps:** try reverting to semantic release 15.13.27 ([4c3d2df](https://github.com/adobe/helix-simulator/commit/4c3d2df5854945394e7f9379783ccfe88739a386))
+
 ## [2.13.10](https://github.com/adobe/helix-simulator/compare/v2.13.9...v2.13.10) (2019-10-21)
 
 
