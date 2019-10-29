@@ -1,3 +1,10 @@
+## [2.13.12](https://github.com/adobe/helix-simulator/compare/v2.13.11...v2.13.12) (2019-10-29)
+
+
+### Bug Fixes
+
+* **ci:** use sematic release 15.13.28 with improved released ci config ([b2bc3c8](https://github.com/adobe/helix-simulator/commit/b2bc3c84ffe12f79091b2eb3cbc4848ee3281dbc))
+
 ## [2.13.11](https://github.com/adobe/helix-simulator/compare/v2.13.10...v2.13.11) (2019-10-29)
 
 
