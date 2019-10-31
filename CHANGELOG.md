@@ -1,3 +1,10 @@
+# [2.14.0](https://github.com/adobe/helix-simulator/compare/v2.13.12...v2.14.0) (2019-10-31)
+
+
+### Features
+
+* **server:** use info.json files for rendering ([#324](https://github.com/adobe/helix-simulator/issues/324)) ([6bd8d20](https://github.com/adobe/helix-simulator/commit/6bd8d202c63d2d399dca75255dfc9a5e8eb0e393)), closes [#323](https://github.com/adobe/helix-simulator/issues/323)
+
 ## [2.13.12](https://github.com/adobe/helix-simulator/compare/v2.13.11...v2.13.12) (2019-10-29)
 
 
