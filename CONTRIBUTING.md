@@ -31,7 +31,7 @@ In your pull request, outline:
 
 * What the changes intend
 * How they change the existing code
-* If (and what) they breaks
+* If (and what) they break
 * Start the pull request with the GitHub issue ID, e.g. #123
 
 Lastly, please follow the [pull request template](.github/pull_request_template.md) when submitting a pull request!
@@ -45,9 +45,9 @@ Each commit message that is not part of a pull request:
 
 ## Coding Styleguides
 
-We enforce a coding styleguide using `eslint`. As part of your build, run `npm run lint` to check if your code is conforming to the style guide. We do the same for every PR in our CI, so PRs will get rejected if they don't follow the style guide.
+We enforce a coding style guide using `eslint`. As part of your build, run `npm run lint` to check if your code is conforming to the style guide. We do the same for every PR in our CI, so PRs will get rejected if they don't follow the style guide.
 
-You can fix some of the issues automatically by running `npx eslint . --fix`.
+You can fix some of the issues automatically by running `npx eslint. --fix`.
 
 ## Commit Message Format
 
