@@ -15,7 +15,7 @@
 const assert = require('assert');
 const path = require('path');
 const { Strain } = require('@adobe/helix-shared');
-const { TemplateResolver, Plugins: TemplateResolverPlugins } = require('../src/template_resolver');
+const TemplateResolver = require('../src/TemplateResolver.js');
 const RequestContext = require('../src/RequestContext.js');
 
 const BUILD_DIR = path.resolve(__dirname, 'specs', 'builddir');
@@ -49,25 +49,14 @@ describe('Template Resolver', () => {
     ];
 
     TESTS.forEach((t) => {
-      it(`resolves template name for ${t.url} correctly`, () => {
-        const mockReq = {
-          url: t.url,
-        };
-        const ctx = new RequestContext(mockReq, mockConfig);
-        ctx.logger = console;
-        const template = TemplateResolverPlugins.simple(ctx);
-        assert.equal(template, t.template, 'resolved template');
-      });
-    });
-
-    TESTS.forEach((t) => {
       it(`resolves template script for ${t.url} correctly`, async () => {
         const mockReq = {
           url: t.url,
         };
         const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
         ctx.logger = console;
-        const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
+        const res = new TemplateResolver().withDirectory(BUILD_DIR);
+        await res.init();
 
         const templatePath = path.resolve(BUILD_DIR, t.script);
         assert.equal(true, await res.resolve(ctx), 'Template resolves for an existent file');
@@ -75,13 +64,25 @@ describe('Template Resolver', () => {
       });
     });
 
-    it('fails for non existent file', async () => {
+    it('fails for non existent script', async () => {
       const mockReq = {
         url: '/index.nonexistent.html',
       };
       const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
       ctx.logger = console;
-      const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
+      const res = new TemplateResolver().withDirectory(BUILD_DIR);
+      await res.init();
+      assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a non existent file');
+    });
+
+    it('fails for non existent file', async () => {
+      const mockReq = {
+        url: '/index.noscript.html',
+      };
+      const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
+      ctx.logger = console;
+      const res = new TemplateResolver().withDirectory(BUILD_DIR);
+      await res.init();
       assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a non existent file');
     });
 
@@ -91,7 +92,8 @@ describe('Template Resolver', () => {
       };
       const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
       ctx.logger = console;
-      const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
+      const res = new TemplateResolver().withDirectory(BUILD_DIR);
+      await res.init();
       assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a directory');
     });
   });
