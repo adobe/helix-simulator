@@ -1,3 +1,10 @@
+# [2.16.0](https://github.com/adobe/helix-simulator/compare/v2.15.0...v2.16.0) (2019-10-31)
+
+
+### Features
+
+* **server:** redirect for directory requests without trailing slash ([#327](https://github.com/adobe/helix-simulator/issues/327)) ([1c66988](https://github.com/adobe/helix-simulator/commit/1c66988f481ed65cbc877d7ea9b33e66dca1ad87)), closes [#291](https://github.com/adobe/helix-simulator/issues/291)
+
 # [2.15.0](https://github.com/adobe/helix-simulator/compare/v2.14.0...v2.15.0) (2019-10-31)
 
 
