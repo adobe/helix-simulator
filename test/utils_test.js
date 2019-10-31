@@ -49,7 +49,10 @@ describe('Utils Test', () => {
         url: '/', path: '/index.html', resourcePath: '/index', selector: '', extension: 'html',
       },
       {
-        url: '/content', path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
+        url: '/content', path: '/content', resourcePath: '/content', selector: '', extension: '',
+      },
+      {
+        url: '/content/', path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
       },
       {
         url: '/content/index.html', path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
@@ -99,6 +102,7 @@ describe('Utils Test', () => {
             p2: true,
           },
           path: '/content/index.foo.html',
+          queryString: '',
           resourcePath: '/content/index',
           selector: 'foo',
           url: '/content/index.foo.html',
@@ -112,7 +116,7 @@ describe('Utils Test', () => {
         },
       },
       {
-        url: '/content/index.post.html',
+        url: '/content/index.post.html?a=1&b=2',
         valid: true,
         path: '/content/index.post.html',
         resourcePath: '/content/index',
@@ -130,9 +134,10 @@ describe('Utils Test', () => {
           params: {},
           method: 'POST',
           path: '/content/index.post.html',
+          queryString: '?a=1&b=2',
           resourcePath: '/content/index',
           selector: 'post',
-          url: '/content/index.post.html',
+          url: '/content/index.post.html?a=1&b=2',
           body: {
             content: {
               body: 'Test',

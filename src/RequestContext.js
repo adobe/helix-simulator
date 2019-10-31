@@ -29,7 +29,9 @@ module.exports = class RequestContext {
     const { url } = req;
     this._cfg = cfg || {};
     this._url = url;
-    this._path = parse(url).pathname || '/'; // get the path name without query string
+    const purl = parse(url);
+    this._path = purl.pathname || '/';
+    this._queryString = purl.search || '';
     this._selector = '';
     this._extension = '';
     this._headers = req.headers || {};
@@ -47,24 +49,19 @@ module.exports = class RequestContext {
     if (req.body && Object.entries(req.body).length > 0) {
       this._body = req.body;
     }
-
     const lastSlash = this._path.lastIndexOf('/');
-    let lastDot = this._path.lastIndexOf('.');
-    if (lastDot <= lastSlash) {
-      // no extension means a folder request
+    if (lastSlash === this._path.length - 1) {
+      // directory request
       const index = this._strain.directoryIndex || 'index.html';
-      this._path = `${this._path}/${index}`;
-      // remove multiple slashes
-      this._path = this._path.replace(/\/+/g, '/');
-      lastDot = this._path.lastIndexOf('.');
+      // append index and remove multiple slashes
+      this._path = `${this._path}${index}`.replace(/\/+/g, '/');
     }
-    let relPath = this._path.substring(0, lastDot);
+    const lastDot = this._path.lastIndexOf('.');
+    let relPath = lastDot >= 0 ? this._path.substring(0, lastDot) : this._path;
 
-    const queryParamIndex = this._path.lastIndexOf('?');
-    this._extension = this._path.substring(
-      lastDot + 1,
-      (queryParamIndex !== -1 ? queryParamIndex : this._path.length),
-    );
+    if (lastDot > lastSlash) {
+      this._extension = this._path.substring(lastDot + 1);
+    }
     // check for selector
     const selDot = relPath.lastIndexOf('.');
     if (selDot > lastSlash) {
@@ -223,9 +220,18 @@ module.exports = class RequestContext {
     return this._relPath;
   }
 
+  /**
+   * Returns the queryString of the url (including the ?)
+   * @returns {string}
+   */
+  get queryString() {
+    return this._queryString;
+  }
+
   get json() {
     const o = {
       url: this.url,
+      queryString: this.queryString,
       resourcePath: this.resourcePath,
       path: this.path,
       selector: this.selector,

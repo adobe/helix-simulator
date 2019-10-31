@@ -207,6 +207,14 @@ class HelixServer extends EventEmitter {
       return;
     }
 
+    // redirect for directory requests w/o slash
+    if (!ctx.extension) {
+      const loc = `${ctx.path}/${ctx.queryString}`;
+      this._logger.debug(`redirecting to ${loc}`);
+      res.redirect(loc);
+      return;
+    }
+
     // start git server if needed and adjust content and static url
     await ctx.config.emulateGit(ctx.strain);
 
