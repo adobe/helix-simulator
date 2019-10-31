@@ -196,7 +196,7 @@ class HelixProject {
   async invalidateCache() {
     // we simple remove all entries from the node cache that fall below the build or src directory
     Object.keys(require.cache).forEach((file) => {
-      if (file.startsWith(this._buildDir) || (this._srcDir && file.startsWith(this._srcDir))) {
+      if (file.startsWith(this._buildDir) || (this._srcDir && file.startsWith(this._srcDir)) || file.indexOf('/cgi-bin') > 0) {
         delete require.cache[file];
         this.log.debug(`evicted ${path.relative(this._cwd, file)}`);
       }

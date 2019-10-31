@@ -869,4 +869,19 @@ describe('Helix Server', () => {
       await project.stop();
     }
   });
+
+  it('executes cgi-bin', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/cgi-bin/post.js`, 200, 'expected_cgi.txt');
+    } finally {
+      await project.stop();
+    }
+  });
 });
