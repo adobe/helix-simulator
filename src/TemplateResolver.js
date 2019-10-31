@@ -14,6 +14,9 @@ const glob = require('glob');
 const fse = require('fs-extra');
 const utils = require('./utils');
 
+const SRC_PAT = `src${path.sep}`;
+const CGI_PAT = `cgi-bin${path.sep}`;
+
 /**
  * The template resolver is used to map requests to template script. On init, it reads the
  * `*.info.json` files to create a map for all scripts.
@@ -39,9 +42,9 @@ class TemplateResolver {
         // fallback to legacy info where the action name was not included during build time
         let cgi = false;
         let relPath = path.relative(this._cwd, infos[i]);
-        if (relPath.startsWith('src/')) {
+        if (relPath.startsWith(SRC_PAT)) {
           relPath = relPath.substring(4);
-        } else if (relPath.startsWith('cgi-bin/')) {
+        } else if (relPath.startsWith(CGI_PAT)) {
           relPath = relPath.substring(8);
           cgi = true;
         }
@@ -66,9 +69,16 @@ class TemplateResolver {
    * @return {Promise} A promise that resolves to the request context.
    */
   async resolve(ctx) {
-    let templateName = ctx.selector ? `${ctx.selector}_` : '';
-    templateName += `${ctx.extension || 'html'}`;
+    // test for cgi
+    let templateName;
+    if (ctx.path.startsWith('/cgi-bin/')) {
+      templateName = `cgi-bin-${path.basename(ctx.path, '.js')}`;
+    } else {
+      templateName = ctx.selector ? `${ctx.selector}_` : '';
+      templateName += `${ctx.extension || 'html'}`;
+    }
     ctx.logger.debug(`resolved ${ctx.path} -> ${templateName}`);
+
     if (!this._scripts[templateName]) {
       ctx.logger.info(`no script for ${templateName}`);
       return false;
