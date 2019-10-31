@@ -145,6 +145,36 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver index for directory requests', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/docs/`, 200, 'expected_docs_index.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('deliver redirect for directory requests', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/docs`, 302);
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver modified helper', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
