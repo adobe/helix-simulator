@@ -16,6 +16,7 @@ const path = require('path');
 const { Logger, HelixConfig } = require('@adobe/helix-shared');
 const HelixServer = require('./HelixServer.js');
 const GitManager = require('./GitManager.js');
+const TemplateResolver = require('./TemplateResolver.js');
 
 const SRC_DIR = 'src';
 
@@ -40,6 +41,7 @@ class HelixProject {
     this._logger = null;
     this._requestOverride = null;
     this._gitMgr = null;
+    this._templateResolver = null;
   }
 
   withCwd(cwd) {
@@ -132,6 +134,10 @@ class HelixProject {
     return this._requestOverride;
   }
 
+  get templateResolver() {
+    return this._templateResolver;
+  }
+
   /**
    * Returns the helix server
    * @returns {HelixServer}
@@ -187,7 +193,7 @@ class HelixProject {
   /**
    * Invalidates the node module cache of the file in the build directory.
    */
-  invalidateCache() {
+  async invalidateCache() {
     // we simple remove all entries from the node cache that fall below the build or src directory
     Object.keys(require.cache).forEach((file) => {
       if (file.startsWith(this._buildDir) || (this._srcDir && file.startsWith(this._srcDir))) {
@@ -195,6 +201,7 @@ class HelixProject {
         this.log.debug(`evicted ${path.relative(this._cwd, file)}`);
       }
     });
+    await this._templateResolver.init();
   }
 
   async init() {
@@ -223,6 +230,9 @@ class HelixProject {
     }
 
     this.registerLocalStrains();
+
+    // init template resolver
+    this._templateResolver = new TemplateResolver().withDirectory(this._buildDir);
 
     const log = this._logger;
     if (this._displayVersion) {
@@ -283,6 +293,7 @@ class HelixProject {
     this.log.debug('Launching helix simulation server for development...');
     await this._server.init();
     await this._server.start(this);
+    await this._templateResolver.init();
     return this;
   }
 

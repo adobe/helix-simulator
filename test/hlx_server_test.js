@@ -156,7 +156,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index.html');
       await fse.copy(path.resolve(cwd, 'build/helper2.js'), path.resolve(cwd, 'build/helper.js'));
-      project.invalidateCache();
+      await project.invalidateCache();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index2.html');
     } finally {
       await project.stop();
@@ -174,7 +174,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index.html');
       await fse.copy(path.resolve(cwd, 'src/module2.js'), path.resolve(cwd, 'src/module.js'));
-      project.invalidateCache();
+      await project.invalidateCache();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index3.html');
     } finally {
       await project.stop();

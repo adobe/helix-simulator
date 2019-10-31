@@ -11,6 +11,7 @@
  */
 
 const EventEmitter = require('events');
+const path = require('path');
 const { Module } = require('module');
 const express = require('express');
 const cookieParser = require('cookie-parser');
@@ -22,7 +23,6 @@ const utils = require('./utils.js');
 const packageJson = require('../package.json');
 
 const RequestContext = require('./RequestContext.js');
-const { TemplateResolver, Plugins: TemplateResolverPlugins } = require('../src/template_resolver');
 
 const DEFAULT_PORT = 3000;
 
@@ -53,11 +53,12 @@ async function executeTemplate(ctx) {
 
   /* eslint-disable no-underscore-dangle */
   const nodeModulePathsFn = Module._nodeModulePaths;
+  const buildDirPat = `${ctx.config.buildDir}${path.sep}`;
   Module._nodeModulePaths = function nodeModulePaths(from) {
     let paths = nodeModulePathsFn.call(this, from);
 
     // only tweak module path for scripts in build dir
-    if (from === ctx.config.buildDir) {
+    if (from === ctx.config.buildDir || from.startsWith(buildDirPat)) {
       // the runtime paths take precedence. see #147
       paths = ctx.config.runtimeModulePaths.concat(paths);
     }
@@ -118,9 +119,6 @@ class HelixServer extends EventEmitter {
     this._app = express();
     this._port = DEFAULT_PORT;
     this._server = null;
-
-    // todo: make configurable
-    this._templateResolver = new TemplateResolver().with(TemplateResolverPlugins.simple);
   }
 
   /**
@@ -140,7 +138,7 @@ class HelixServer extends EventEmitter {
    * @returns {@code true} if the request is processed, {@code false} otherwise.
    */
   async handleDynamic(ctx, req, res) {
-    const isResolved = await this._templateResolver.resolve(ctx);
+    const isResolved = await this._project.templateResolver.resolve(ctx);
     if (!isResolved) {
       return false;
     }
@@ -219,7 +217,13 @@ class HelixServer extends EventEmitter {
       baseUrl: `http://localhost:${this._port}${req.url}`,
     };
 
-    if (await this.handleDynamic(ctx, req, res)) {
+    try {
+      if (await this.handleDynamic(ctx, req, res)) {
+        return;
+      }
+    } catch (e) {
+      this._logger.error('error rendering dynamic script: ', e);
+      res.status(500).send();
       return;
     }
 

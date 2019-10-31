@@ -4,3 +4,4 @@ logs
 pipeline.log
 test/tmp
 coverage
+*.tgz
