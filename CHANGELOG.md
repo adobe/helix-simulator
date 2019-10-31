@@ -1,3 +1,10 @@
+# [2.15.0](https://github.com/adobe/helix-simulator/compare/v2.14.0...v2.15.0) (2019-10-31)
+
+
+### Features
+
+* **server:** add support for cgi-bin ([#326](https://github.com/adobe/helix-simulator/issues/326)) ([26edb27](https://github.com/adobe/helix-simulator/commit/26edb2792e148bd9cade12e43290b7bba88669b1)), closes [#325](https://github.com/adobe/helix-simulator/issues/325)
+
 # [2.14.0](https://github.com/adobe/helix-simulator/compare/v2.13.12...v2.14.0) (2019-10-31)
 
 
