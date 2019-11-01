@@ -19,18 +19,22 @@ strains:
 
   localdocs-api:
     <<: *default
-    url: http://localhost:3000/docs/api
+    condition:
+      url: http://localhost:3000/docs/api
 
   localdocs:
     <<: *default
-    url: http://localhost:3000/docs
+    condition:
+      url: http://localhost:3000/docs
 
   local:
     <<: *default
-    url: http://localhost:3000/
+    condition:
+      url: http://localhost:3000/
 
   website:
     <<: *default
-    urls:
-      - http://project-helix.io/
-      - http://www.project-helix.io/
+    condition:
+      or:
+        - url: http://project-helix.io/
+        - url: http://www.project-helix.io/
