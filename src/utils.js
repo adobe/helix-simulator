@@ -35,15 +35,17 @@ const utils = {
    * Fetches content from the given uri
    * @param {String} uri URL to fetch
    * @param {Logger} logger the logger
+   * @param {object} auth authentication object ({@see https://github.com/request/request#http-authentication})
    * @returns {*} The requested content or NULL if not exists.
    */
-  async fetch(uri, logger) {
+  async fetch(uri, logger, auth) {
     try {
       const response = await request({
         method: 'GET',
         uri,
         resolveWithFullResponse: true,
         encoding: null,
+        auth,
       });
       return response.body;
     } catch (e) {
@@ -72,8 +74,15 @@ const utils = {
     for (let i = 0; i < uris.length; i += 1) {
       const uri = uris[i];
       ctx.logger.debug(`fetching static resource from ${uri}`);
+      let auth = null;
+      if (ctx.actionParams.GITHUB_TOKEN && (uri.startsWith('https://raw.github.com') || uri.startsWith('https://raw.githubusercontent.com'))) {
+        auth = {
+          bearer: ctx.actionParams.GITHUB_TOKEN,
+        };
+      }
+
       // eslint-disable-next-line no-await-in-loop
-      const data = await utils.fetch(uri, ctx.logger);
+      const data = await utils.fetch(uri, ctx.logger, auth);
       if (data != null) {
         ctx.content = Buffer.from(data, 'utf8');
         return ctx;
