@@ -1,3 +1,10 @@
+# [2.17.0](https://github.com/adobe/helix-simulator/compare/v2.16.3...v2.17.0) (2019-11-06)
+
+
+### Features
+
+* **server:** use GITHUB_TOKEN when available to fetch static content ([#335](https://github.com/adobe/helix-simulator/issues/335)) ([a058cc1](https://github.com/adobe/helix-simulator/commit/a058cc149d48f52267f19a77a0a1c9bd65474dcf)), closes [#330](https://github.com/adobe/helix-simulator/issues/330)
+
 ## [2.16.3](https://github.com/adobe/helix-simulator/compare/v2.16.2...v2.16.3) (2019-11-06)
 
 
