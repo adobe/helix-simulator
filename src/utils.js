@@ -75,7 +75,7 @@ const utils = {
       const uri = uris[i];
       ctx.logger.debug(`fetching static resource from ${uri}`);
       let auth = null;
-      if (ctx.actionParams.GITHUB_TOKEN && (uri.startsWith('https://raw.github.com') || uri.startsWith('https://raw.githubusercontent.com'))) {
+      if (ctx.actionParams.GITHUB_TOKEN && (uri.startsWith('https://raw.github.com/') || uri.startsWith('https://raw.githubusercontent.com/'))) {
         auth = {
           bearer: ctx.actionParams.GITHUB_TOKEN,
         };
