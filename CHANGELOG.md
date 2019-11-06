@@ -1,3 +1,10 @@
+## [2.16.3](https://github.com/adobe/helix-simulator/compare/v2.16.2...v2.16.3) (2019-11-06)
+
+
+### Bug Fixes
+
+* **deps:** update any ([#336](https://github.com/adobe/helix-simulator/issues/336)) ([3c58280](https://github.com/adobe/helix-simulator/commit/3c582807b7ae07a3952433a911dc8533b60af386))
+
 ## [2.16.2](https://github.com/adobe/helix-simulator/compare/v2.16.1...v2.16.2) (2019-11-04)
 
 
