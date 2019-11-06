@@ -19,6 +19,7 @@ const http = require('http');
 const path = require('path');
 const uuidv4 = require('uuid/v4');
 const shell = require('shelljs');
+const nock = require('nock');
 const { GitUrl } = require('@adobe/helix-shared');
 const HelixProject = require('../src/HelixProject.js');
 
@@ -910,6 +911,55 @@ describe('Helix Server', () => {
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/cgi-bin/post.js`, 200, 'expected_cgi.txt');
+    } finally {
+      await project.stop();
+    }
+  });
+});
+
+describe('Private Repo Tests', () => {
+  let testRoot;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+  });
+
+  afterEach(async () => {
+    await fse.remove(testRoot);
+    nock.cleanAll();
+  });
+
+  it('deliver static resource from private repository', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'remote'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withActionParams({
+        GITHUB_TOKEN: '1234',
+      })
+      .withHttpPort(0);
+    await project.init();
+
+    function handler() {
+      if (this.req.headers.authorization === 'Bearer 1234') {
+        return [
+          200,
+          'This is a static resource.',
+          { 'content-type': 'text/plain' },
+        ];
+      }
+      return [401, '', { }];
+    }
+
+    nock('https://raw.github.com')
+      .get('/Adobe-Marketing-Cloud/reactor-user-docs/master/welcome.txt')
+      .reply(handler);
+    nock('https://raw.githubusercontent.com')
+      .get('/Adobe-Marketing-Cloud/reactor-user-docs/master/welcome.txt')
+      .reply(handler);
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
     } finally {
       await project.stop();
     }
