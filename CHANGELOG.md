@@ -1,3 +1,10 @@
+## [2.17.1](https://github.com/adobe/helix-simulator/compare/v2.17.0...v2.17.1) (2019-11-06)
+
+
+### Bug Fixes
+
+* **lgtm:** ensure that hostname matches correctly ([#337](https://github.com/adobe/helix-simulator/issues/337)) ([c715f26](https://github.com/adobe/helix-simulator/commit/c715f261b9f6279ccf3d0baab049c36356f41cf6))
+
 # [2.17.0](https://github.com/adobe/helix-simulator/compare/v2.16.3...v2.17.0) (2019-11-06)
 
 
