@@ -31,7 +31,7 @@ async function isDirectory(dirPath) {
 class HelixProject {
   constructor() {
     this._cwd = process.cwd();
-    this._srcDir = '';
+    this._srcDirs = [];
     this._repoPath = '';
     this._cfg = null;
     this._buildDir = DEFAULT_BUILD_DIR;
@@ -88,7 +88,11 @@ class HelixProject {
   }
 
   withSourceDir(value) {
-    this._srcDir = value;
+    if (Array.isArray(value)) {
+      this._srcDirs.push(...value);
+    } else {
+      this._srcDirs.push(value);
+    }
     return this;
   }
 
@@ -147,15 +151,14 @@ class HelixProject {
   }
 
   async checkPaths() {
-    if (!this._srcDir) {
-      const srcPath = path.join(this._cwd, SRC_DIR);
+    if (this._srcDirs.length === 0) {
+      const srcPath = path.resolve(this._cwd, SRC_DIR);
       if (await isDirectory(srcPath)) {
-        this._srcDir = srcPath;
+        this._srcDirs.push(srcPath);
       }
     }
-
+    this._srcDirs = this._srcDirs.map((s) => (path.resolve(this._cwd, s)));
     this._buildDir = path.resolve(this._cwd, this._buildDir);
-
     const dotGitPath = path.join(this._cwd, GIT_DIR);
     if (await isDirectory(dotGitPath)) {
       this._repoPath = path.resolve(dotGitPath, '../');
@@ -196,12 +199,28 @@ class HelixProject {
   async invalidateCache() {
     // we simple remove all entries from the node cache that fall below the build or src directory
     Object.keys(require.cache).forEach((file) => {
-      if (file.startsWith(this._buildDir) || (this._srcDir && file.startsWith(this._srcDir)) || file.indexOf('/cgi-bin') > 0) {
+      if (this.isModulePath(file)) {
         delete require.cache[file];
         this.log.debug(`evicted ${path.relative(this._cwd, file)}`);
       }
     });
     await this._templateResolver.init();
+  }
+
+  /**
+   * Checks whether the given file path is a potential module path. i.e. if it is in the
+   * build, source or cgi-bin location.
+   *
+   * @param {string} filepath The path to check
+   * @return {boolean} {@code true} if the filepath is a module path.
+   */
+  isModulePath(filepath) {
+    if (!this._checkPaths) {
+      this._checkPaths = [this._buildDir, ...this._srcDirs];
+      this._checkPathsP = this._checkPaths.map((p) => (`${p}${path.sep}`));
+    }
+    return (this._checkPaths.indexOf(filepath) >= 0)
+      || (this._checkPathsP.findIndex((p) => (filepath.startsWith(p))) >= 0);
   }
 
   async init() {
@@ -225,7 +244,7 @@ class HelixProject {
 
     await this.checkPaths();
 
-    if (!this._srcDir) {
+    if (this._srcDirs.length === 0) {
       throw new Error('Invalid config. No "src" directory.');
     }
 
@@ -242,9 +261,9 @@ class HelixProject {
       log.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
       log.info('                         ');
     }
-    log.debug('Initialized helix-config with: ');
-    log.debug(`     srcPath: ${this._srcDir}`);
-    log.debug(`    buildDir: ${this._buildDir}`);
+    log.debug('Initialized helix-project with: ');
+    log.debug(`    srcPaths: ${this._srcDirs.map((d) => (path.relative(this._cwd, d)))}`);
+    log.debug(`    buildDir: ${path.relative(this._cwd, this._buildDir)}`);
     return this;
   }
 

@@ -11,7 +11,6 @@
  */
 
 const EventEmitter = require('events');
-const path = require('path');
 const { Module } = require('module');
 const express = require('express');
 const cookieParser = require('cookie-parser');
@@ -53,12 +52,11 @@ async function executeTemplate(ctx) {
 
   /* eslint-disable no-underscore-dangle */
   const nodeModulePathsFn = Module._nodeModulePaths;
-  const buildDirPat = `${ctx.config.buildDir}${path.sep}`;
   Module._nodeModulePaths = function nodeModulePaths(from) {
     let paths = nodeModulePathsFn.call(this, from);
 
-    // only tweak module path for scripts in build dir
-    if (from === ctx.config.buildDir || from.startsWith(buildDirPat)) {
+    // only tweak module path for scripts in build or src dir
+    if (ctx.config.isModulePath(from)) {
       // the runtime paths take precedence. see #147
       paths = ctx.config.runtimeModulePaths.concat(paths);
     }

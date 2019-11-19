@@ -203,4 +203,24 @@ describe('Helix Project', () => {
     await project.stop();
     assert.equal(false, project.started);
   });
+
+  it('can set source dir', async () => {
+    const cwd = path.join(SPEC_ROOT, 'remote');
+    const project = await new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('tmp/mybuild')
+      .withSourceDir('foo')
+      .init();
+    assert.deepEqual(project._srcDirs, [path.resolve(cwd, 'foo')]);
+  });
+
+  it('can set source dir array', async () => {
+    const cwd = path.join(SPEC_ROOT, 'remote');
+    const project = await new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('tmp/mybuild')
+      .withSourceDir(['foo', 'bar'])
+      .init();
+    assert.deepEqual(project._srcDirs, [path.resolve(cwd, 'foo'), path.resolve(cwd, 'bar')]);
+  });
 });
