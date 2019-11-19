@@ -1,3 +1,10 @@
+## [2.17.4](https://github.com/adobe/helix-simulator/compare/v2.17.3...v2.17.4) (2019-11-19)
+
+
+### Bug Fixes
+
+* **server:** modules required from src fail loading ([#344](https://github.com/adobe/helix-simulator/issues/344)) ([4f1a1a9](https://github.com/adobe/helix-simulator/commit/4f1a1a9d0dc4c119db72c34ce83f65ab57da9d65)), closes [#343](https://github.com/adobe/helix-simulator/issues/343)
+
 ## [2.17.3](https://github.com/adobe/helix-simulator/compare/v2.17.2...v2.17.3) (2019-11-17)
 
 
