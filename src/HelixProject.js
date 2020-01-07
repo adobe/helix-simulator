@@ -13,7 +13,8 @@
 const fs = require('fs-extra');
 const { URL } = require('url');
 const path = require('path');
-const { Logger, HelixConfig } = require('@adobe/helix-shared');
+const { SimpleInterface, deriveLogger } = require('@adobe/helix-log');
+const { HelixConfig } = require('@adobe/helix-shared');
 const HelixServer = require('./HelixServer.js');
 const GitManager = require('./GitManager.js');
 const TemplateResolver = require('./TemplateResolver.js');
@@ -39,6 +40,7 @@ class HelixProject {
     this._params = {};
     this._server = new HelixServer(this);
     this._logger = null;
+    this._logsDir = null;
     this._requestOverride = null;
     this._gitMgr = null;
     this._templateResolver = null;
@@ -79,6 +81,11 @@ class HelixProject {
 
   withLogger(logger) {
     this._logger = logger;
+    return this;
+  }
+
+  withLogsDir(dir) {
+    this._logsDir = dir;
     return this;
   }
 
@@ -225,16 +232,30 @@ class HelixProject {
 
   async init() {
     if (!this._logger) {
-      this._logger = Logger.getLogger({
-        category: 'hlx',
+      this._logger = new SimpleInterface({
         level: 'debug',
+        defaultFields: {
+          category: 'hlx',
+        },
+        filter: (fields) => {
+          // eslint-disable-next-line no-param-reassign
+          fields.message[0] = `[${fields.category}] ${fields.message[0]}`;
+          // eslint-disable-next-line no-param-reassign
+          delete fields.category;
+          return fields;
+        },
       });
     } else {
-      this._logger = this._logger.getLogger('hlx');
+      this._logger = deriveLogger(this._logger, {
+        defaultFields: {
+          category: 'hlx',
+        },
+      });
     }
     this._gitMgr = new GitManager()
       .withCwd(this._cwd)
-      .withLogger(this._logger);
+      .withLogger(this._logger)
+      .withLogsDir(this._logsDir);
 
     if (!this._cfg) {
       this._cfg = await new HelixConfig()

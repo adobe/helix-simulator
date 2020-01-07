@@ -11,9 +11,11 @@
  */
 
 const path = require('path');
+const fse = require('fs-extra');
 const _ = require('lodash');
 const gitServer = require('@adobe/git-server/lib/server.js');
 const { GitUrl } = require('@adobe/helix-shared');
+const { deriveLogger } = require('@adobe/helix-log');
 const GitMapping = require('./GitMapping.js');
 
 const GIT_LOCAL_HOST = '127.0.0.1';
@@ -87,6 +89,13 @@ class GitManager {
     return this;
   }
 
+  withLogsDir(dir) {
+    if (dir) {
+      this._gitConfig.logs.logsDir = dir;
+    }
+    return this;
+  }
+
   get log() {
     return this._logger;
   }
@@ -153,7 +162,14 @@ class GitManager {
       };
     });
     this.log.debug('Launching local git server...');
-    this._gitConfig.logger = this.log.getLogger('git');
+    this._gitConfig.logger = deriveLogger(this.log, {
+      defaultFields: {
+        category: 'git',
+      },
+    });
+    // ensure that git server has logs directory
+    await fse.ensureDir(path.resolve(this._cwd, this._gitConfig.logs.logsDir));
+
     this._gitState = await gitServer.start(this._gitConfig);
 
     await Promise.all(mappings.map(async (mapping) => {
