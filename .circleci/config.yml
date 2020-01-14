@@ -1,8 +1,8 @@
 version: 2.1
 executors:
-  node8:
+  node10:
     docker:
-    - image: circleci/node:8-jessie
+    - image: circleci/node:10-stretch
       environment:
         NPM_CONFIG_PREFIX: "~/.npm-global"
     working_directory: ~/repo
@@ -64,7 +64,7 @@ jobs:
           path: junit
 
   build:
-    executor: node8
+    executor: node10
 
     steps:
     - setup
@@ -88,7 +88,7 @@ jobs:
         path: junit
 
   release:
-    executor: node8
+    executor: node10
 
     steps:
     - setup
