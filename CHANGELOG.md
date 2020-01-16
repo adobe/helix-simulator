@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/adobe/helix-simulator/compare/v3.0.0...v3.0.1) (2020-01-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v5 ([#365](https://github.com/adobe/helix-simulator/issues/365)) ([02617be](https://github.com/adobe/helix-simulator/commit/02617be9e70a317908abac868f4759921410dd33))
+
 # [3.0.0](https://github.com/adobe/helix-simulator/compare/v2.17.11...v3.0.0) (2020-01-16)
 
 
