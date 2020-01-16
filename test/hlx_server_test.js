@@ -13,6 +13,7 @@
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
 
+const os = require('os');
 const assert = require('assert');
 const fse = require('fs-extra');
 const http = require('http');
@@ -128,7 +129,12 @@ describe('Helix Server', () => {
   });
 
   afterEach(async () => {
-    await fse.remove(testRoot);
+    if (os.platform() === 'win32') {
+      // don't wait for test root removal to finish on windows
+      fse.remove(testRoot);
+    } else {
+      await fse.remove(testRoot);
+    }
   });
 
   it('deliver rendered resource', async () => {
