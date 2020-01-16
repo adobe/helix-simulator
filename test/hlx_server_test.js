@@ -130,8 +130,9 @@ describe('Helix Server', () => {
 
   afterEach(async () => {
     if (os.platform() === 'win32') {
-      // don't wait for test root removal to finish on windows
-      fse.remove(testRoot);
+      // Note: the async variant of remove hangs on windows, probably due to open filehandle to
+      // logs/request.log
+      fse.removeSync(testRoot);
     } else {
       await fse.remove(testRoot);
     }
@@ -975,7 +976,13 @@ describe('Private Repo Tests', () => {
   });
 
   afterEach(async () => {
-    await fse.remove(testRoot);
+    if (os.platform() === 'win32') {
+      // Note: the async variant of remove hangs on windows, probably due to open filehandle to
+      // logs/request.log
+      fse.removeSync(testRoot);
+    } else {
+      await fse.remove(testRoot);
+    }
     nock.cleanAll();
   });
 

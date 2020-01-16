@@ -52,7 +52,7 @@ jobs:
       # test & get code coverage
       - run:
           name: Running Tests
-          command: ./node_modules/.bin/mocha --timeout 20000 --reporter xunit test --reporter-options output=junit/test.xml
+          command: npm run test-win
           environment:
             MOCHA_FILE: junit/test-results.xml
           when: always
