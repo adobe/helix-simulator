@@ -16,7 +16,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const NodeESI = require('nodesi');
 const rp = require('request-promise-native');
-const { Logger } = require('@adobe/helix-shared');
+const { SimpleInterface } = require('@adobe/helix-log');
 const querystring = require('querystring');
 const utils = require('./utils.js');
 const packageJson = require('../package.json');
@@ -124,7 +124,14 @@ class HelixServer extends EventEmitter {
    */
   async init() {
     /* eslint-disable no-underscore-dangle */
-    this._logger = this._project._logger || Logger.getLogger('hlx');
+    this._logger = this._project._logger;
+    if (!this._logger) {
+      this._logger = new SimpleInterface({
+        defaultFields: {
+          category: 'hlx',
+        },
+      });
+    }
   }
 
   /**

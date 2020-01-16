@@ -17,7 +17,7 @@ const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
 const shell = require('shelljs'); // eslint-disable-line import/no-extraneous-dependencies
-const { Logger } = require('@adobe/helix-shared');
+const { logging } = require('@adobe/helix-testutils');
 const HelixProject = require('../src/HelixProject.js');
 
 if (!shell.which('git')) {
@@ -74,16 +74,15 @@ describe('Helix Project', () => {
   });
 
   it('shows warning when starting outside git repository with local strains', async () => {
-    const logger = Logger.getTestLogger();
-    logger.getLogger = () => logger;
+    const logger = logging.createTestLogger();
     await new HelixProject()
       .withCwd(path.join(SPEC_ROOT, 'invalid_no_git'))
       .withLogger(logger)
       .init();
 
-    const output = await logger.getOutput();
-    assert.ok(output.indexOf('Local GitURL in strain default.content invalid when running outside of a .git repository.') > 0);
-    assert.ok(output.indexOf('Local GitURL in strain default.static invalid when running outside of a .git repository.') > 0);
+    const output = logger.getOutput();
+    assert.ok(output.indexOf('Local GitURL in strain default.content invalid when running outside of a .git repository.') >= 0);
+    assert.ok(output.indexOf('Local GitURL in strain default.static invalid when running outside of a .git repository.') >= 0);
   });
 
   it('throws error with no src directory', async () => {
@@ -106,7 +105,6 @@ describe('Helix Project', () => {
     const logger = {
       info: counter,
       debug: counter,
-      getLogger: () => logger,
     };
 
     const cwd = path.join(SPEC_ROOT, 'local');
@@ -118,27 +116,25 @@ describe('Helix Project', () => {
   });
 
   it('Shows banner with version', async () => {
-    const logger = Logger.getTestLogger();
-    logger.getLogger = () => logger;
+    const logger = logging.createTestLogger();
     const cwd = path.join(SPEC_ROOT, 'local');
     await new HelixProject()
       .withLogger(logger)
       .withCwd(cwd)
       .withDisplayVersion('1234')
       .init();
-    const output = await logger.getOutput();
+    const output = logger.getOutput();
     assert.ok(output.indexOf('/_//_/\\__/_/_//_\\_\\ v1234') > 0);
   });
 
   it('Shows no banner without version', async () => {
-    const logger = Logger.getTestLogger();
-    logger.getLogger = () => logger;
+    const logger = logging.createTestLogger();
     const cwd = path.join(SPEC_ROOT, 'local');
     await new HelixProject()
       .withLogger(logger)
       .withCwd(cwd)
       .init();
-    const output = await logger.getOutput();
+    const output = logger.getOutput();
     assert.ok(output.indexOf('/_//_/\\__/_/_//_\\_\\') < 0);
   });
 

@@ -45,14 +45,14 @@ jobs:
           name: prepare test git user
           command: git config --global user.name "Your Name"
       - checkout
-      - run: choco install nodejs-lts
+      - run: choco install nodejs-lts --version=10.16.3
       - run: npm install
       - run: mkdir junit
 
       # test & get code coverage
       - run:
           name: Running Tests
-          command: ./node_modules/.bin/mocha --timeout 10000 --reporter xunit test --reporter-options output=junit/test.xml
+          command: npm run test-win
           environment:
             MOCHA_FILE: junit/test-results.xml
           when: always

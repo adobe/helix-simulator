@@ -10,11 +10,13 @@
     "commit": "git-cz",
     "start": "node src/run.js",
     "test": "nyc --reporter=text --reporter=lcov --check-coverage --branches 78 --statements 94 --lines 94 mocha -t 5000",
+    "test-win": "mocha --timeout 20000 --reporter xunit test --reporter-options output=junit/test.xml",
     "test-ci": "npm run lint && npm run test && codecov",
     "lint": "./node_modules/.bin/eslint ."
   },
   "dependencies": {
     "@adobe/git-server": "1.0.12",
+    "@adobe/helix-log": "4.4.2",
     "@adobe/helix-shared": "3.3.0",
     "colors": "^1.3.0",
     "cookie-parser": "^1.4.4",
@@ -30,6 +32,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.0",
+    "@adobe/helix-testutils": "0.3.0",
     "@semantic-release/changelog": "3.0.6",
     "@semantic-release/git": "8.0.0",
     "@semantic-release/github": "6.0.1",
