@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/adobe/helix-simulator/compare/v2.17.11...v3.0.0) (2020-01-16)
+
+
+### Features
+
+* **log:** use helix-log ([#359](https://github.com/adobe/helix-simulator/issues/359)) ([3825e96](https://github.com/adobe/helix-simulator/commit/3825e96f89d9f54360da8501202227aec8eb4892)), closes [#345](https://github.com/adobe/helix-simulator/issues/345)
+
+
+### BREAKING CHANGES
+
+* **log:** no longer compatible with winston logger.
+
 ## [2.17.11](https://github.com/adobe/helix-simulator/compare/v2.17.10...v2.17.11) (2020-01-14)
 
 
