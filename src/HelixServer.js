@@ -23,6 +23,8 @@ const packageJson = require('../package.json');
 
 const RequestContext = require('./RequestContext.js');
 
+const HELIX_BLOB_REGEXP = /^\/hlx_([0-9a-f]{40}).(jpg|jpeg|png|webp|gif)$/;
+
 const DEFAULT_PORT = 3000;
 
 function safeCycles() {
@@ -216,6 +218,15 @@ class HelixServer extends EventEmitter {
     if (!ctx.extension) {
       const loc = `${ctx.path}/${ctx.queryString}`;
       this._logger.debug(`redirecting to ${loc}`);
+      res.redirect(loc);
+      return;
+    }
+
+    // check for helix blobs
+    const rgx = HELIX_BLOB_REGEXP.exec(ctx.path);
+    if (rgx) {
+      const loc = `https://hlx.blob.core.windows.net/external/${rgx[1]}`;
+      this._logger.debug(`helix blob, redirecting to ${loc}`);
       res.redirect(loc);
       return;
     }

@@ -92,7 +92,7 @@ async function assertHttp(config, status, spec, subst) {
                 assert.equal(data.toString().trim(), expected.trim());
               }
             }
-            resolve();
+            resolve(res);
           } catch (e) {
             reject(e);
           }
@@ -181,6 +181,23 @@ describe('Helix Server', () => {
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/docs`, 302);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('deliver redirect for blobs requests', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+    try {
+      await project.start();
+      const res = await assertHttp(`http://localhost:${project.server.port}/hlx_098af326aa856bb42ce9a21240cf73d6f64b0b45.png`, 302);
+      assert.equal(res.headers.location, 'https://hlx.blob.core.windows.net/external/098af326aa856bb42ce9a21240cf73d6f64b0b45');
     } finally {
       await project.stop();
     }
