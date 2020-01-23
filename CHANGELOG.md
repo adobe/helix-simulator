@@ -1,3 +1,11 @@
+## [3.0.4](https://github.com/adobe/helix-simulator/compare/v3.0.3...v3.0.4) (2020-01-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.14 ([d4ff56b](https://github.com/adobe/helix-simulator/commit/d4ff56b77caeb904a41ab55fae44292697501dfc))
+* **server:** add support for azure blobs ([#373](https://github.com/adobe/helix-simulator/issues/373)) ([e2ccf9a](https://github.com/adobe/helix-simulator/commit/e2ccf9a01b2681b1cf60812c1638162e307203a0)), closes [#372](https://github.com/adobe/helix-simulator/issues/372)
+
 ## [3.0.3](https://github.com/adobe/helix-simulator/compare/v3.0.2...v3.0.3) (2020-01-22)
 
 
