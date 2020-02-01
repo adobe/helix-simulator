@@ -254,7 +254,12 @@ class HelixServer extends EventEmitter {
     try {
       const result = await utils.fetchStatic(ctx);
       res.type(ctx.extension);
-      res.send(result.content);
+      const ctype = res.get('Content-Type');
+      if (ctype && ctype.match(/(text\/)|(\/xml)/)) {
+        res.send(result.content.toString());
+      } else {
+        res.send(result.content);
+      }
     } catch (err) {
       if (err.code === 404) {
         this._logger.error(`Resource not found: ${ctx.path}`);
