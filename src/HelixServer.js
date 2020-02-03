@@ -87,13 +87,16 @@ async function executeTemplate(ctx) {
     selector: ctx._selector,
     extension: ctx._extension,
     rootPath: ctx._mount,
-    // Keep next line this for backward compatibility?
-    params: querystring.stringify(ctx._params),
     REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
   };
 
-  Object.assign(actionParams, ctx.actionParams, ctx.body, ctx._params);
+  Object.assign(actionParams, ctx.actionParams, ctx.body);
+  if (ctx.url.match(/^\/cgi-bin\//)) {
+    Object.assign(actionParams, ctx._params);
+  } else {
+    actionParams.params = querystring.stringify(ctx._params);
+  }
   return Promise.resolve(mod.main(actionParams));
   /* eslint-enable no-underscore-dangle */
 }
