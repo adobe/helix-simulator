@@ -41,6 +41,10 @@ module.exports = class RequestContext {
     this._requestId = utils.randomChars(32);
     this._cdnRequestId = utils.uuid();
     this._strain = cfg.selectStrain({ ...req, path: this._path });
+    // TODO: should evaluate condition if available
+    // if (this._strain.condition) {
+    //   this._strain.condition.
+    // }
     if (this._strain.urls.length > 0) {
       this._mount = parse(this._strain.urls[0]).pathname.replace(/\/+$/, '');
     } else {
