@@ -80,9 +80,6 @@ async function executeTemplate(ctx) {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
-    owner: ctx.strain.content.owner,
-    repo: ctx.strain.content.repo,
-    ref: ctx.strain.content.ref || 'master',
     path: `${ctx.resourcePath}.md`,
     selector: ctx._selector,
     extension: ctx._extension,
@@ -93,9 +90,18 @@ async function executeTemplate(ctx) {
 
   Object.assign(actionParams, ctx.actionParams, ctx.body);
   if (ctx.url.match(/^\/cgi-bin\//)) {
-    Object.assign(actionParams, ctx._params);
+    Object.assign(actionParams, {
+      __hlx_owner: ctx.strain.content.owner,
+      __hlx_repo: ctx.strain.content.repo,
+      __hlx_ref: ctx.strain.content.ref || 'master',
+    }, ctx._params);
   } else {
-    actionParams.params = querystring.stringify(ctx._params);
+    Object.assign(actionParams, {
+      owner: ctx.strain.content.owner,
+      repo: ctx.strain.content.repo,
+      ref: ctx.strain.content.ref || 'master',
+      params: querystring.stringify(ctx._params),
+    });
   }
   return Promise.resolve(mod.main(actionParams));
   /* eslint-enable no-underscore-dangle */
