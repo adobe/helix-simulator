@@ -1,3 +1,10 @@
+## [3.0.6](https://github.com/adobe/helix-simulator/compare/v3.0.5...v3.0.6) (2020-02-04)
+
+
+### Bug Fixes
+
+* **deps:** update nodesi dependenc ([57d8d16](https://github.com/adobe/helix-simulator/commit/57d8d16bf7c00b8d1a5366484b6c18853c345fbb))
+
 ## [3.0.5](https://github.com/adobe/helix-simulator/compare/v3.0.4...v3.0.5) (2020-01-23)
 
 
