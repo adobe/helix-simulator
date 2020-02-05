@@ -80,10 +80,6 @@ async function executeTemplate(ctx) {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
-    path: `${ctx.resourcePath}.md`,
-    selector: ctx._selector,
-    extension: ctx._extension,
-    rootPath: ctx._mount,
     REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
   };
@@ -100,6 +96,10 @@ async function executeTemplate(ctx) {
       owner: ctx.strain.content.owner,
       repo: ctx.strain.content.repo,
       ref: ctx.strain.content.ref || 'master',
+      path: `${ctx.resourcePath}.md`,
+      selector: ctx._selector,
+      extension: ctx._extension,
+      rootPath: ctx._mount,
       params: querystring.stringify(ctx._params),
     });
   }
