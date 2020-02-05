@@ -80,8 +80,6 @@ async function executeTemplate(ctx) {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
-    REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
-    REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
   };
 
   Object.assign(actionParams, ctx.actionParams, ctx.body);
@@ -101,6 +99,8 @@ async function executeTemplate(ctx) {
       extension: ctx._extension,
       rootPath: ctx._mount,
       params: querystring.stringify(ctx._params),
+      REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
+      REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
     });
   }
   return Promise.resolve(mod.main(actionParams));
