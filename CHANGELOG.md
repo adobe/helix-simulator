@@ -1,3 +1,14 @@
+## [3.0.7](https://github.com/adobe/helix-simulator/compare/v3.0.6...v3.0.7) (2020-02-05)
+
+
+### Bug Fixes
+
+* **params:** assign action/body and querystring to params ([d91f6a3](https://github.com/adobe/helix-simulator/commit/d91f6a3d91cbb82add9b27823d4e57138cb7109b))
+* **params:** assign querystring to params in case of cgi-bin ([ee944a3](https://github.com/adobe/helix-simulator/commit/ee944a32337863ac8ed146420702e43289f7e0ef))
+* **params:** some parameters are not available in CGI ([16de18b](https://github.com/adobe/helix-simulator/commit/16de18bf2487a5bf8da2caf05cdc34d56a2c0583))
+* **params:** some parameters are not available in CGI ([aede49b](https://github.com/adobe/helix-simulator/commit/aede49b55936a2fc5fbe703dffff3bab19e8236c))
+* **params:** use __hlx_ prefix in CGI actions ([2a4f45a](https://github.com/adobe/helix-simulator/commit/2a4f45a223048e95c1d5a46e0b1986002b8bda72))
+
 ## [3.0.6](https://github.com/adobe/helix-simulator/compare/v3.0.5...v3.0.6) (2020-02-04)
 
 
