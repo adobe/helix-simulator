@@ -80,28 +80,27 @@ async function executeTemplate(ctx) {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
-    owner: ctx.strain.content.owner,
-    repo: ctx.strain.content.repo,
-    ref: ctx.strain.content.ref || 'master',
-    path: `${ctx.resourcePath}.md`,
-    selector: ctx._selector,
-    extension: ctx._extension,
-    rootPath: ctx._mount,
-    params: querystring.stringify(ctx._params),
-    REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
-    REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
   };
 
-  if (ctx.body) {
-    // add post params to action params
-    Object.keys(ctx.body).forEach((key) => {
-      actionParams[key] = ctx.body[key];
-    });
-  }
-  if (ctx.actionParams) {
-    // add argument action params
-    Object.keys(ctx.actionParams).forEach((key) => {
-      actionParams[key] = ctx.actionParams[key];
+  Object.assign(actionParams, ctx.actionParams, ctx.body);
+  if (ctx.url.match(/^\/cgi-bin\//)) {
+    Object.assign(actionParams, {
+      __hlx_owner: ctx.strain.content.owner,
+      __hlx_repo: ctx.strain.content.repo,
+      __hlx_ref: ctx.strain.content.ref || 'master',
+    }, ctx._params);
+  } else {
+    Object.assign(actionParams, {
+      owner: ctx.strain.content.owner,
+      repo: ctx.strain.content.repo,
+      ref: ctx.strain.content.ref || 'master',
+      path: `${ctx.resourcePath}.md`,
+      selector: ctx._selector,
+      extension: ctx._extension,
+      rootPath: ctx._mount,
+      params: querystring.stringify(ctx._params),
+      REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
+      REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
     });
   }
   return Promise.resolve(mod.main(actionParams));
