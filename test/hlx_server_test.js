@@ -203,6 +203,23 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver redirect for fonts requests', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+    try {
+      await project.start();
+      const res = await assertHttp(`http://localhost:${project.server.port}/hlx_fonts/pnv6nym.css`, 302);
+      assert.equal(res.headers.location, 'https://use.typekit.net/pnv6nym.css');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver modified helper', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
