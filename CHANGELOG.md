@@ -1,3 +1,10 @@
+## [3.0.8](https://github.com/adobe/helix-simulator/compare/v3.0.7...v3.0.8) (2020-02-11)
+
+
+### Bug Fixes
+
+* **server:** add support for fonts redirects ([#384](https://github.com/adobe/helix-simulator/issues/384)) ([#386](https://github.com/adobe/helix-simulator/issues/386)) ([c30c14a](https://github.com/adobe/helix-simulator/commit/c30c14af894790a2c826cbdb34d9a8d8f7c9634c))
+
 ## [3.0.7](https://github.com/adobe/helix-simulator/compare/v3.0.6...v3.0.7) (2020-02-05)
 
 
