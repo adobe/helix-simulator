@@ -219,18 +219,20 @@ class HelixServer extends EventEmitter {
     // check for helix blobs
     let rgx = HELIX_BLOB_REGEXP.exec(ctx.path);
     if (rgx) {
-      const loc = `https://hlx.blob.core.windows.net/external/${rgx[1]}`;
-      this._logger.debug(`helix blob, redirecting to ${loc}`);
-      res.redirect(loc);
+      const url = `https://hlx.blob.core.windows.net/external/${rgx[1]}`;
+      this._logger.debug(`helix blob, proxying to ${url}`);
+      // proxy to azure blob storage
+      r(url).pipe(res);
       return;
     }
 
     // check for helix fonts
     rgx = HELIX_FONTS_REGEXP.exec(ctx.path);
     if (rgx) {
-      const loc = `https://use.typekit.net/${rgx[1]}`;
-      this._logger.debug(`helix fonts, redirecting to ${loc}`);
-      res.redirect(loc);
+      const url = `https://use.typekit.net/${rgx[1]}`;
+      this._logger.debug(`helix fonts, proxying to ${url}`);
+      // proxy to typekit CDN
+      r(url).pipe(res);
       return;
     }
 
