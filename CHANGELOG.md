@@ -1,3 +1,11 @@
+## [3.1.1](https://github.com/adobe/helix-simulator/compare/v3.1.0...v3.1.1) (2020-02-13)
+
+
+### Bug Fixes
+
+* **HelixServer:** handle case where index name is not found ([d9bd145](https://github.com/adobe/helix-simulator/commit/d9bd1453ab78df44c1f1b3873e5a1f1a09674794))
+* **HelixServer:** use code strain for query ([4b05cc9](https://github.com/adobe/helix-simulator/commit/4b05cc9816aa762a4fde934f75b58b50efae0e40))
+
 # [3.1.0](https://github.com/adobe/helix-simulator/compare/v3.0.9...v3.1.0) (2020-02-13)
 
 
