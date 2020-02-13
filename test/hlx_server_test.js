@@ -21,7 +21,7 @@ const path = require('path');
 const uuidv4 = require('uuid/v4');
 const shell = require('shelljs');
 const nock = require('nock');
-const { GitUrl } = require('@adobe/helix-shared');
+const { GitUrl, IndexConfig } = require('@adobe/helix-shared');
 const HelixProject = require('../src/HelixProject.js');
 
 if (!shell.which('git')) {
@@ -215,6 +215,69 @@ describe('Helix Server', () => {
       await project.start();
       const res = await assertHttp(`http://localhost:${project.server.port}/hlx_fonts/pnv6nym.css`, 302);
       assert.equal(res.headers.location, 'https://use.typekit.net/pnv6nym.css');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('proxies query requests to algolia', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+
+    const idxCfg = new IndexConfig()
+      .withConfigPath(path.resolve(path.join(SPEC_ROOT, 'local'), 'helix-index.yaml'));
+    await idxCfg.init();
+
+    const algoliaAppID = 'fake-id';
+    const algoliaAPIKey = 'fake-key';
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withIndexConfig(idxCfg)
+      .withAlgoliaAppID(algoliaAppID)
+      .withAlgoliaAPIKey(algoliaAPIKey)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    function handler() {
+      if (this.req.headers['x-algolia-api-key'] === algoliaAPIKey
+        && this.req.headers['x-algolia-application-id'] === algoliaAppID) {
+        return [200, '', {}];
+      }
+      return [403, '', {}];
+    }
+
+    nock(`https://${algoliaAppID}-dsn.algolia.net`)
+      .get('/1/indexes/local--default--blog-posts?query=*&filters=&page=1&hitsPerPage=25')
+      .reply(handler);
+
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 200);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('proxies query requests to algolia (no index configuration found)', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+
+    const algoliaAppID = 'fake-id';
+    const algoliaAPIKey = 'fake-key';
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withAlgoliaAppID(algoliaAppID)
+      .withAlgoliaAPIKey(algoliaAPIKey)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 404);
     } finally {
       await project.stop();
     }

@@ -44,6 +44,9 @@ class HelixProject {
     this._requestOverride = null;
     this._gitMgr = null;
     this._templateResolver = null;
+    this._indexConfig = null;
+    this._algoliaAppID = null;
+    this._algoliaAPIKey = null;
   }
 
   withCwd(cwd) {
@@ -108,6 +111,21 @@ class HelixProject {
     return this;
   }
 
+  withIndexConfig(indexConfig) {
+    this._indexConfig = indexConfig;
+    return this;
+  }
+
+  withAlgoliaAppID(value) {
+    this._algoliaAppID = value;
+    return this;
+  }
+
+  withAlgoliaAPIKey(value) {
+    this._algoliaAPIKey = value;
+    return this;
+  }
+
   registerGitRepository(repoPath, gitUrl) {
     this._gitMgr.registerServer(repoPath, gitUrl);
     return this;
@@ -147,6 +165,18 @@ class HelixProject {
 
   get templateResolver() {
     return this._templateResolver;
+  }
+
+  get indexConfig() {
+    return this._indexConfig;
+  }
+
+  get algoliaAppID() {
+    return this._algoliaAppID;
+  }
+
+  get algoliaAPIKey() {
+    return this._algoliaAPIKey;
   }
 
   /**
