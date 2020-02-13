@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/adobe/helix-simulator/compare/v3.0.9...v3.1.0) (2020-02-13)
+
+
+### Features
+
+* **HelixServer:** Implement Aloglia Proxy similar to VCL ([#385](https://github.com/adobe/helix-simulator/issues/385)) ([#389](https://github.com/adobe/helix-simulator/issues/389)) ([3f4a20c](https://github.com/adobe/helix-simulator/commit/3f4a20c82b2c7831914553ec0dae3e239baf8936))
+
 ## [3.0.9](https://github.com/adobe/helix-simulator/compare/v3.0.8...v3.0.9) (2020-02-12)
 
 
