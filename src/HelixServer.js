@@ -239,9 +239,8 @@ class HelixServer extends EventEmitter {
     if (rgx) {
       const [, indexName, queryName] = rgx;
       const { owner, repo } = ctx.strain.content;
-      const { algoliaAppID, algoliaAPIKey } = ctx.config;
+      const { algoliaAppID, algoliaAPIKey, indexConfig } = ctx.config;
 
-      const { indexConfig } = ctx.config;
       if (!indexConfig) {
         res.status(404).send('no index configuration found');
         return;
