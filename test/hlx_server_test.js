@@ -243,7 +243,7 @@ describe('Helix Server', () => {
     function handler() {
       if (this.req.headers['x-algolia-api-key'] === algoliaAPIKey
         && this.req.headers['x-algolia-application-id'] === algoliaAppID) {
-        return [200, '', { location: `https://${algoliaAppID}-dsn.algolia.net` }];
+        return [200, '', {}];
       }
       return [403, '', {}];
     }
@@ -254,8 +254,30 @@ describe('Helix Server', () => {
 
     try {
       await project.start();
-      const res = await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 200);
-      assert.equal(res.headers.location, `https://${algoliaAppID}-dsn.algolia.net`);
+      await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 200);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('proxies query requests to algolia (no index configuration found)', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+
+    const algoliaAppID = 'fake-id';
+    const algoliaAPIKey = 'fake-key';
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withAlgoliaAppID(algoliaAppID)
+      .withAlgoliaAPIKey(algoliaAPIKey)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 404);
     } finally {
       await project.stop();
     }
