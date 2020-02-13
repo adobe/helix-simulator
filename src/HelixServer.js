@@ -241,7 +241,12 @@ class HelixServer extends EventEmitter {
       const { owner, repo } = ctx.strain.content;
       const { algoliaAppID, algoliaAPIKey } = ctx.config;
 
-      const urlPath = ctx.config.indexConfig.getQueryURL(
+      const { indexConfig } = ctx.config;
+      if (!indexConfig) {
+        res.status(404).send('no index configuration found');
+        return;
+      }
+      const urlPath = indexConfig.getQueryURL(
         indexName, queryName, owner, repo, ctx.params,
       );
       const url = `https://${algoliaAppID}-dsn.algolia.net${urlPath}`;
