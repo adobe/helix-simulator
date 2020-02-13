@@ -15,6 +15,7 @@ const { Module } = require('module');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const NodeESI = require('nodesi');
+const r = require('request');
 const rp = require('request-promise-native');
 const { SimpleInterface } = require('@adobe/helix-log');
 const querystring = require('querystring');
@@ -24,7 +25,8 @@ const packageJson = require('../package.json');
 const RequestContext = require('./RequestContext.js');
 
 const HELIX_BLOB_REGEXP = /^\/hlx_([0-9a-f]{40}).(jpg|jpeg|png|webp|gif)$/;
-const HELIX_FONTS_REGEXP = /^\/hlx_fonts\/(.*)$/;
+const HELIX_FONTS_REGEXP = /^\/hlx_fonts\/(.+)$/;
+const HELIX_QUERY_REGEXP = /^\/_query\/(.+)\/(.+)$/;
 
 const DEFAULT_PORT = 3000;
 
@@ -214,14 +216,6 @@ class HelixServer extends EventEmitter {
       return;
     }
 
-    // redirect for directory requests w/o slash
-    if (!ctx.extension) {
-      const loc = `${ctx.path}/${ctx.queryString}`;
-      this._logger.debug(`redirecting to ${loc}`);
-      res.redirect(loc);
-      return;
-    }
-
     // check for helix blobs
     let rgx = HELIX_BLOB_REGEXP.exec(ctx.path);
     if (rgx) {
@@ -236,6 +230,36 @@ class HelixServer extends EventEmitter {
     if (rgx) {
       const loc = `https://use.typekit.net/${rgx[1]}`;
       this._logger.debug(`helix fonts, redirecting to ${loc}`);
+      res.redirect(loc);
+      return;
+    }
+
+    // check for helix query
+    rgx = HELIX_QUERY_REGEXP.exec(ctx.path);
+    if (rgx) {
+      const [, indexName, queryName] = rgx;
+      const { owner, repo } = ctx.strain.content;
+      const { algoliaAppID, algoliaAPIKey } = ctx.config;
+
+      const urlPath = ctx.config.indexConfig.getQueryURL(
+        indexName, queryName, owner, repo, ctx.params,
+      );
+      const url = `https://${algoliaAppID}-dsn.algolia.net${urlPath}`;
+      this._logger.debug(`helix query, proxying to ${url}`);
+      // proxy to algolia endpoint
+      r(url, {
+        headers: {
+          'X-Algolia-Application-Id': algoliaAppID,
+          'X-Algolia-API-Key': algoliaAPIKey,
+        },
+      }).pipe(res);
+      return;
+    }
+
+    // redirect for directory requests w/o slash
+    if (!ctx.extension) {
+      const loc = `${ctx.path}/${ctx.queryString}`;
+      this._logger.debug(`redirecting to ${loc}`);
       res.redirect(loc);
       return;
     }
