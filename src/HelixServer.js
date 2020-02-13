@@ -238,7 +238,7 @@ class HelixServer extends EventEmitter {
     rgx = HELIX_QUERY_REGEXP.exec(ctx.path);
     if (rgx) {
       const [, indexName, queryName] = rgx;
-      const { owner, repo } = ctx.strain.content;
+      const { owner, repo } = ctx.strain.code;
       const { algoliaAppID, algoliaAPIKey, indexConfig } = ctx.config;
 
       if (!indexConfig) {
