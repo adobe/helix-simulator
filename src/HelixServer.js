@@ -248,6 +248,10 @@ class HelixServer extends EventEmitter {
       const urlPath = indexConfig.getQueryURL(
         indexName, queryName, owner, repo, ctx.params,
       );
+      if (!urlPath) {
+        res.status(404).send('index not found');
+        return;
+      }
       const url = `https://${algoliaAppID}-dsn.algolia.net${urlPath}`;
       this._logger.debug(`helix query, proxying to ${url}`);
       // proxy to algolia endpoint
