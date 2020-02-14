@@ -222,7 +222,12 @@ class HelixServer extends EventEmitter {
       const url = `https://hlx.blob.core.windows.net/external/${rgx[1]}`;
       this._logger.debug(`helix blob, proxying to ${url}`);
       // proxy to azure blob storage
-      r(url).pipe(res);
+      try {
+        r(url).pipe(res);
+      } catch (err) {
+        this._logger.error(`Failed to proxy blob request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy blob request: ${err.message}`);
+      }
       return;
     }
 
@@ -232,7 +237,12 @@ class HelixServer extends EventEmitter {
       const url = `https://use.typekit.net/${rgx[1]}`;
       this._logger.debug(`helix fonts, proxying to ${url}`);
       // proxy to typekit CDN
-      r(url).pipe(res);
+      try {
+        r(url).pipe(res);
+      } catch (err) {
+        this._logger.error(`Failed to proxy font request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy font request: ${err.message}`);
+      }
       return;
     }
 
@@ -257,12 +267,17 @@ class HelixServer extends EventEmitter {
       const url = `https://${algoliaAppID}-dsn.algolia.net${urlPath}`;
       this._logger.debug(`helix query, proxying to ${url}`);
       // proxy to algolia endpoint
-      r(url, {
-        headers: {
-          'X-Algolia-Application-Id': algoliaAppID,
-          'X-Algolia-API-Key': algoliaAPIKey,
-        },
-      }).pipe(res);
+      try {
+        r(url, {
+          headers: {
+            'X-Algolia-Application-Id': algoliaAppID,
+            'X-Algolia-API-Key': algoliaAPIKey,
+          },
+        }).pipe(res);
+      } catch (err) {
+        this._logger.error(`Failed to proxy font request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy font request: ${err.message}`);
+      }
       return;
     }
 
