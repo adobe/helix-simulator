@@ -275,8 +275,8 @@ class HelixServer extends EventEmitter {
           },
         }).pipe(res);
       } catch (err) {
-        this._logger.error(`Failed to proxy font request ${ctx.path}: ${err.message}`);
-        res.status(502).send(`Failed to proxy font request: ${err.message}`);
+        this._logger.error(`Failed to proxy query request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy query request: ${err.message}`);
       }
       return;
     }
