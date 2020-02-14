@@ -257,7 +257,7 @@ describe('Helix Server', () => {
     }
 
     nock(`https://${algoliaAppID}-dsn.algolia.net`)
-      .get('/1/indexes/local--default--blog-posts?query=*&filters=&page=1&hitsPerPage=25')
+      .get('/1/indexes/local--default--blog-posts?query=*&hitsPerPage=25')
       .reply(handler);
 
     try {
