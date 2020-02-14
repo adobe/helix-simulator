@@ -219,18 +219,30 @@ class HelixServer extends EventEmitter {
     // check for helix blobs
     let rgx = HELIX_BLOB_REGEXP.exec(ctx.path);
     if (rgx) {
-      const loc = `https://hlx.blob.core.windows.net/external/${rgx[1]}`;
-      this._logger.debug(`helix blob, redirecting to ${loc}`);
-      res.redirect(loc);
+      const url = `https://hlx.blob.core.windows.net/external/${rgx[1]}`;
+      this._logger.debug(`helix blob, proxying to ${url}`);
+      // proxy to azure blob storage
+      try {
+        r(url).pipe(res);
+      } catch (err) {
+        this._logger.error(`Failed to proxy blob request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy blob request: ${err.message}`);
+      }
       return;
     }
 
     // check for helix fonts
     rgx = HELIX_FONTS_REGEXP.exec(ctx.path);
     if (rgx) {
-      const loc = `https://use.typekit.net/${rgx[1]}`;
-      this._logger.debug(`helix fonts, redirecting to ${loc}`);
-      res.redirect(loc);
+      const url = `https://use.typekit.net/${rgx[1]}`;
+      this._logger.debug(`helix fonts, proxying to ${url}`);
+      // proxy to typekit CDN
+      try {
+        r(url).pipe(res);
+      } catch (err) {
+        this._logger.error(`Failed to proxy font request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy font request: ${err.message}`);
+      }
       return;
     }
 
@@ -255,12 +267,17 @@ class HelixServer extends EventEmitter {
       const url = `https://${algoliaAppID}-dsn.algolia.net${urlPath}`;
       this._logger.debug(`helix query, proxying to ${url}`);
       // proxy to algolia endpoint
-      r(url, {
-        headers: {
-          'X-Algolia-Application-Id': algoliaAppID,
-          'X-Algolia-API-Key': algoliaAPIKey,
-        },
-      }).pipe(res);
+      try {
+        r(url, {
+          headers: {
+            'X-Algolia-Application-Id': algoliaAppID,
+            'X-Algolia-API-Key': algoliaAPIKey,
+          },
+        }).pipe(res);
+      } catch (err) {
+        this._logger.error(`Failed to proxy query request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy query request: ${err.message}`);
+      }
       return;
     }
 

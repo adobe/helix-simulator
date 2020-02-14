@@ -186,7 +186,7 @@ describe('Helix Server', () => {
     }
   });
 
-  it('deliver redirect for blobs requests', async () => {
+  it('proxy blobs requests to azure blob storage', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
@@ -194,16 +194,20 @@ describe('Helix Server', () => {
       .withHttpPort(0)
       .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
+
+    nock('https://hlx.blob.core.windows.net')
+      .get('/external/098af326aa856bb42ce9a21240cf73d6f64b0b45')
+      .reply(() => [200, '', {}]);
+
     try {
       await project.start();
-      const res = await assertHttp(`http://localhost:${project.server.port}/hlx_098af326aa856bb42ce9a21240cf73d6f64b0b45.png`, 302);
-      assert.equal(res.headers.location, 'https://hlx.blob.core.windows.net/external/098af326aa856bb42ce9a21240cf73d6f64b0b45');
+      await assertHttp(`http://localhost:${project.server.port}/hlx_098af326aa856bb42ce9a21240cf73d6f64b0b45.png`, 200);
     } finally {
       await project.stop();
     }
   });
 
-  it('deliver redirect for fonts requests', async () => {
+  it('proxy fonts requests to typekit CDN', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
@@ -211,16 +215,20 @@ describe('Helix Server', () => {
       .withHttpPort(0)
       .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
+
+    nock('https://use.typekit.net')
+      .get('/pnv6nym.css')
+      .reply(() => [200, '', {}]);
+
     try {
       await project.start();
-      const res = await assertHttp(`http://localhost:${project.server.port}/hlx_fonts/pnv6nym.css`, 302);
-      assert.equal(res.headers.location, 'https://use.typekit.net/pnv6nym.css');
+      await assertHttp(`http://localhost:${project.server.port}/hlx_fonts/pnv6nym.css`, 200);
     } finally {
       await project.stop();
     }
   });
 
-  it('proxies query requests to algolia', async () => {
+  it('proxy query requests to algolia endpoint', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
 
     const idxCfg = new IndexConfig()
