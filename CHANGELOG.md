@@ -1,3 +1,10 @@
+## [3.1.2](https://github.com/adobe/helix-simulator/compare/v3.1.1...v3.1.2) (2020-02-14)
+
+
+### Bug Fixes
+
+* **HelixServer:** server-side reverse proxies instead of client-side redirects ([#387](https://github.com/adobe/helix-simulator/issues/387)) ([#390](https://github.com/adobe/helix-simulator/issues/390)) ([1392732](https://github.com/adobe/helix-simulator/commit/13927321e15d592ef2735dec742a26642744eae0))
+
 ## [3.1.1](https://github.com/adobe/helix-simulator/compare/v3.1.0...v3.1.1) (2020-02-13)
 
 
