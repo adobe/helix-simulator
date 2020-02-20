@@ -1,3 +1,225 @@
+## [3.1.4](https://github.com/adobe/helix-simulator/compare/v3.1.3...v3.1.4) (2020-02-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.15 ([#394](https://github.com/adobe/helix-simulator/issues/394)) ([0fb10c2](https://github.com/adobe/helix-simulator/commit/0fb10c2bc49b4b7864365e83f44ecee7f65344ef))
+
+## [3.1.3](https://github.com/adobe/helix-simulator/compare/v3.1.2...v3.1.3) (2020-02-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v5.2.1 ([b3a199f](https://github.com/adobe/helix-simulator/commit/b3a199f19d5be12e15942879ce03d22bb2a2fae5))
+
+## [3.1.2](https://github.com/adobe/helix-simulator/compare/v3.1.1...v3.1.2) (2020-02-14)
+
+
+### Bug Fixes
+
+* **HelixServer:** server-side reverse proxies instead of client-side redirects ([#387](https://github.com/adobe/helix-simulator/issues/387)) ([#390](https://github.com/adobe/helix-simulator/issues/390)) ([1392732](https://github.com/adobe/helix-simulator/commit/13927321e15d592ef2735dec742a26642744eae0))
+
+## [3.1.1](https://github.com/adobe/helix-simulator/compare/v3.1.0...v3.1.1) (2020-02-13)
+
+
+### Bug Fixes
+
+* **HelixServer:** handle case where index name is not found ([d9bd145](https://github.com/adobe/helix-simulator/commit/d9bd1453ab78df44c1f1b3873e5a1f1a09674794))
+* **HelixServer:** use code strain for query ([4b05cc9](https://github.com/adobe/helix-simulator/commit/4b05cc9816aa762a4fde934f75b58b50efae0e40))
+
+# [3.1.0](https://github.com/adobe/helix-simulator/compare/v3.0.9...v3.1.0) (2020-02-13)
+
+
+### Features
+
+* **HelixServer:** Implement Aloglia Proxy similar to VCL ([#385](https://github.com/adobe/helix-simulator/issues/385)) ([#389](https://github.com/adobe/helix-simulator/issues/389)) ([3f4a20c](https://github.com/adobe/helix-simulator/commit/3f4a20c82b2c7831914553ec0dae3e239baf8936))
+
+## [3.0.9](https://github.com/adobe/helix-simulator/compare/v3.0.8...v3.0.9) (2020-02-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v5.2.0 ([5eb6025](https://github.com/adobe/helix-simulator/commit/5eb60254597d66b2103f3f9dc4a431784375a3b0))
+
+## [3.0.8](https://github.com/adobe/helix-simulator/compare/v3.0.7...v3.0.8) (2020-02-11)
+
+
+### Bug Fixes
+
+* **server:** add support for fonts redirects ([#384](https://github.com/adobe/helix-simulator/issues/384)) ([#386](https://github.com/adobe/helix-simulator/issues/386)) ([c30c14a](https://github.com/adobe/helix-simulator/commit/c30c14af894790a2c826cbdb34d9a8d8f7c9634c))
+
+## [3.0.7](https://github.com/adobe/helix-simulator/compare/v3.0.6...v3.0.7) (2020-02-05)
+
+
+### Bug Fixes
+
+* **params:** assign action/body and querystring to params ([d91f6a3](https://github.com/adobe/helix-simulator/commit/d91f6a3d91cbb82add9b27823d4e57138cb7109b))
+* **params:** assign querystring to params in case of cgi-bin ([ee944a3](https://github.com/adobe/helix-simulator/commit/ee944a32337863ac8ed146420702e43289f7e0ef))
+* **params:** some parameters are not available in CGI ([16de18b](https://github.com/adobe/helix-simulator/commit/16de18bf2487a5bf8da2caf05cdc34d56a2c0583))
+* **params:** some parameters are not available in CGI ([aede49b](https://github.com/adobe/helix-simulator/commit/aede49b55936a2fc5fbe703dffff3bab19e8236c))
+* **params:** use __hlx_ prefix in CGI actions ([2a4f45a](https://github.com/adobe/helix-simulator/commit/2a4f45a223048e95c1d5a46e0b1986002b8bda72))
+
+## [3.0.6](https://github.com/adobe/helix-simulator/compare/v3.0.5...v3.0.6) (2020-02-04)
+
+
+### Bug Fixes
+
+* **deps:** update nodesi dependenc ([57d8d16](https://github.com/adobe/helix-simulator/commit/57d8d16bf7c00b8d1a5366484b6c18853c345fbb))
+
+## [3.0.5](https://github.com/adobe/helix-simulator/compare/v3.0.4...v3.0.5) (2020-01-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v5.1.0 ([1268655](https://github.com/adobe/helix-simulator/commit/1268655008ee9dbe2df3d8fa12fa1d22536a5fc2))
+
+## [3.0.4](https://github.com/adobe/helix-simulator/compare/v3.0.3...v3.0.4) (2020-01-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.14 ([d4ff56b](https://github.com/adobe/helix-simulator/commit/d4ff56b77caeb904a41ab55fae44292697501dfc))
+* **server:** add support for azure blobs ([#373](https://github.com/adobe/helix-simulator/issues/373)) ([e2ccf9a](https://github.com/adobe/helix-simulator/commit/e2ccf9a01b2681b1cf60812c1638162e307203a0)), closes [#372](https://github.com/adobe/helix-simulator/issues/372)
+
+## [3.0.3](https://github.com/adobe/helix-simulator/compare/v3.0.2...v3.0.3) (2020-01-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-log to v4.5.0 ([d142217](https://github.com/adobe/helix-simulator/commit/d142217c87415c01579f0eaed679c7d4f549bef3))
+
+## [3.0.2](https://github.com/adobe/helix-simulator/compare/v3.0.1...v3.0.2) (2020-01-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.13 ([#369](https://github.com/adobe/helix-simulator/issues/369)) ([68d82a6](https://github.com/adobe/helix-simulator/commit/68d82a6f5136582b59c5995660f684dceed18dec))
+
+## [3.0.1](https://github.com/adobe/helix-simulator/compare/v3.0.0...v3.0.1) (2020-01-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v5 ([#365](https://github.com/adobe/helix-simulator/issues/365)) ([02617be](https://github.com/adobe/helix-simulator/commit/02617be9e70a317908abac868f4759921410dd33))
+
+# [3.0.0](https://github.com/adobe/helix-simulator/compare/v2.17.11...v3.0.0) (2020-01-16)
+
+
+### Features
+
+* **log:** use helix-log ([#359](https://github.com/adobe/helix-simulator/issues/359)) ([3825e96](https://github.com/adobe/helix-simulator/commit/3825e96f89d9f54360da8501202227aec8eb4892)), closes [#345](https://github.com/adobe/helix-simulator/issues/345)
+
+
+### BREAKING CHANGES
+
+* **log:** no longer compatible with winston logger.
+
+## [2.17.11](https://github.com/adobe/helix-simulator/compare/v2.17.10...v2.17.11) (2020-01-14)
+
+
+### Bug Fixes
+
+* **ci:** update to node 10 ([#364](https://github.com/adobe/helix-simulator/issues/364)) ([e532a8d](https://github.com/adobe/helix-simulator/commit/e532a8d0b1dd2dde5efd510fa963d5000edf172a))
+* **deps:** update dependency @adobe/git-server to v1.0.12 ([d1b9b7b](https://github.com/adobe/helix-simulator/commit/d1b9b7b87b38701b1b2c72c7fda6dc5a861d0975))
+
+## [2.17.10](https://github.com/adobe/helix-simulator/compare/v2.17.9...v2.17.10) (2020-01-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.11 ([#360](https://github.com/adobe/helix-simulator/issues/360)) ([bc264d9](https://github.com/adobe/helix-simulator/commit/bc264d9cbfd3e1db131b80029c48b4955fa14931))
+
+## [2.17.9](https://github.com/adobe/helix-simulator/compare/v2.17.8...v2.17.9) (2019-12-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v3.3.0 ([20b5f77](https://github.com/adobe/helix-simulator/commit/20b5f771eb7be81c798ae3512b5f071bafff1957))
+
+## [2.17.8](https://github.com/adobe/helix-simulator/compare/v2.17.7...v2.17.8) (2019-12-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v3.2.0 ([1dfcda5](https://github.com/adobe/helix-simulator/commit/1dfcda56261ee21d98b993500c1c88959686160a))
+
+## [2.17.7](https://github.com/adobe/helix-simulator/compare/v2.17.6...v2.17.7) (2019-12-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.10 ([6f1f7aa](https://github.com/adobe/helix-simulator/commit/6f1f7aab25f48781cb40c16fd9375ac55a526a3e))
+
+## [2.17.6](https://github.com/adobe/helix-simulator/compare/v2.17.5...v2.17.6) (2019-12-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.9 ([#349](https://github.com/adobe/helix-simulator/issues/349)) ([46d77d7](https://github.com/adobe/helix-simulator/commit/46d77d7a73251c59764753ee742cee28151aa9dc))
+
+## [2.17.5](https://github.com/adobe/helix-simulator/compare/v2.17.4...v2.17.5) (2019-11-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.6 ([3eb5ed0](https://github.com/adobe/helix-simulator/commit/3eb5ed0a5a950cf13db202de4ac46634111809bf))
+
+## [2.17.4](https://github.com/adobe/helix-simulator/compare/v2.17.3...v2.17.4) (2019-11-19)
+
+
+### Bug Fixes
+
+* **server:** modules required from src fail loading ([#344](https://github.com/adobe/helix-simulator/issues/344)) ([4f1a1a9](https://github.com/adobe/helix-simulator/commit/4f1a1a9d0dc4c119db72c34ce83f65ab57da9d65)), closes [#343](https://github.com/adobe/helix-simulator/issues/343)
+
+## [2.17.3](https://github.com/adobe/helix-simulator/compare/v2.17.2...v2.17.3) (2019-11-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.5 ([553d136](https://github.com/adobe/helix-simulator/commit/553d1365869d83f69a8a5a4e9a4c78eb44ed77fa))
+
+## [2.17.2](https://github.com/adobe/helix-simulator/compare/v2.17.1...v2.17.2) (2019-11-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.4 ([#338](https://github.com/adobe/helix-simulator/issues/338)) ([f0feb9f](https://github.com/adobe/helix-simulator/commit/f0feb9f32af69d9471cc09fa8474899b5e5a746c))
+
+## [2.17.1](https://github.com/adobe/helix-simulator/compare/v2.17.0...v2.17.1) (2019-11-06)
+
+
+### Bug Fixes
+
+* **lgtm:** ensure that hostname matches correctly ([#337](https://github.com/adobe/helix-simulator/issues/337)) ([c715f26](https://github.com/adobe/helix-simulator/commit/c715f261b9f6279ccf3d0baab049c36356f41cf6))
+
+# [2.17.0](https://github.com/adobe/helix-simulator/compare/v2.16.3...v2.17.0) (2019-11-06)
+
+
+### Features
+
+* **server:** use GITHUB_TOKEN when available to fetch static content ([#335](https://github.com/adobe/helix-simulator/issues/335)) ([a058cc1](https://github.com/adobe/helix-simulator/commit/a058cc149d48f52267f19a77a0a1c9bd65474dcf)), closes [#330](https://github.com/adobe/helix-simulator/issues/330)
+
+## [2.16.3](https://github.com/adobe/helix-simulator/compare/v2.16.2...v2.16.3) (2019-11-06)
+
+
+### Bug Fixes
+
+* **deps:** update any ([#336](https://github.com/adobe/helix-simulator/issues/336)) ([3c58280](https://github.com/adobe/helix-simulator/commit/3c582807b7ae07a3952433a911dc8533b60af386))
+
+## [2.16.2](https://github.com/adobe/helix-simulator/compare/v2.16.1...v2.16.2) (2019-11-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.2 ([#334](https://github.com/adobe/helix-simulator/issues/334)) ([5bd3eb3](https://github.com/adobe/helix-simulator/commit/5bd3eb381a488bf39595120ea6feb17e0337144a))
+
+## [2.16.1](https://github.com/adobe/helix-simulator/compare/v2.16.0...v2.16.1) (2019-11-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.0.1 ([#333](https://github.com/adobe/helix-simulator/issues/333)) ([1417bdb](https://github.com/adobe/helix-simulator/commit/1417bdba71083e8b917e34483797e26034be6ac8))
+
 # [2.16.0](https://github.com/adobe/helix-simulator/compare/v2.15.0...v2.16.0) (2019-10-31)
 
 

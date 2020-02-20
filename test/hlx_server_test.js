@@ -13,13 +13,15 @@
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
 
+const os = require('os');
 const assert = require('assert');
 const fse = require('fs-extra');
 const http = require('http');
 const path = require('path');
 const uuidv4 = require('uuid/v4');
 const shell = require('shelljs');
-const { GitUrl } = require('@adobe/helix-shared');
+const nock = require('nock');
+const { GitUrl, IndexConfig } = require('@adobe/helix-shared');
 const HelixProject = require('../src/HelixProject.js');
 
 if (!shell.which('git')) {
@@ -90,7 +92,7 @@ async function assertHttp(config, status, spec, subst) {
                 assert.equal(data.toString().trim(), expected.trim());
               }
             }
-            resolve();
+            resolve(res);
           } catch (e) {
             reject(e);
           }
@@ -127,7 +129,13 @@ describe('Helix Server', () => {
   });
 
   afterEach(async () => {
-    await fse.remove(testRoot);
+    if (os.platform() === 'win32') {
+      // Note: the async variant of remove hangs on windows, probably due to open filehandle to
+      // logs/request.log
+      fse.removeSync(testRoot);
+    } else {
+      await fse.remove(testRoot);
+    }
   });
 
   it('deliver rendered resource', async () => {
@@ -135,7 +143,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -150,7 +159,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -165,11 +175,117 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/docs`, 302);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('proxy blobs requests to azure blob storage', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    nock('https://hlx.blob.core.windows.net')
+      .get('/external/098af326aa856bb42ce9a21240cf73d6f64b0b45')
+      .reply(() => [200, '', {}]);
+
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/hlx_098af326aa856bb42ce9a21240cf73d6f64b0b45.png`, 200);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('proxy fonts requests to typekit CDN', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    nock('https://use.typekit.net')
+      .get('/pnv6nym.css')
+      .reply(() => [200, '', {}]);
+
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/hlx_fonts/pnv6nym.css`, 200);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('proxy query requests to algolia endpoint', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+
+    const idxCfg = new IndexConfig()
+      .withConfigPath(path.resolve(path.join(SPEC_ROOT, 'local'), 'helix-index.yaml'));
+    await idxCfg.init();
+
+    const algoliaAppID = 'fake-id';
+    const algoliaAPIKey = 'fake-key';
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withIndexConfig(idxCfg)
+      .withAlgoliaAppID(algoliaAppID)
+      .withAlgoliaAPIKey(algoliaAPIKey)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    function handler() {
+      if (this.req.headers['x-algolia-api-key'] === algoliaAPIKey
+        && this.req.headers['x-algolia-application-id'] === algoliaAppID) {
+        return [200, '', {}];
+      }
+      return [403, '', {}];
+    }
+
+    nock(`https://${algoliaAppID}-dsn.algolia.net`)
+      .get('/1/indexes/local--default--blog-posts?query=*&hitsPerPage=25')
+      .reply(handler);
+
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 200);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('proxies query requests to algolia (no index configuration found)', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
+
+    const algoliaAppID = 'fake-id';
+    const algoliaAPIKey = 'fake-key';
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withAlgoliaAppID(algoliaAppID)
+      .withAlgoliaAPIKey(algoliaAPIKey)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 404);
     } finally {
       await project.stop();
     }
@@ -180,7 +296,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -198,7 +315,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -216,7 +334,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -242,7 +361,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -259,7 +379,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -274,7 +395,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -289,7 +411,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -304,7 +427,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -319,7 +443,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -335,7 +460,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -350,7 +476,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -365,7 +492,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -380,7 +508,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -395,7 +524,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -415,7 +545,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     project.registerGitRepository(apiRepo, apiUrl);
     try {
@@ -436,6 +567,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withBuildDir('./build')
       .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'))
       .withRequestOverride({
         headers: {
           host: '127.0.0.1',
@@ -457,6 +589,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withBuildDir('./build')
       .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'))
       .withRequestOverride({
         headers: {
           host: '127.0.0.1',
@@ -477,7 +610,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
 
     const proxyDir = await setupProject(path.join(SPEC_ROOT, 'proxy'), testRoot, false);
@@ -485,6 +619,7 @@ describe('Helix Server', () => {
       .withCwd(proxyDir)
       .withBuildDir('./build')
       .withHttpPort(0)
+      .withLogsDir(path.resolve(proxyDir, 'logs'))
       .withRequestOverride({
         headers: {
           host: 'proxy.local',
@@ -516,7 +651,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
 
     const proxyDir = await setupProject(path.join(SPEC_ROOT, 'proxy'), testRoot, false);
@@ -524,6 +660,7 @@ describe('Helix Server', () => {
       .withCwd(proxyDir)
       .withBuildDir('./build')
       .withHttpPort(0)
+      .withLogsDir(path.resolve(proxyDir, 'logs'))
       .withRequestOverride({
         headers: {
           host: 'proxy.local',
@@ -555,7 +692,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
 
     const proxyDir = await setupProject(path.join(SPEC_ROOT, 'proxy'), testRoot, false);
@@ -563,6 +701,7 @@ describe('Helix Server', () => {
       .withCwd(proxyDir)
       .withBuildDir('./build')
       .withHttpPort(0)
+      .withLogsDir(path.resolve(proxyDir, 'logs'))
       .withRequestOverride({
         headers: {
           host: 'proxy.local',
@@ -595,6 +734,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withBuildDir('./build')
       .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'))
       .withRequestOverride({
         headers: {
           host: 'proxy.local',
@@ -607,6 +747,7 @@ describe('Helix Server', () => {
       .withCwd(proxyDir)
       .withBuildDir('./build')
       .withHttpPort(0)
+      .withLogsDir(path.resolve(proxyDir, 'logs'))
       .withRequestOverride({
         headers: {
           host: 'proxy.local',
@@ -639,7 +780,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -664,7 +806,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -679,7 +822,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -694,7 +838,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -713,7 +858,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -728,7 +874,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -744,7 +891,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -759,7 +907,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -774,7 +923,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -789,7 +939,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -804,7 +955,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -819,7 +971,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -843,6 +996,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withBuildDir('./build')
       .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'))
       .withActionParams(fakeParams);
 
     await project.init();
@@ -863,6 +1017,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withBuildDir('./build')
       .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'))
       .withActionParams(fakeParams);
     await project.init();
     try {
@@ -879,7 +1034,8 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
@@ -905,11 +1061,68 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/cgi-bin/post.js`, 200, 'expected_cgi.txt');
+    } finally {
+      await project.stop();
+    }
+  });
+});
+
+describe('Private Repo Tests', () => {
+  let testRoot;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+  });
+
+  afterEach(async () => {
+    if (os.platform() === 'win32') {
+      // Note: the async variant of remove hangs on windows, probably due to open filehandle to
+      // logs/request.log
+      fse.removeSync(testRoot);
+    } else {
+      await fse.remove(testRoot);
+    }
+    nock.cleanAll();
+  });
+
+  it('deliver static resource from private repository', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'remote'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withActionParams({
+        GITHUB_TOKEN: '1234',
+      })
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    function handler() {
+      if (this.req.headers.authorization === 'Bearer 1234') {
+        return [
+          200,
+          'This is a static resource.',
+          { 'content-type': 'text/plain' },
+        ];
+      }
+      return [401, '', { }];
+    }
+
+    nock('https://raw.github.com')
+      .get('/Adobe-Marketing-Cloud/reactor-user-docs/master/welcome.txt')
+      .reply(handler);
+    nock('https://raw.githubusercontent.com')
+      .get('/Adobe-Marketing-Cloud/reactor-user-docs/master/welcome.txt')
+      .reply(handler);
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
     } finally {
       await project.stop();
     }

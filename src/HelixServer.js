@@ -11,18 +11,22 @@
  */
 
 const EventEmitter = require('events');
-const path = require('path');
 const { Module } = require('module');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const NodeESI = require('nodesi');
+const r = require('request');
 const rp = require('request-promise-native');
-const { Logger } = require('@adobe/helix-shared');
+const { SimpleInterface } = require('@adobe/helix-log');
 const querystring = require('querystring');
 const utils = require('./utils.js');
 const packageJson = require('../package.json');
 
 const RequestContext = require('./RequestContext.js');
+
+const HELIX_BLOB_REGEXP = /^\/hlx_([0-9a-f]{40}).(jpg|jpeg|png|webp|gif)$/;
+const HELIX_FONTS_REGEXP = /^\/hlx_fonts\/(.+)$/;
+const HELIX_QUERY_REGEXP = /^\/_query\/(.+)\/(.+)$/;
 
 const DEFAULT_PORT = 3000;
 
@@ -53,12 +57,11 @@ async function executeTemplate(ctx) {
 
   /* eslint-disable no-underscore-dangle */
   const nodeModulePathsFn = Module._nodeModulePaths;
-  const buildDirPat = `${ctx.config.buildDir}${path.sep}`;
   Module._nodeModulePaths = function nodeModulePaths(from) {
     let paths = nodeModulePathsFn.call(this, from);
 
-    // only tweak module path for scripts in build dir
-    if (from === ctx.config.buildDir || from.startsWith(buildDirPat)) {
+    // only tweak module path for scripts in build or src dir
+    if (ctx.config.isModulePath(from)) {
       // the runtime paths take precedence. see #147
       paths = ctx.config.runtimeModulePaths.concat(paths);
     }
@@ -80,28 +83,27 @@ async function executeTemplate(ctx) {
     __ow_headers: owHeaders,
     __ow_method: ctx.method.toLowerCase(),
     __ow_logger: ctx.logger,
-    owner: ctx.strain.content.owner,
-    repo: ctx.strain.content.repo,
-    ref: ctx.strain.content.ref || 'master',
-    path: `${ctx.resourcePath}.md`,
-    selector: ctx._selector,
-    extension: ctx._extension,
-    rootPath: ctx._mount,
-    params: querystring.stringify(ctx._params),
-    REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
-    REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
   };
 
-  if (ctx.body) {
-    // add post params to action params
-    Object.keys(ctx.body).forEach((key) => {
-      actionParams[key] = ctx.body[key];
-    });
-  }
-  if (ctx.actionParams) {
-    // add argument action params
-    Object.keys(ctx.actionParams).forEach((key) => {
-      actionParams[key] = ctx.actionParams[key];
+  Object.assign(actionParams, ctx.actionParams, ctx.body);
+  if (ctx.url.match(/^\/cgi-bin\//)) {
+    Object.assign(actionParams, {
+      __hlx_owner: ctx.strain.content.owner,
+      __hlx_repo: ctx.strain.content.repo,
+      __hlx_ref: ctx.strain.content.ref || 'master',
+    }, ctx._params);
+  } else {
+    Object.assign(actionParams, {
+      owner: ctx.strain.content.owner,
+      repo: ctx.strain.content.repo,
+      ref: ctx.strain.content.ref || 'master',
+      path: `${ctx.resourcePath}.md`,
+      selector: ctx._selector,
+      extension: ctx._extension,
+      rootPath: ctx._mount,
+      params: querystring.stringify(ctx._params),
+      REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
+      REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
     });
   }
   return Promise.resolve(mod.main(actionParams));
@@ -126,7 +128,14 @@ class HelixServer extends EventEmitter {
    */
   async init() {
     /* eslint-disable no-underscore-dangle */
-    this._logger = this._project._logger || Logger.getLogger('hlx');
+    this._logger = this._project._logger;
+    if (!this._logger) {
+      this._logger = new SimpleInterface({
+        defaultFields: {
+          category: 'hlx',
+        },
+      });
+    }
   }
 
   /**
@@ -204,6 +213,71 @@ class HelixServer extends EventEmitter {
     this._logger.debug(`current strain: ${ctx.strain.name}: ${JSON.stringify(ctx.strain.toJSON({ minimal: true, keepFormat: true }), null, 2)}`);
 
     if (await this.handleProxy(ctx, req, res)) {
+      return;
+    }
+
+    // check for helix blobs
+    let rgx = HELIX_BLOB_REGEXP.exec(ctx.path);
+    if (rgx) {
+      const url = `https://hlx.blob.core.windows.net/external/${rgx[1]}`;
+      this._logger.debug(`helix blob, proxying to ${url}`);
+      // proxy to azure blob storage
+      try {
+        r(url).pipe(res);
+      } catch (err) {
+        this._logger.error(`Failed to proxy blob request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy blob request: ${err.message}`);
+      }
+      return;
+    }
+
+    // check for helix fonts
+    rgx = HELIX_FONTS_REGEXP.exec(ctx.path);
+    if (rgx) {
+      const url = `https://use.typekit.net/${rgx[1]}`;
+      this._logger.debug(`helix fonts, proxying to ${url}`);
+      // proxy to typekit CDN
+      try {
+        r(url).pipe(res);
+      } catch (err) {
+        this._logger.error(`Failed to proxy font request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy font request: ${err.message}`);
+      }
+      return;
+    }
+
+    // check for helix query
+    rgx = HELIX_QUERY_REGEXP.exec(ctx.path);
+    if (rgx) {
+      const [, indexName, queryName] = rgx;
+      const { owner, repo } = ctx.strain.code;
+      const { algoliaAppID, algoliaAPIKey, indexConfig } = ctx.config;
+
+      if (!indexConfig) {
+        res.status(404).send('no index configuration found');
+        return;
+      }
+      const urlPath = indexConfig.getQueryURL(
+        indexName, queryName, owner, repo, ctx.params,
+      );
+      if (!urlPath) {
+        res.status(404).send('index not found');
+        return;
+      }
+      const url = `https://${algoliaAppID}-dsn.algolia.net${urlPath}`;
+      this._logger.debug(`helix query, proxying to ${url}`);
+      // proxy to algolia endpoint
+      try {
+        r(url, {
+          headers: {
+            'X-Algolia-Application-Id': algoliaAppID,
+            'X-Algolia-API-Key': algoliaAPIKey,
+          },
+        }).pipe(res);
+      } catch (err) {
+        this._logger.error(`Failed to proxy query request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy query request: ${err.message}`);
+      }
       return;
     }
 

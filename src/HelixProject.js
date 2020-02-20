@@ -13,7 +13,8 @@
 const fs = require('fs-extra');
 const { URL } = require('url');
 const path = require('path');
-const { Logger, HelixConfig } = require('@adobe/helix-shared');
+const { SimpleInterface, deriveLogger } = require('@adobe/helix-log');
+const { HelixConfig } = require('@adobe/helix-shared');
 const HelixServer = require('./HelixServer.js');
 const GitManager = require('./GitManager.js');
 const TemplateResolver = require('./TemplateResolver.js');
@@ -31,7 +32,7 @@ async function isDirectory(dirPath) {
 class HelixProject {
   constructor() {
     this._cwd = process.cwd();
-    this._srcDir = '';
+    this._srcDirs = [];
     this._repoPath = '';
     this._cfg = null;
     this._buildDir = DEFAULT_BUILD_DIR;
@@ -39,9 +40,13 @@ class HelixProject {
     this._params = {};
     this._server = new HelixServer(this);
     this._logger = null;
+    this._logsDir = null;
     this._requestOverride = null;
     this._gitMgr = null;
     this._templateResolver = null;
+    this._indexConfig = null;
+    this._algoliaAppID = null;
+    this._algoliaAPIKey = null;
   }
 
   withCwd(cwd) {
@@ -82,18 +87,42 @@ class HelixProject {
     return this;
   }
 
+  withLogsDir(dir) {
+    this._logsDir = dir;
+    return this;
+  }
+
   withRequestOverride(value) {
     this._requestOverride = value;
     return this;
   }
 
   withSourceDir(value) {
-    this._srcDir = value;
+    if (Array.isArray(value)) {
+      this._srcDirs.push(...value);
+    } else {
+      this._srcDirs.push(value);
+    }
     return this;
   }
 
   withActionParams(value) {
     this._params = value;
+    return this;
+  }
+
+  withIndexConfig(indexConfig) {
+    this._indexConfig = indexConfig;
+    return this;
+  }
+
+  withAlgoliaAppID(value) {
+    this._algoliaAppID = value;
+    return this;
+  }
+
+  withAlgoliaAPIKey(value) {
+    this._algoliaAPIKey = value;
     return this;
   }
 
@@ -138,6 +167,18 @@ class HelixProject {
     return this._templateResolver;
   }
 
+  get indexConfig() {
+    return this._indexConfig;
+  }
+
+  get algoliaAppID() {
+    return this._algoliaAppID;
+  }
+
+  get algoliaAPIKey() {
+    return this._algoliaAPIKey;
+  }
+
   /**
    * Returns the helix server
    * @returns {HelixServer}
@@ -147,15 +188,14 @@ class HelixProject {
   }
 
   async checkPaths() {
-    if (!this._srcDir) {
-      const srcPath = path.join(this._cwd, SRC_DIR);
+    if (this._srcDirs.length === 0) {
+      const srcPath = path.resolve(this._cwd, SRC_DIR);
       if (await isDirectory(srcPath)) {
-        this._srcDir = srcPath;
+        this._srcDirs.push(srcPath);
       }
     }
-
+    this._srcDirs = this._srcDirs.map((s) => (path.resolve(this._cwd, s)));
     this._buildDir = path.resolve(this._cwd, this._buildDir);
-
     const dotGitPath = path.join(this._cwd, GIT_DIR);
     if (await isDirectory(dotGitPath)) {
       this._repoPath = path.resolve(dotGitPath, '../');
@@ -201,7 +241,7 @@ class HelixProject {
   async invalidateCache() {
     // we simple remove all entries from the node cache that fall below the build or src directory
     Object.keys(require.cache).forEach((file) => {
-      if (file.startsWith(this._buildDir) || (this._srcDir && file.startsWith(this._srcDir)) || file.indexOf('/cgi-bin') > 0) {
+      if (this.isModulePath(file)) {
         delete require.cache[file];
         this.log.debug(`evicted ${path.relative(this._cwd, file)}`);
       }
@@ -209,18 +249,48 @@ class HelixProject {
     await this._templateResolver.init();
   }
 
+  /**
+   * Checks whether the given file path is a potential module path. i.e. if it is in the
+   * build, source or cgi-bin location.
+   *
+   * @param {string} filepath The path to check
+   * @return {boolean} {@code true} if the filepath is a module path.
+   */
+  isModulePath(filepath) {
+    if (!this._checkPaths) {
+      this._checkPaths = [this._buildDir, ...this._srcDirs];
+      this._checkPathsP = this._checkPaths.map((p) => (`${p}${path.sep}`));
+    }
+    return (this._checkPaths.indexOf(filepath) >= 0)
+      || (this._checkPathsP.findIndex((p) => (filepath.startsWith(p))) >= 0);
+  }
+
   async init() {
     if (!this._logger) {
-      this._logger = Logger.getLogger({
-        category: 'hlx',
+      this._logger = new SimpleInterface({
         level: 'debug',
+        defaultFields: {
+          category: 'hlx',
+        },
+        filter: (fields) => {
+          // eslint-disable-next-line no-param-reassign
+          fields.message[0] = `[${fields.category}] ${fields.message[0]}`;
+          // eslint-disable-next-line no-param-reassign
+          delete fields.category;
+          return fields;
+        },
       });
     } else {
-      this._logger = this._logger.getLogger('hlx');
+      this._logger = deriveLogger(this._logger, {
+        defaultFields: {
+          category: 'hlx',
+        },
+      });
     }
     this._gitMgr = new GitManager()
       .withCwd(this._cwd)
-      .withLogger(this._logger);
+      .withLogger(this._logger)
+      .withLogsDir(this._logsDir);
 
     if (!this._cfg) {
       this._cfg = await new HelixConfig()
@@ -230,7 +300,7 @@ class HelixProject {
 
     await this.checkPaths();
 
-    if (!this._srcDir) {
+    if (this._srcDirs.length === 0) {
       throw new Error('Invalid config. No "src" directory.');
     }
 
@@ -247,9 +317,9 @@ class HelixProject {
       log.info(` /_//_/\\__/_/_//_\\_\\ v${this._displayVersion}`);
       log.info('                         ');
     }
-    log.debug('Initialized helix-config with: ');
-    log.debug(`     srcPath: ${this._srcDir}`);
-    log.debug(`    buildDir: ${this._buildDir}`);
+    log.debug('Initialized helix-project with: ');
+    log.debug(`    srcPaths: ${this._srcDirs.map((d) => (path.relative(this._cwd, d)))}`);
+    log.debug(`    buildDir: ${path.relative(this._cwd, this._buildDir)}`);
     return this;
   }
 
