@@ -216,7 +216,7 @@ class HelixProject {
     const strains = this.config.strains.getByFilter((strain) => {
       // try selecting strain by condition
       if (strain.condition) {
-        return strain.condition.toFunction()(request);
+        return strain.condition.match(request);
       }
       // fallback to selecting strain by urls
       if (strain.urls.length === 0) {

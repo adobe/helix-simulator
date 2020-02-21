@@ -21,7 +21,7 @@ const path = require('path');
 const uuidv4 = require('uuid/v4');
 const shell = require('shelljs');
 const nock = require('nock');
-const { GitUrl, IndexConfig } = require('@adobe/helix-shared');
+const { GitUrl, IndexConfig, Condition } = require('@adobe/helix-shared');
 const HelixProject = require('../src/HelixProject.js');
 
 if (!shell.which('git')) {
@@ -530,7 +530,7 @@ describe('Helix Server', () => {
     try {
       await project.start();
       // hack in correct port for hostname matching
-      project.config.strains.get('dev').urls = [`http://127.0.0.1:${project.server.port}`];
+      project.config.strains.get('dev').condition = new Condition({ url: `http://127.0.0.1:${project.server.port}` });
       await assertHttp(`http://127.0.0.1:${project.server.port}/index.json`, 200, 'expected_index_dev.json');
     } finally {
       await project.stop();
@@ -552,8 +552,8 @@ describe('Helix Server', () => {
     try {
       await project.start();
       // hack in correct port for hostname matching
-      project.config.strains.get('default').urls = [`http://127.0.0.1:${project.server.port}`];
-      project.config.strains.get('api').urls = [`http://127.0.0.1:${project.server.port}/api`];
+      project.config.strains.get('default').condition = new Condition({ url: `http://127.0.0.1:${project.server.port}` });
+      project.config.strains.get('api').condition = new Condition({ url: `http://127.0.0.1:${project.server.port}/api` });
       await assertHttp(`http://127.0.0.1:${project.server.port}/api/introduction.html`, 200, 'expected_api_introduction.html');
       await assertHttp(`http://127.0.0.1:${project.server.port}/api/welcome.txt`, 200, 'expected_api_welcome.txt');
     } finally {

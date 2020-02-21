@@ -40,12 +40,15 @@ module.exports = class RequestContext {
     this._wskActivationId = utils.randomChars(32, true);
     this._requestId = utils.randomChars(32);
     this._cdnRequestId = utils.uuid();
-    this._strain = cfg.selectStrain({ ...req, path: this._path });
-    // TODO: should evaluate condition if available
-    // if (this._strain.condition) {
-    //   this._strain.condition.
-    // }
-    if (this._strain.urls.length > 0) {
+
+    const reqP = { ...req, path: this._path };
+    this._strain = cfg.selectStrain(reqP);
+    if (this._strain.condition) {
+      // ugly: we have to re-execute the match op because selectStrain
+      //       just remembers the strain, not the match result
+      const match = this._strain.condition.match(reqP);
+      this._mount = match.baseURL || '';
+    } else if (this._strain.urls.length > 0) {
       this._mount = parse(this._strain.urls[0]).pathname.replace(/\/+$/, '');
     } else {
       this._mount = '';
