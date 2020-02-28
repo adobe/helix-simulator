@@ -207,39 +207,6 @@ class HelixProject {
     if (request.cookies) {
       const cstrain = this.config.strains.get(request.cookies['X-Strain']);
       if (cstrain) {
-        return cstrain;
-      }
-    }
-    const host = request && request.headers ? request.headers.host : '';
-    const reqPath = `${request && request.path && request.path.replace(/\/+$/, '') ? request.path : ''}/`;
-
-    const strains = this.config.strains.getByFilter((strain) => {
-      // try selecting strain by condition
-      if (strain.condition) {
-        return strain.condition.match(request);
-      }
-      // fallback to selecting strain by urls
-      if (strain.urls.length === 0) {
-        return false;
-      }
-      const uri = new URL(strain.urls[0]);
-      if (uri.host !== host) {
-        return false;
-      }
-      const uriPath = `${uri.pathname.replace(/\/+$/, '')}/`;
-      return reqPath.indexOf(uriPath) === 0;
-    });
-    if (strains.length > 0) {
-      return strains[0];
-    }
-    return this.config.strains.get('default');
-  }
-
-  matchStrain(request) {
-    // look for X-Strain cookie first
-    if (request.cookies) {
-      const cstrain = this.config.strains.get(request.cookies['X-Strain']);
-      if (cstrain) {
         return { strain: cstrain };
       }
     }

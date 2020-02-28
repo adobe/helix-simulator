@@ -41,14 +41,11 @@ module.exports = class RequestContext {
     this._requestId = utils.randomChars(32);
     this._cdnRequestId = utils.uuid();
 
-    if (cfg.matchStrain) {
-      ({
-        strain: this._strain,
-        mount: this._mount,
-      } = cfg.matchStrain({ ...req, path: this._path }));
-    } else {
-      this._strain = cfg.selectStrain({ ...req, path: this._path });
-    }
+    ({
+      strain: this._strain,
+      mount: this._mount,
+    } = cfg.selectStrain({ ...req, path: this._path }));
+
     if (!this._mount) {
       if (this._strain.urls.length > 0) {
         this._mount = parse(this._strain.urls[0]).pathname.replace(/\/+$/, '');

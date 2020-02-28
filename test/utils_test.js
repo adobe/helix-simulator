@@ -20,25 +20,29 @@ const utils = require('../src/utils.js');
 
 const mockConfig = {
   selectStrain() {
-    return new Strain({
-      name: 'default',
-      code: 'https://localhost/helix/local.git',
-      content: 'https://localhost/helix/local.git',
-      static: 'https://localhost/helix/local.git',
-      url: 'http://www.foo.com/docs',
-    });
+    return {
+      strain: new Strain({
+        name: 'default',
+        code: 'https://localhost/helix/local.git',
+        content: 'https://localhost/helix/local.git',
+        static: 'https://localhost/helix/local.git',
+        url: 'http://www.foo.com/docs',
+      }),
+    };
   },
 };
 
 const mockConfigContentDir = {
   selectStrain() {
-    return new Strain({
-      name: 'default',
-      code: 'https://localhost/helix/local.git',
-      content: 'https://localhost/helix/local.git/api',
-      static: 'https://localhost/helix/local.git',
-      url: 'http://www.foo.com/docs',
-    });
+    return {
+      strain: new Strain({
+        name: 'default',
+        code: 'https://localhost/helix/local.git',
+        content: 'https://localhost/helix/local.git/api',
+        static: 'https://localhost/helix/local.git',
+        url: 'http://www.foo.com/docs',
+      }),
+    };
   },
 };
 
