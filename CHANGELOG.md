@@ -1,3 +1,15 @@
+# [4.0.0](https://github.com/adobe/helix-simulator/compare/v3.1.7...v4.0.0) (2020-03-01)
+
+
+### Features
+
+* **server:** support for new condition language ([c7b95f2](https://github.com/adobe/helix-simulator/commit/c7b95f269608da0000fbe04cbb41a782a8a7e136)), closes [#277](https://github.com/adobe/helix-simulator/issues/277)
+
+
+### BREAKING CHANGES
+
+* **server:** selectStrain() returns an object consisting of strain and mount
+
 ## [3.1.7](https://github.com/adobe/helix-simulator/compare/v3.1.6...v3.1.7) (2020-02-26)
 
 
