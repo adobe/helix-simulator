@@ -207,27 +207,40 @@ class HelixProject {
     if (request.cookies) {
       const cstrain = this.config.strains.get(request.cookies['X-Strain']);
       if (cstrain) {
-        return cstrain;
+        return { strain: cstrain };
       }
     }
-    // todo: use strain conditions, once implemented. for now, just use request.headers.host
     const host = request && request.headers ? request.headers.host : '';
     const reqPath = `${request && request.path && request.path.replace(/\/+$/, '') ? request.path : ''}/`;
-    const strains = this.config.strains.getByFilter((strain) => {
-      if (strain.urls.length === 0) {
-        return false;
-      }
-      const uri = new URL(strain.urls[0]);
-      if (uri.host !== host) {
-        return false;
-      }
-      const uriPath = `${uri.pathname.replace(/\/+$/, '')}/`;
-      return reqPath.indexOf(uriPath) === 0;
-    });
-    if (strains.length > 0) {
-      return strains[0];
+
+    const matches = [...this.config.strains.values()]
+      .map((strain) => ({ strain, mount: null }))
+      .filter((info) => {
+        const { strain } = info;
+        // try selecting strain by condition
+        if (strain.condition) {
+          const result = strain.condition.match(request);
+          if (result.baseURL) {
+            // eslint-disable-next-line no-param-reassign
+            info.mount = result.baseURL;
+          }
+          return !!result;
+        }
+        // fallback to selecting strain by urls
+        if (strain.urls.length === 0) {
+          return false;
+        }
+        const uri = new URL(strain.urls[0]);
+        if (uri.host !== host) {
+          return false;
+        }
+        const uriPath = `${uri.pathname.replace(/\/+$/, '')}/`;
+        return reqPath.indexOf(uriPath) === 0;
+      });
+    if (matches.length > 0) {
+      return matches[0];
     }
-    return this.config.strains.get('default');
+    return { strain: this.config.strains.get('default') };
   }
 
   /**

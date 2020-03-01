@@ -26,7 +26,7 @@ describe('Helix Project - Strain Select', () => {
     const project = new HelixProject()
       .withHelixConfig(cfg);
 
-    assert.equal(project.selectStrain({}).name, 'default');
+    assert.equal(project.selectStrain({}).strain.name, 'default');
   });
 
   it('selects local strain ', async () => {
@@ -40,7 +40,7 @@ describe('Helix Project - Strain Select', () => {
       headers: {
         host: 'localhost:3000',
       },
-    }).name, 'local');
+    }).strain.name, 'local');
   });
 
   it('selects local docs strain ', async () => {
@@ -55,7 +55,7 @@ describe('Helix Project - Strain Select', () => {
       headers: {
         host: 'localhost:3000',
       },
-    }).name, 'localdocs');
+    }).strain.name, 'localdocs');
   });
 
   it('selects local docs api strain ', async () => {
@@ -70,7 +70,7 @@ describe('Helix Project - Strain Select', () => {
       headers: {
         host: 'localhost:3000',
       },
-    }).name, 'localdocs-api');
+    }).strain.name, 'localdocs-api');
   });
 
   it('selects local docs api strain with slash', async () => {
@@ -85,7 +85,7 @@ describe('Helix Project - Strain Select', () => {
       headers: {
         host: 'localhost:3000',
       },
-    }).name, 'localdocs-api');
+    }).strain.name, 'localdocs-api');
   });
 
   it('selects local docs api strain for deep', async () => {
@@ -100,7 +100,7 @@ describe('Helix Project - Strain Select', () => {
       headers: {
         host: 'localhost:3000',
       },
-    }).name, 'localdocs-api');
+    }).strain.name, 'localdocs-api');
   });
 
   it('selects website strain ', async () => {
@@ -114,7 +114,7 @@ describe('Helix Project - Strain Select', () => {
       headers: {
         host: 'project-helix.io',
       },
-    }).name, 'website');
+    }).strain.name, 'website');
   });
 
   it('selects strain from cookie', async () => {
@@ -128,13 +128,13 @@ describe('Helix Project - Strain Select', () => {
       cookies: {
         foo: 'bar',
       },
-    }).name, 'default', 'returns default strain if no X-Strain cookie found');
+    }).strain.name, 'default', 'returns default strain if no X-Strain cookie found');
 
     assert.equal(project.selectStrain({
       cookies: {
         'X-Strain': 'foo',
       },
-    }).name, 'default', 'returns default strain if X-Strain cookie invalid');
+    }).strain.name, 'default', 'returns default strain if X-Strain cookie invalid');
 
     assert.equal(project.selectStrain({
       headers: {
@@ -143,7 +143,7 @@ describe('Helix Project - Strain Select', () => {
       cookies: {
         'X-Strain': 'foo',
       },
-    }).name, 'website', 'returns host based strain if X-Strain cookie invalid');
+    }).strain.name, 'website', 'returns host based strain if X-Strain cookie invalid');
 
     assert.equal(project.selectStrain({
       headers: {
@@ -152,6 +152,6 @@ describe('Helix Project - Strain Select', () => {
       cookies: {
         'X-Strain': 'localdocs',
       },
-    }).name, 'localdocs', 'returns X-Strain cookie instead of host based strain');
+    }).strain.name, 'localdocs', 'returns X-Strain cookie instead of host based strain');
   });
 });
