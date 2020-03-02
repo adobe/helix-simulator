@@ -1,3 +1,10 @@
+## [4.0.1](https://github.com/adobe/helix-simulator/compare/v4.0.0...v4.0.1) (2020-03-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v6.0.1 ([#404](https://github.com/adobe/helix-simulator/issues/404)) ([3ca47eb](https://github.com/adobe/helix-simulator/commit/3ca47eb1afc0a002682cf30a073f205f6cd2bcef))
+
 # [4.0.0](https://github.com/adobe/helix-simulator/compare/v3.1.7...v4.0.0) (2020-03-01)
 
 
