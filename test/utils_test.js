@@ -80,6 +80,7 @@ describe('Utils Test', () => {
           'X-Old-Url': '/docs/index.foo.html',
           'X-Repo-Root-Path': '/api',
           'X-Strain': 'default',
+          'X-CDN-URL': 'http://localhost/docs/index.foo.html',
         },
       },
       {
@@ -116,6 +117,7 @@ describe('Utils Test', () => {
           'X-Old-Url': '/content/index.foo.html',
           'X-Repo-Root-Path': '',
           'X-Strain': 'default',
+          'X-CDN-URL': 'http://localhost/content/index.foo.html',
           h1: '1',
         },
       },
@@ -159,6 +161,9 @@ describe('Utils Test', () => {
           headers: t.headers,
           body: t.body || undefined,
           method: t.method || undefined,
+          originalUrl: t.url,
+          protocol: 'http',
+          get: (key) => (key === 'host' ? 'localhost' : ''),
         };
         const p = new RequestContext(mockReq, t.config || mockConfig);
         assert.equal(p.url, t.url);
