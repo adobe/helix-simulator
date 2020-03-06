@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/adobe/helix-simulator/compare/v4.0.2...v4.1.0) (2020-03-06)
+
+
+### Features
+
+* **request:** support for X-CDN-URL header ([55a9dc7](https://github.com/adobe/helix-simulator/commit/55a9dc7997fe6a039adfae08bc21fc20a8462d60))
+
 ## [4.0.2](https://github.com/adobe/helix-simulator/compare/v4.0.1...v4.0.2) (2020-03-03)
 
 
