@@ -54,6 +54,7 @@ describe('Template Resolver', () => {
       it(`resolves template script for ${t.url} correctly`, async () => {
         const mockReq = {
           url: t.url,
+          get: (key) => (key === 'host' ? 'localhost' : ''),
         };
         const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
         ctx.logger = console;
@@ -69,6 +70,7 @@ describe('Template Resolver', () => {
     it('fails for non existent script', async () => {
       const mockReq = {
         url: '/index.nonexistent.html',
+        get: (key) => (key === 'host' ? 'localhost' : ''),
       };
       const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
       ctx.logger = console;
@@ -80,6 +82,7 @@ describe('Template Resolver', () => {
     it('fails for non existent file', async () => {
       const mockReq = {
         url: '/index.noscript.html',
+        get: (key) => (key === 'host' ? 'localhost' : ''),
       };
       const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
       ctx.logger = console;
@@ -91,6 +94,7 @@ describe('Template Resolver', () => {
     it('fails for directory instead of file', async () => {
       const mockReq = {
         url: '/index.wrong.html',
+        get: (key) => (key === 'host' ? 'localhost' : ''),
       };
       const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
       ctx.logger = console;

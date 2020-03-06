@@ -101,6 +101,7 @@ module.exports = class RequestContext {
       'X-Request-Id': this._requestId,
       'X-Backend-Name': 'localhost--F_Petridish',
       'X-CDN-Request-ID': this._cdnRequestId,
+      'X-CDN-URL': `${request.protocol}://${request.get('host')}${request.originalUrl}`,
       'X-Strain': this._strain.name,
       'X-Old-Url': this._url,
       'X-Repo-Root-Path': repoPath,
