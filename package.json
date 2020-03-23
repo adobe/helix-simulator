@@ -15,7 +15,7 @@
     "lint": "./node_modules/.bin/eslint ."
   },
   "dependencies": {
-    "@adobe/git-server": "1.1.1",
+    "@adobe/git-server": "1.1.2",
     "@adobe/helix-log": "4.5.1",
     "@adobe/helix-shared": "6.0.4",
     "colors": "^1.3.0",
