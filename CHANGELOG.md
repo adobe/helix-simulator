@@ -1,3 +1,10 @@
+## [4.1.7](https://github.com/adobe/helix-simulator/compare/v4.1.6...v4.1.7) (2020-03-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency fs-extra to v9 ([#415](https://github.com/adobe/helix-simulator/issues/415)) ([90791e0](https://github.com/adobe/helix-simulator/commit/90791e0f0d6cc55822eed2cb2ca2fd9622817839))
+
 ## [4.1.6](https://github.com/adobe/helix-simulator/compare/v4.1.5...v4.1.6) (2020-03-23)
 
 
