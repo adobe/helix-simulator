@@ -26,8 +26,11 @@ const mockConfig = {
         code: 'https://localhost/helix/local.git',
         content: 'https://localhost/helix/local.git',
         static: 'https://localhost/helix/local.git',
-        url: 'http://www.foo.com/docs',
+        condition: {
+          url: 'http://www.foo.com/docs',
+        },
       }),
+      mount: '/docs',
     };
   },
 };
@@ -40,8 +43,11 @@ const mockConfigContentDir = {
         code: 'https://localhost/helix/local.git',
         content: 'https://localhost/helix/local.git/api',
         static: 'https://localhost/helix/local.git',
-        url: 'http://www.foo.com/docs',
+        condition: {
+          url: 'http://www.foo.com/docs',
+        },
       }),
+      mount: '/docs',
     };
   },
 };
