@@ -20,10 +20,12 @@ strains:
     static: *localRepo
 
   proxy_help:
-    url: http://proxy.local/help
+    condition:
+      url: http://proxy.local/help
     origin: http://127.0.0.1:3000/developer-help
 
   proxy:
-    url: http://proxy.local/
+    condition:
+      url: http://proxy.local
     origin: http://127.0.0.1:3000/
 
