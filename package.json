@@ -2,7 +2,10 @@
   "name": "@adobe/helix-simulator",
   "version": "4.1.14",
   "description": "Helix Testing Environment",
-  "repository": "https://github.com/adobe/helix-simulator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adobe/helix-simulator.git"
+  },
   "main": "src/index.js",
   "license": "Apache-2.0",
   "scripts": {
@@ -60,5 +63,9 @@
     "ghooks": {
       "pre-commit": "npx lint-staged"
     }
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/adobe/helix-simulator/issues"
+  },
+  "homepage": "https://github.com/adobe/helix-simulator#readme"
 }
