@@ -74,8 +74,8 @@ async function assertHttp(config, status, spec, subst) {
         })
         .on('end', () => {
           try {
+            const dat = Buffer.concat(data);
             if (spec) {
-              const dat = Buffer.concat(data);
               let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
               const repl = (_isFunction(subst) ? subst() : subst) || {};
               Object.keys(repl).forEach((k) => {
@@ -92,7 +92,7 @@ async function assertHttp(config, status, spec, subst) {
                 assert.equal(data.toString().trim(), expected.trim());
               }
             }
-            resolve(res);
+            resolve(dat.toString('utf-8'));
           } catch (e) {
             reject(e);
           }
@@ -1123,6 +1123,58 @@ describe('Private Repo Tests', () => {
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
+    } finally {
+      await project.stop();
+    }
+  });
+});
+
+describe('Content Proxy Tests', () => {
+  let testRoot;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+  });
+
+  afterEach(async () => {
+    if (os.platform() === 'win32') {
+      // Note: the async variant of remove hangs on windows, probably due to open filehandle to
+      // logs/request.log
+      fse.removeSync(testRoot);
+    } else {
+      await fse.remove(testRoot);
+    }
+    nock.cleanAll();
+  });
+
+  it('delivers local github content first.', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'contentproxy'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    nock('https://adobeioruntime.net')
+      .get('/api/v1/web/helix/helix-services/content-proxy@v1?owner=local&repo=default&path=%2Fms%2Ffoo.docx&ignore=github')
+      .reply(200, '# Hello\n\ndocx\n');
+    try {
+      await project.start();
+      const ret = JSON.parse(await assertHttp(`http://localhost:${project.server.port}/index.html`, 200));
+
+      // fetch header from internal content proxy. should return local github variant
+      const url = new URL(ret.CONTENT_PROXY_URL);
+      url.searchParams.append('owner', ret.owner);
+      url.searchParams.append('repo', ret.repo);
+      url.searchParams.append('path', '/header.md');
+      await assertHttp(url.toString(), 200, 'expected_header.md');
+
+      // fetch document from onedrive
+      url.searchParams.set('path', '/ms/foo.docx');
+      await assertHttp(url.toString(), 200, 'expected_docx.md');
+
+      // console.log(content);
     } finally {
       await project.stop();
     }

@@ -45,71 +45,6 @@ function safeCycles() {
   return guardCycles;
 }
 
-/**
- * Executes the template and resolves with the content.
- * @param {RequestContext} ctx Context
- * @return {Promise} A promise that resolves to generated output.
- */
-async function executeTemplate(ctx) {
-  // the compiled script does not bundle the modules that are required for execution, since it
-  // expects them to be provided by the runtime. We tweak the module loader here in order to
-  // inject the project module paths.
-
-  /* eslint-disable no-underscore-dangle */
-  const nodeModulePathsFn = Module._nodeModulePaths;
-  Module._nodeModulePaths = function nodeModulePaths(from) {
-    let paths = nodeModulePathsFn.call(this, from);
-
-    // only tweak module path for scripts in build or src dir
-    if (ctx.config.isModulePath(from)) {
-      // the runtime paths take precedence. see #147
-      paths = ctx.config.runtimeModulePaths.concat(paths);
-    }
-    return paths;
-  };
-
-  // eslint-disable-next-line import/no-dynamic-require,global-require
-  const mod = require(ctx.templatePath);
-
-  // openwhisk uses lowercase header names
-  const owHeaders = {};
-  Object.keys(ctx.wskHeaders).forEach((k) => {
-    owHeaders[k.toLowerCase()] = ctx.wskHeaders[k];
-  });
-
-  Module._nodeModulePaths = nodeModulePathsFn;
-
-  const actionParams = {
-    __ow_headers: owHeaders,
-    __ow_method: ctx.method.toLowerCase(),
-    __ow_logger: ctx.logger,
-  };
-
-  Object.assign(actionParams, ctx.actionParams, ctx.body);
-  if (ctx.url.match(/^\/cgi-bin\//)) {
-    Object.assign(actionParams, {
-      __hlx_owner: ctx.strain.content.owner,
-      __hlx_repo: ctx.strain.content.repo,
-      __hlx_ref: ctx.strain.content.ref || 'master',
-    }, ctx._params);
-  } else {
-    Object.assign(actionParams, {
-      owner: ctx.strain.content.owner,
-      repo: ctx.strain.content.repo,
-      ref: ctx.strain.content.ref || 'master',
-      path: `${ctx.resourcePath}.md`,
-      selector: ctx._selector,
-      extension: ctx._extension,
-      rootPath: ctx._mount,
-      params: querystring.stringify(ctx._params),
-      REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
-      REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
-    });
-  }
-  return Promise.resolve(mod.main(actionParams));
-  /* eslint-enable no-underscore-dangle */
-}
-
 class HelixServer extends EventEmitter {
   /**
    * Creates a new HelixServer for the given project.
@@ -139,6 +74,72 @@ class HelixServer extends EventEmitter {
   }
 
   /**
+   * Executes the template and resolves with the content.
+   * @param {RequestContext} ctx Context
+   * @return {Promise} A promise that resolves to generated output.
+   */
+  async executeTemplate(ctx) {
+    // the compiled script does not bundle the modules that are required for execution, since it
+    // expects them to be provided by the runtime. We tweak the module loader here in order to
+    // inject the project module paths.
+
+    /* eslint-disable no-underscore-dangle */
+    const nodeModulePathsFn = Module._nodeModulePaths;
+    Module._nodeModulePaths = function nodeModulePaths(from) {
+      let paths = nodeModulePathsFn.call(this, from);
+
+      // only tweak module path for scripts in build or src dir
+      if (ctx.config.isModulePath(from)) {
+        // the runtime paths take precedence. see #147
+        paths = ctx.config.runtimeModulePaths.concat(paths);
+      }
+      return paths;
+    };
+
+    // eslint-disable-next-line import/no-dynamic-require,global-require
+    const mod = require(ctx.templatePath);
+
+    // openwhisk uses lowercase header names
+    const owHeaders = {};
+    Object.keys(ctx.wskHeaders).forEach((k) => {
+      owHeaders[k.toLowerCase()] = ctx.wskHeaders[k];
+    });
+
+    Module._nodeModulePaths = nodeModulePathsFn;
+
+    const actionParams = {
+      __ow_headers: owHeaders,
+      __ow_method: ctx.method.toLowerCase(),
+      __ow_logger: ctx.logger,
+    };
+
+    Object.assign(actionParams, ctx.actionParams, ctx.body);
+    if (ctx.url.match(/^\/cgi-bin\//)) {
+      Object.assign(actionParams, {
+        __hlx_owner: ctx.strain.content.owner,
+        __hlx_repo: ctx.strain.content.repo,
+        __hlx_ref: ctx.strain.content.ref || 'master',
+      }, ctx._params);
+    } else {
+      Object.assign(actionParams, {
+        owner: ctx.strain.content.owner,
+        repo: ctx.strain.content.repo,
+        ref: ctx.strain.content.ref || 'master',
+        path: `${ctx.resourcePath}.md`,
+        selector: ctx._selector,
+        extension: ctx._extension,
+        rootPath: ctx._mount,
+        params: querystring.stringify(ctx._params),
+        REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
+        REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
+        CONTENT_PROXY_URL: `http://localhost:${this._port}/__internal__/content-proxy`,
+      });
+    }
+    return Promise.resolve(mod.main(actionParams));
+    /* eslint-enable no-underscore-dangle */
+  }
+
+  /**
    * Handles a dynamic request by resolving the template and then executing it.
    * The processing is rejected, if the template returns a 404 status code.
    * @param {RequestContext} ctx the request context
@@ -152,7 +153,7 @@ class HelixServer extends EventEmitter {
       return false;
     }
 
-    const result = await executeTemplate(ctx);
+    const result = await this.executeTemplate(ctx);
     if (!result) {
       throw new Error('Response is empty, don\'t know what to do');
     }
@@ -199,6 +200,22 @@ class HelixServer extends EventEmitter {
       res.status(500).send();
     }
     return true;
+  }
+
+  /**
+   * Handles the request the content proxy.
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   */
+  async handleContentProxy(req, res) {
+    try {
+      const ctx = new RequestContext(req, this._project);
+      ctx.logger = this._logger;
+      await utils.proxyToContentProxy(ctx, req, res);
+    } catch (err) {
+      this._logger.error(`Error during proxy: ${err.stack || err}`);
+      res.status(500).send();
+    }
   }
 
   /**
@@ -340,6 +357,7 @@ class HelixServer extends EventEmitter {
     this._app.use(express.json());
 
     const handler = this.handleRequest.bind(this);
+    this._app.get('/__internal__/content-proxy', this.handleContentProxy.bind(this));
     this._app.get('*', handler);
     this._app.post('*', handler);
   }

@@ -15,6 +15,7 @@ const request = require('request-promise-native');
 const requestNative = require('request');
 const crypto = require('crypto');
 const { Socket } = require('net');
+const { MountConfig } = require('@adobe/helix-shared');
 
 const utils = {
 
@@ -114,6 +115,88 @@ const utils = {
     ctx.logger.info(`Proxy ${req.method} request to ${url}`);
     return new Promise((resolve, reject) => {
       req.pipe(requestNative(url)
+        .on('error', reject)
+        .on('end', resolve)).pipe(res);
+    });
+  },
+
+  /**
+   * Fetches the content from the content proxy
+   * @param {RequestContext} ctx Context
+   * @param {Request} req The original express request
+   * @param {Response} res The express response
+   * @return {Promise} A promise that resolves when the stream is done.
+   */
+  async proxyToContentProxy(ctx, req, res) {
+    let { path: resourcePath } = req.query;
+    const idxLastSlash = resourcePath.lastIndexOf('/');
+    const idx = resourcePath.indexOf('.', idxLastSlash + 1);
+    const ext = resourcePath.substring(idx + 1);
+    resourcePath = resourcePath.substring(0, idx);
+
+    const contentUrl = ctx.strain.content;
+
+    // try to fetch from github first
+    const githubUrl = `${contentUrl.raw}${contentUrl.path}${req.query.path}`;
+    ctx.logger.info(`content proxy: try loading from github first: ${githubUrl}`);
+    try {
+      const response = await request({
+        method: 'GET',
+        uri: githubUrl,
+        resolveWithFullResponse: true,
+        encoding: null,
+      });
+      ctx.logger.info(`content proxy: try loading from github first: ${githubUrl}: ${response.statusCode}`);
+      res.type(ext);
+      res.send(response.body);
+      return true;
+    } catch (e) {
+      const status = (e.response && e.response.statusCode) || 500;
+      ctx.logger[status === 404 ? 'info' : 'error'](`content proxy: ${githubUrl} does not exist. ${status} ${e.error}`);
+      if (status !== 404) {
+        res.status(status).send();
+        return true;
+      }
+    }
+    // ignore some well known files
+    if (['/head.md', '/header.md', '/footer.md'].indexOf(req.query.path) >= 0) {
+      res.status(404).send();
+      return true;
+    }
+
+    // load fstab
+    const mount = await new MountConfig()
+      .withRepoURL(ctx.strain.content)
+      .init();
+
+    // mountpoint
+    const mp = mount.match(resourcePath);
+    if (!mp || !mp.type) {
+      res.status(404).send();
+      return true;
+    }
+
+    // todo: use correct namespace ??
+    const url = new URL('https://adobeioruntime.net/api/v1/web/helix/helix-services/content-proxy@v1');
+
+    const { originalContent } = ctx.strain;
+    Object.entries(req.query).forEach(([key, value]) => {
+      if (key === 'REPO_RAW_ROOT') {
+        // todo: potentially specify different root
+      } else if (key === 'repo' && originalContent) {
+        url.searchParams.append(key, originalContent.repo);
+      } else if (key === 'owner' && originalContent) {
+        url.searchParams.append(key, originalContent.owner);
+      } else {
+        url.searchParams.append(key, value);
+      }
+    });
+    // make content-proxy to ignore github
+    url.searchParams.append('ignore', 'github');
+    ctx.logger.info(`content proxy: proxy to ${url}`);
+
+    return new Promise((resolve, reject) => {
+      req.pipe(requestNative(url.toString())
         .on('error', reject)
         .on('end', resolve)).pipe(res);
     });
