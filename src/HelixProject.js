@@ -210,6 +210,13 @@ class HelixProject {
         return { strain: cstrain };
       }
     }
+    // check for request params (content proxy emulation)
+    if (request.params && request.params.strain) {
+      const cstrain = this.config.strains.get(request.params.strain);
+      if (cstrain) {
+        return { strain: cstrain };
+      }
+    }
     const host = request && request.headers ? request.headers.host : '';
     const reqPath = `${request && request.path && request.path.replace(/\/+$/, '') ? request.path : ''}/`;
 

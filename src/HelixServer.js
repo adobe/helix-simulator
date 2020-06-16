@@ -132,7 +132,7 @@ class HelixServer extends EventEmitter {
         params: querystring.stringify(ctx._params),
         REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
         REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
-        CONTENT_PROXY_URL: `http://localhost:${this._port}/__internal__/content-proxy`,
+        CONTENT_PROXY_URL: `http://localhost:${this._port}/__internal__/content-proxy/${ctx.strain.name}`,
       });
     }
     return Promise.resolve(mod.main(actionParams));
@@ -357,7 +357,7 @@ class HelixServer extends EventEmitter {
     this._app.use(express.json());
 
     const handler = this.handleRequest.bind(this);
-    this._app.get('/__internal__/content-proxy', this.handleContentProxy.bind(this));
+    this._app.get('/__internal__/content-proxy/:strain', this.handleContentProxy.bind(this));
     this._app.get('*', handler);
     this._app.post('*', handler);
   }
