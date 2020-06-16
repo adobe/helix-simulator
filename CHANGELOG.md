@@ -1,3 +1,10 @@
+## [4.2.1](https://github.com/adobe/helix-simulator/compare/v4.2.0...v4.2.1) (2020-06-16)
+
+
+### Bug Fixes
+
+* ensure that content proxy forwards github token ([#459](https://github.com/adobe/helix-simulator/issues/459)) ([eb1adda](https://github.com/adobe/helix-simulator/commit/eb1adda7f21e0066bba129503673f0f1100736a9))
+
 # [4.2.0](https://github.com/adobe/helix-simulator/compare/v4.1.18...v4.2.0) (2020-06-16)
 
 
