@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/adobe/helix-simulator/compare/v4.1.18...v4.2.0) (2020-06-16)
+
+
+### Features
+
+* content proxy support ([#452](https://github.com/adobe/helix-simulator/issues/452)) ([dc512e6](https://github.com/adobe/helix-simulator/commit/dc512e631d27d8f2c2dba20e004b5c6f803df73c))
+
 ## [4.1.18](https://github.com/adobe/helix-simulator/compare/v4.1.17...v4.1.18) (2020-06-15)
 
 
