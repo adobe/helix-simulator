@@ -140,11 +140,18 @@ const utils = {
     const githubUrl = `${contentUrl.raw}${contentUrl.path}${req.query.path}`;
     ctx.logger.info(`content proxy: try loading from github first: ${githubUrl}`);
     try {
+      let auth = null;
+      if (req.headers['x-github-token']) {
+        auth = {
+          bearer: req.headers['x-github-token'],
+        };
+      }
       const response = await request({
         method: 'GET',
         uri: githubUrl,
         resolveWithFullResponse: true,
         encoding: null,
+        auth,
       });
       ctx.logger.info(`content proxy: try loading from github first: ${githubUrl}: ${response.statusCode}`);
       res.type(ext);
