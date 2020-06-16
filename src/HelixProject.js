@@ -363,6 +363,8 @@ class HelixProject {
     const contentUrl = await this._gitMgr.resolve(strain.content);
     if (contentUrl) {
       // eslint-disable-next-line no-param-reassign
+      strain.originalContent = strain.content;
+      // eslint-disable-next-line no-param-reassign
       strain.content = contentUrl;
     }
     const staticUrl = await this._gitMgr.resolve(strain.static.url);

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>${content.title}</title>
+  <link rel="stylesheet" href="static/styles.css"/>
+</head>
+<body>
+
+<h1>Lars was here</h1>
+<div data-sly-list="${content.children}">
+  <div class="container-fluid">${item}</div>
+</div>
+
+<div class="container-fluid">
+  <em>generated at ${content.time}</em>
+</div>
+
+</body>
+</html>
