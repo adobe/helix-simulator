@@ -237,6 +237,14 @@ module.exports = class RequestContext {
     return this._queryString;
   }
 
+  /**
+   * The request id.
+   * @returns {String}
+   */
+  get requestId() {
+    return this._requestId;
+  }
+
   get json() {
     const o = {
       url: this.url,

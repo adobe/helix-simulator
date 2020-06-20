@@ -16,13 +16,12 @@
 const os = require('os');
 const assert = require('assert');
 const fse = require('fs-extra');
-const http = require('http');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 const shell = require('shelljs');
 const nock = require('nock');
 const { GitUrl, IndexConfig, Condition } = require('@adobe/helix-shared');
 const HelixProject = require('../src/HelixProject.js');
+const { createTestRoot, setupProject, assertHttp } = require('./utils.js');
 
 if (!shell.which('git')) {
   shell.echo('Sorry, this tests requires git');
@@ -32,94 +31,7 @@ if (!shell.which('git')) {
 // throw a Javascript error when any shell.js command encounters an error
 shell.config.fatal = true;
 
-const _isFunction = (fn) => !!(fn && fn.constructor && fn.call && fn.apply);
-
 const SPEC_ROOT = path.resolve(__dirname, 'specs');
-
-async function createTestRoot() {
-  const dir = path.resolve(__dirname, 'tmp', uuidv4());
-  await fse.ensureDir(dir);
-  return dir;
-}
-
-async function setupProject(srcDir, root, initGit = true) {
-  const dir = path.resolve(root, path.basename(srcDir));
-  await fse.copy(srcDir, dir);
-  if (initGit) {
-    const pwd = shell.pwd();
-    shell.cd(dir);
-    shell.exec('git init');
-    shell.exec('git add -A');
-    shell.exec('git commit -m"initial commit."');
-    shell.cd(pwd);
-  }
-  return dir;
-}
-
-// todo: use replay ?
-
-async function assertHttp(config, status, spec, subst) {
-  return new Promise((resolve, reject) => {
-    const data = [];
-    const requestHandler = (res) => {
-      try {
-        assert.equal(res.statusCode, status);
-      } catch (e) {
-        res.resume();
-        reject(e);
-      }
-      res
-        .on('data', (chunk) => {
-          data.push(chunk);
-        })
-        .on('end', () => {
-          try {
-            const dat = Buffer.concat(data);
-            if (spec) {
-              let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
-              const repl = (_isFunction(subst) ? subst() : subst) || {};
-              Object.keys(repl).forEach((k) => {
-                const reg = new RegExp(k, 'g');
-                expected = expected.replace(reg, repl[k]);
-              });
-              if (/\/json/.test(res.headers['content-type'])) {
-                assert.equal(JSON.parse(dat).params, JSON.parse(expected).params);
-              } else if (/octet-stream/.test(res.headers['content-type'])) {
-                expected = JSON.parse(expected).data;
-                const actual = dat.toString('hex');
-                assert.equal(actual, expected);
-              } else {
-                assert.equal(data.toString().trim(), expected.trim());
-              }
-            }
-            resolve(dat.toString('utf-8'));
-          } catch (e) {
-            reject(e);
-          }
-        });
-    };
-    const errorHandler = (e) => {
-      reject(e);
-    };
-    if (typeof config === 'string') {
-      // use as URL and do GET
-      http.get(config, requestHandler).on('error', errorHandler);
-    } else {
-      // do POST
-      const postStr = config.postData ? JSON.stringify(config.postData) : '';
-      const { options } = config;
-      options.method = 'POST';
-      options.headers = {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postStr),
-      };
-      const req = http.request(options, requestHandler);
-      req.on('error', errorHandler);
-      req.write(postStr);
-      req.end();
-    }
-  });
-}
 
 describe('Helix Server', () => {
   let testRoot;

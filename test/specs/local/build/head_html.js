@@ -11,8 +11,8 @@
  */
 
 /* eslint-disable */
-module.exports.main = function main() {
+module.exports.main = function main(params) {
   return {
-    body: `<!-- wrapper --><html><esi:include src="/index.head.html" /><body><esi:include src="/index.esi2.html" /></body></html><!-- wrapper end -->`,
+    body: `<head><title>Test</title></head>`,
   }
 };

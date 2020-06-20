@@ -18,6 +18,7 @@ const { HelixConfig } = require('@adobe/helix-shared');
 const HelixServer = require('./HelixServer.js');
 const GitManager = require('./GitManager.js');
 const TemplateResolver = require('./TemplateResolver.js');
+const LiveReload = require('./LiveReload.js');
 
 const SRC_DIR = 'src';
 
@@ -47,6 +48,8 @@ class HelixProject {
     this._indexConfig = null;
     this._algoliaAppID = null;
     this._algoliaAPIKey = null;
+    this._liveReload = null;
+    this._enableLiveReload = false;
   }
 
   withCwd(cwd) {
@@ -126,6 +129,11 @@ class HelixProject {
     return this;
   }
 
+  withLiveReload(value) {
+    this._enableLiveReload = value;
+    return this;
+  }
+
   registerGitRepository(repoPath, gitUrl) {
     this._gitMgr.registerServer(repoPath, gitUrl);
     return this;
@@ -177,6 +185,10 @@ class HelixProject {
 
   get algoliaAPIKey() {
     return this._algoliaAPIKey;
+  }
+
+  get liveReload() {
+    return this._liveReload;
   }
 
   /**
@@ -262,6 +274,9 @@ class HelixProject {
       }
     });
     await this._templateResolver.init();
+    if (this.liveReload) {
+      this.liveReload.changed(['/']);
+    }
   }
 
   /**
@@ -302,10 +317,12 @@ class HelixProject {
         },
       });
     }
+    this._liveReload = this._enableLiveReload ? new LiveReload(this._logger) : null;
     this._gitMgr = new GitManager()
       .withCwd(this._cwd)
       .withLogger(this._logger)
-      .withLogsDir(this._logsDir);
+      .withLogsDir(this._logsDir)
+      .withLiveReload(this._liveReload);
 
     if (!this._cfg) {
       this._cfg = await new HelixConfig()
@@ -381,6 +398,12 @@ class HelixProject {
     }
   }
 
+  initLiveReload(app, server) {
+    if (this.liveReload) {
+      this.liveReload.init(app, server);
+    }
+  }
+
   async start() {
     this.log.debug('Launching helix simulation server for development...');
     await this._server.init();
@@ -393,6 +416,9 @@ class HelixProject {
     this.log.debug('Stopping helix simulation server..');
     await this._server.stop();
     await this._gitMgr.stop();
+    if (this.liveReload) {
+      this.liveReload.stop();
+    }
     return this;
   }
 }

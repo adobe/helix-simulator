@@ -35,11 +35,11 @@ const utils = {
   /**
    * Fetches content from the given uri
    * @param {String} uri URL to fetch
-   * @param {Logger} logger the logger
+   * @param {RequestContext} ctx the context
    * @param {object} auth authentication object ({@see https://github.com/request/request#http-authentication})
    * @returns {*} The requested content or NULL if not exists.
    */
-  async fetch(uri, logger, auth) {
+  async fetch(ctx, uri, auth) {
     try {
       const response = await request({
         method: 'GET',
@@ -47,16 +47,19 @@ const utils = {
         resolveWithFullResponse: true,
         encoding: null,
         auth,
+        headers: {
+          'X-Request-Id': ctx.requestId,
+        },
       });
       return response.body;
     } catch (e) {
       if (e.response && e.response.statusCode) {
         if (e.response.statusCode !== 404) {
-          logger.error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
+          ctx.logger.error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
         }
         return null;
       }
-      logger.error(`resource at ${uri} does not exist. ${e.message}`);
+      ctx.logger.error(`resource at ${uri} does not exist. ${e.message}`);
       return null;
     }
   },
@@ -83,7 +86,7 @@ const utils = {
       }
 
       // eslint-disable-next-line no-await-in-loop
-      const data = await utils.fetch(uri, ctx.logger, auth);
+      const data = await utils.fetch(ctx, uri, auth);
       if (data != null) {
         ctx.content = Buffer.from(data, 'utf8');
         return ctx;
@@ -146,12 +149,18 @@ const utils = {
           bearer: req.headers['x-github-token'],
         };
       }
+      const headers = {};
+      const requestId = req.headers['x-request-id'];
+      if (requestId) {
+        headers['x-request-id'] = requestId;
+      }
       const response = await request({
         method: 'GET',
         uri: githubUrl,
         resolveWithFullResponse: true,
         encoding: null,
         auth,
+        headers,
       });
       ctx.logger.info(`content proxy: try loading from github first: ${githubUrl}: ${response.statusCode}`);
       res.type(ext);
