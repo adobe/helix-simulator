@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/adobe/helix-simulator/compare/v4.2.1...v4.3.0) (2020-06-22)
+
+
+### Features
+
+* implement live-reload ([#461](https://github.com/adobe/helix-simulator/issues/461)) ([21a8b69](https://github.com/adobe/helix-simulator/commit/21a8b69e6464ee56a5f8328199595a5ca04b2dff))
+
 ## [4.2.1](https://github.com/adobe/helix-simulator/compare/v4.2.0...v4.2.1) (2020-06-16)
 
 
