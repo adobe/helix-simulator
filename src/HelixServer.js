@@ -152,7 +152,6 @@ class HelixServer extends EventEmitter {
     if (!isResolved) {
       return false;
     }
-
     const result = await this.executeTemplate(ctx);
     if (!result) {
       throw new Error('Response is empty, don\'t know what to do');
@@ -177,6 +176,20 @@ class HelixServer extends EventEmitter {
       body = JSON.stringify(body, safeCycles());
     } else if (/.*\/octet-stream/.test(contentType) || /image\/.*/.test(contentType)) {
       body = Buffer.from(body, 'base64');
+    } else if (ctx.config.liveReload && contentType === 'text/html' && !req.headers['x-esi']) {
+      // inject live reload script
+      let match = body.match(/<\/head>/i);
+      if (!match) {
+        match = body.match(/<\/body>/i);
+      }
+      if (!match) {
+        match = body.match(/<\/html>/i);
+      }
+      // don't inject if no html found at all.
+      if (match) {
+        const { index } = match;
+        body = `${body.substring(0, index)}<script src="/__internal__/livereload.js"></script>${body.substring(index)}`;
+      }
     }
     res.set(headers).status(status).send(body);
     return true;
@@ -316,13 +329,23 @@ class HelixServer extends EventEmitter {
       baseUrl: `http://localhost:${this._port}${req.url}`,
     };
 
+    const { liveReload } = ctx.config;
+    if (liveReload) {
+      liveReload.startRequest(ctx.requestId, ctx.path);
+    }
     try {
       if (await this.handleDynamic(ctx, req, res)) {
+        if (liveReload) {
+          liveReload.endRequest(ctx.requestId);
+        }
         return;
       }
     } catch (e) {
       this._logger.error('error rendering dynamic script: ', e);
       res.status(500).send();
+      if (liveReload) {
+        liveReload.endRequest(ctx.requestId);
+      }
       return;
     }
 
@@ -338,6 +361,9 @@ class HelixServer extends EventEmitter {
       }
       res.status(err.code || 500).send();
     }
+    if (liveReload) {
+      liveReload.endRequest(ctx.requestId);
+    }
   }
 
   async setupApp() {
@@ -348,6 +374,9 @@ class HelixServer extends EventEmitter {
       cache: false,
       httpClient: rp.defaults({
         resolveWithFullResponse: true,
+        headers: {
+          'x-esi': true,
+        },
       }),
     }));
 
@@ -392,6 +421,7 @@ class HelixServer extends EventEmitter {
         this._logger.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
         resolve();
       });
+      this._project.initLiveReload(this._app, this._server);
     });
     await this.setupApp();
   }

@@ -77,6 +77,19 @@ class GitManager {
     this._serversByPath = new Map();
     this._gitState = null;
     this._gitConfig = _.cloneDeep(GIT_SERVER_CONFIG);
+    this._gitConfig.onRawRequest = this._onRawRequest.bind(this);
+    this._liveReload = null;
+  }
+
+  _onRawRequest({ req, repoPath, filePath }) {
+    if (!this._liveReload) {
+      return;
+    }
+    const requestId = req.headers['x-request-id'];
+    if (!requestId) {
+      return;
+    }
+    this._liveReload.registerFile(requestId, path.resolve(repoPath, filePath));
   }
 
   withCwd(cwd) {
@@ -93,6 +106,11 @@ class GitManager {
     if (dir) {
       this._gitConfig.logs.logsDir = dir;
     }
+    return this;
+  }
+
+  withLiveReload(value) {
+    this._liveReload = value;
     return this;
   }
 

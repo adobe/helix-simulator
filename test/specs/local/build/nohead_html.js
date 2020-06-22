@@ -9,10 +9,17 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const { utils } = require('./helper.js');
 
 /* eslint-disable */
-module.exports.main = function main() {
+module.exports.main = function main(params) {
+  if (params.path === '/404.md') {
+    return {
+      statusCode: 404,
+      body: '404 Not Found',
+    };
+  }
   return {
-    body: `<!-- wrapper --><html><esi:include src="/index.head.html" /><body><esi:include src="/index.esi2.html" /></body></html><!-- wrapper end -->`,
+    body: `<html><body>${utils.stamp()} path=${params.path}, strain=${params.__ow_headers['x-strain']}</body></html>`,
   }
 };
