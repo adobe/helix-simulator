@@ -11,12 +11,11 @@
  */
 
 const EventEmitter = require('events');
+const path = require('path').posix;
 const { Module } = require('module');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const NodeESI = require('nodesi');
-const r = require('request');
-const rp = require('request-promise-native');
 const { SimpleInterface } = require('@adobe/helix-log');
 const querystring = require('querystring');
 const utils = require('./utils.js');
@@ -45,6 +44,17 @@ function safeCycles() {
   return guardCycles;
 }
 
+/**
+ * Wraps the route middleware so it can catch potential promise rejections
+ * during the async invocation.
+ *
+ * @param {ExpressMiddleware} fn an extended express middleware function
+ * @returns {ExpressMiddleware} an express middleware function.
+ */
+function asyncHandler(fn) {
+  return (req, res, next) => (Promise.resolve(fn(req, res, next)).catch(next));
+}
+
 class HelixServer extends EventEmitter {
   /**
    * Creates a new HelixServer for the given project.
@@ -56,21 +66,26 @@ class HelixServer extends EventEmitter {
     this._app = express();
     this._port = DEFAULT_PORT;
     this._server = null;
+    this._logger = new SimpleInterface({
+      defaultFields: {
+        category: 'hlx',
+      },
+    });
   }
 
   /**
    * Initializes the server
    */
   async init() {
-    /* eslint-disable no-underscore-dangle */
-    this._logger = this._project._logger;
-    if (!this._logger) {
-      this._logger = new SimpleInterface({
-        defaultFields: {
-          category: 'hlx',
-        },
-      });
-    }
+    this._logger = this._project.log || this.log;
+  }
+
+  /**
+   * Returns the logger.
+   * @returns {Logger} the logger.
+   */
+  get log() {
+    return this._logger;
   }
 
   /**
@@ -110,7 +125,7 @@ class HelixServer extends EventEmitter {
     const actionParams = {
       __ow_headers: owHeaders,
       __ow_method: ctx.method.toLowerCase(),
-      __ow_logger: ctx.logger,
+      __ow_logger: ctx.log,
     };
 
     Object.assign(actionParams, ctx.actionParams, ctx.body);
@@ -206,10 +221,23 @@ class HelixServer extends EventEmitter {
     if (!ctx.strain.isProxy()) {
       return false;
     }
+    const { log } = this;
+    const { origin } = ctx.strain;
+    if (!origin) {
+      log.error(`No proxy strain: ${ctx.strain.name}`);
+      res.status(500).send();
+      return true;
+    }
+    let proxyPath = path.relative(ctx.mount, ctx.path);
+    if (proxyPath.startsWith('/../')) {
+      proxyPath = req.path;
+    }
+    proxyPath = path.resolve('/', origin.path, proxyPath);
+    const url = `${origin.useSSL ? 'https' : 'http'}://${origin.hostname}:${origin.port}${proxyPath}`;
     try {
-      await utils.proxyRequest(ctx, req, res);
+      await utils.proxyRequest(ctx, url, req, res);
     } catch (err) {
-      this._logger.error(`Error during proxy: ${err.stack || err}`);
+      log.error(`Error during proxy: ${err.stack || err}`);
       res.status(500).send();
     }
     return true;
@@ -223,10 +251,9 @@ class HelixServer extends EventEmitter {
   async handleContentProxy(req, res) {
     try {
       const ctx = new RequestContext(req, this._project);
-      ctx.logger = this._logger;
       await utils.proxyToContentProxy(ctx, req, res);
     } catch (err) {
-      this._logger.error(`Error during proxy: ${err.stack || err}`);
+      this.log.error(`Error during proxy: ${err.stack || err}`);
       res.status(500).send();
     }
   }
@@ -238,10 +265,8 @@ class HelixServer extends EventEmitter {
    */
   async handleRequest(req, res) {
     const ctx = new RequestContext(req, this._project);
-    ctx.logger = this._logger;
-
-    this._logger.debug(`current strain: ${ctx.strain.name}: ${JSON.stringify(ctx.strain.toJSON({ minimal: true, keepFormat: true }), null, 2)}`);
-
+    const { log } = this;
+    log.debug(`current strain: ${ctx.strain.name}: ${JSON.stringify(ctx.strain.toJSON({ minimal: true, keepFormat: true }), null, 2)}`);
     if (await this.handleProxy(ctx, req, res)) {
       return;
     }
@@ -250,12 +275,12 @@ class HelixServer extends EventEmitter {
     let rgx = HELIX_BLOB_REGEXP.exec(ctx.path);
     if (rgx) {
       const url = `https://hlx.blob.core.windows.net/external/${rgx[1]}`;
-      this._logger.debug(`helix blob, proxying to ${url}`);
+      log.debug(`helix blob, proxying to ${url}`);
       // proxy to azure blob storage
       try {
-        r(url).pipe(res);
+        await utils.proxyRequest(ctx, url, req, res);
       } catch (err) {
-        this._logger.error(`Failed to proxy blob request ${ctx.path}: ${err.message}`);
+        log.error(`Failed to proxy blob request ${ctx.path}: ${err.message}`);
         res.status(502).send(`Failed to proxy blob request: ${err.message}`);
       }
       return;
@@ -265,12 +290,12 @@ class HelixServer extends EventEmitter {
     rgx = HELIX_FONTS_REGEXP.exec(ctx.path);
     if (rgx) {
       const url = `https://use.typekit.net/${rgx[1]}`;
-      this._logger.debug(`helix fonts, proxying to ${url}`);
+      log.debug(`helix fonts, proxying to ${url}`);
       // proxy to typekit CDN
       try {
-        r(url).pipe(res);
+        await utils.proxyRequest(ctx, url, req, res);
       } catch (err) {
-        this._logger.error(`Failed to proxy font request ${ctx.path}: ${err.message}`);
+        log.error(`Failed to proxy font request ${ctx.path}: ${err.message}`);
         res.status(502).send(`Failed to proxy font request: ${err.message}`);
       }
       return;
@@ -295,27 +320,19 @@ class HelixServer extends EventEmitter {
         return;
       }
       const url = `https://${algoliaAppID}-dsn.algolia.net${urlPath}`;
-      this._logger.debug(`helix query, proxying to ${url}`);
+      log.debug(`helix query, proxying to ${url}`);
       // proxy to algolia endpoint
       try {
-        r(url, {
+        await utils.proxyRequest(ctx, url, req, res, {
           headers: {
             'X-Algolia-Application-Id': algoliaAppID,
             'X-Algolia-API-Key': algoliaAPIKey,
           },
-        }).pipe(res);
+        });
       } catch (err) {
-        this._logger.error(`Failed to proxy query request ${ctx.path}: ${err.message}`);
+        log.error(`Failed to proxy query request ${ctx.path}: ${err.message}`);
         res.status(502).send(`Failed to proxy query request: ${err.message}`);
       }
-      return;
-    }
-
-    // redirect for directory requests w/o slash
-    if (!ctx.extension) {
-      const loc = `${ctx.path}/${ctx.queryString}`;
-      this._logger.debug(`redirecting to ${loc}`);
-      res.redirect(loc);
       return;
     }
 
@@ -341,7 +358,7 @@ class HelixServer extends EventEmitter {
         return;
       }
     } catch (e) {
-      this._logger.error('error rendering dynamic script: ', e);
+      log.error('error rendering dynamic script: ', e);
       res.status(500).send();
       if (liveReload) {
         liveReload.endRequest(ctx.requestId);
@@ -355,9 +372,9 @@ class HelixServer extends EventEmitter {
       res.send(result.content);
     } catch (err) {
       if (err.code === 404) {
-        this._logger.error(`Resource not found: ${ctx.path}`);
+        log.error(`Resource not found: ${ctx.path}`);
       } else {
-        this._logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
+        log.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
       }
       res.status(err.code || 500).send();
     }
@@ -368,15 +385,13 @@ class HelixServer extends EventEmitter {
 
   async setupApp() {
     // setup ESI as express middleware
+    const baseUrl = `http://localhost:${this._port}`;
     this._app.use(NodeESI.middleware({
-      baseUrl: `http://localhost:${this._port}`,
+      baseUrl,
       allowedHosts: [/^http.*/],
       cache: false,
-      httpClient: rp.defaults({
-        resolveWithFullResponse: true,
-        headers: {
-          'x-esi': true,
-        },
+      dataProvider: utils.createNodeESIDataProvider({
+        baseUrl,
       }),
     }));
 
@@ -385,8 +400,8 @@ class HelixServer extends EventEmitter {
     // use json body parser
     this._app.use(express.json());
 
-    const handler = this.handleRequest.bind(this);
-    this._app.get('/__internal__/content-proxy/:strain', this.handleContentProxy.bind(this));
+    const handler = asyncHandler(this.handleRequest.bind(this));
+    this._app.get('/__internal__/content-proxy/:strain', asyncHandler(this.handleContentProxy.bind(this)));
     this._app.get('*', handler);
     this._app.post('*', handler);
   }
@@ -405,20 +420,21 @@ class HelixServer extends EventEmitter {
   }
 
   async start() {
+    const { log } = this;
     if (this._port !== 0) {
       const inUse = await utils.checkPortInUse(this._port);
       if (inUse) {
         throw new Error(`Port ${this._port} already in use by another process.`);
       }
     }
-    this._logger.info(`Starting helix-simulator v${packageJson.version}`);
+    log.info(`Starting helix-simulator v${packageJson.version}`);
     await new Promise((resolve, reject) => {
       this._server = this._app.listen(this._port, (err) => {
         if (err) {
           reject(new Error(`Error while starting http server: ${err}`));
         }
         this._port = this._server.address().port;
-        this._logger.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
+        log.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
         resolve();
       });
       this._project.initLiveReload(this._app, this._server);
@@ -427,15 +443,17 @@ class HelixServer extends EventEmitter {
   }
 
   async stop() {
+    const { log } = this;
     if (!this._server) {
-      throw new Error('not started.');
+      log.warn('server not started.');
+      return true;
     }
     return new Promise((resolve, reject) => {
       this._server.close((err) => {
         if (err) {
           reject(new Error(`Error while stopping http server: ${err}`));
         }
-        this._logger.info('Local Helix Dev server stopped.');
+        log.info('Local Helix Dev server stopped.');
         this._server = null;
         resolve();
       });

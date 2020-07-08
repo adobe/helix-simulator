@@ -59,7 +59,7 @@ describe('Utils Test', () => {
         url: '/', path: '/index.html', resourcePath: '/index', selector: '', extension: 'html',
       },
       {
-        url: '/content', path: '/content', resourcePath: '/content', selector: '', extension: '',
+        url: '/content', path: '/content.html', resourcePath: '/content', selector: '', extension: 'html',
       },
       {
         url: '/content/', path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',

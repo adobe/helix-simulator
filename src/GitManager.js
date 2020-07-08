@@ -12,7 +12,7 @@
 
 const path = require('path');
 const fse = require('fs-extra');
-const _ = require('lodash');
+const cloneDeep = require('lodash.clonedeep');
 const gitServer = require('@adobe/git-server/lib/server.js');
 const { GitUrl } = require('@adobe/helix-shared');
 const { deriveLogger } = require('@adobe/helix-log');
@@ -76,7 +76,7 @@ class GitManager {
     this._serversByUrl = new Map();
     this._serversByPath = new Map();
     this._gitState = null;
-    this._gitConfig = _.cloneDeep(GIT_SERVER_CONFIG);
+    this._gitConfig = cloneDeep(GIT_SERVER_CONFIG);
     this._gitConfig.onRawRequest = this._onRawRequest.bind(this);
     this._liveReload = null;
   }
