@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/adobe/helix-simulator/compare/v4.3.5...v4.4.0) (2020-07-09)
+
+
+### Features
+
+* **server:** use helix-fetch instead of request ([#477](https://github.com/adobe/helix-simulator/issues/477)) ([9aa1c6d](https://github.com/adobe/helix-simulator/commit/9aa1c6d266b0b4130592f93488a2f6adefc04bd3)), closes [#470](https://github.com/adobe/helix-simulator/issues/470)
+
 ## [4.3.5](https://github.com/adobe/helix-simulator/compare/v4.3.4...v4.3.5) (2020-06-27)
 
 
