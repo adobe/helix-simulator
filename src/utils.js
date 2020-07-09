@@ -10,14 +10,27 @@
  * governing permissions and limitations under the License.
  */
 const fs = require('fs-extra');
-const path = require('path');
-const request = require('request-promise-native');
-const requestNative = require('request');
 const crypto = require('crypto');
 const { Socket } = require('net');
+const { PassThrough } = require('stream');
 const { MountConfig } = require('@adobe/helix-shared');
+const fetchAPI = require('@adobe/helix-fetch');
+
+function createFetchContext() {
+  if (process.env.HELIX_FETCH_FORCE_HTTP1) {
+    return fetchAPI.context({ httpProtocol: 'http1', httpsProtocols: ['http1'] });
+  }
+  return fetchAPI.context({});
+}
+const fetchContext = createFetchContext();
+const { fetch: helixFetch } = fetchContext;
 
 const utils = {
+
+  /**
+   * Helix fetch context. Useful for unit tests to disconnect hanging sockets.
+   */
+  fetchContext,
 
   /**
    * Checks if the file addressed by the given filename exists and is a regular file.
@@ -37,31 +50,26 @@ const utils = {
    * @param {String} uri URL to fetch
    * @param {RequestContext} ctx the context
    * @param {object} auth authentication object ({@see https://github.com/request/request#http-authentication})
-   * @returns {*} The requested content or NULL if not exists.
+   * @returns {Buffer} The requested content or NULL if not exists.
    */
   async fetch(ctx, uri, auth) {
-    try {
-      const response = await request({
-        method: 'GET',
-        uri,
-        resolveWithFullResponse: true,
-        encoding: null,
-        auth,
-        headers: {
-          'X-Request-Id': ctx.requestId,
-        },
-      });
-      return response.body;
-    } catch (e) {
-      if (e.response && e.response.statusCode) {
-        if (e.response.statusCode !== 404) {
-          ctx.logger.error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
-        }
-        return null;
-      }
-      ctx.logger.error(`resource at ${uri} does not exist. ${e.message}`);
+    const headers = {
+      'X-Request-Id': ctx.requestId,
+    };
+    if (auth) {
+      headers.authorization = `Bearer ${auth}`;
+    }
+    const res = await helixFetch(uri, {
+      cache: 'no-store',
+      redirect: 'follow',
+      headers,
+    });
+    const body = await res.buffer();
+    if (!res.ok) {
+      ctx.log.error(`resource at ${uri} does not exist. got ${res.status} from server`);
       return null;
     }
+    return body;
   },
 
   /**
@@ -77,18 +85,16 @@ const utils = {
     ];
     for (let i = 0; i < uris.length; i += 1) {
       const uri = uris[i];
-      ctx.logger.debug(`fetching static resource from ${uri}`);
+      ctx.log.debug(`fetching static resource from ${uri}`);
       let auth = null;
       if (ctx.actionParams.GITHUB_TOKEN && (uri.startsWith('https://raw.github.com/') || uri.startsWith('https://raw.githubusercontent.com/'))) {
-        auth = {
-          bearer: ctx.actionParams.GITHUB_TOKEN,
-        };
+        auth = ctx.actionParams.GITHUB_TOKEN;
       }
 
       // eslint-disable-next-line no-await-in-loop
       const data = await utils.fetch(ctx, uri, auth);
       if (data != null) {
-        ctx.content = Buffer.from(data, 'utf8');
+        ctx.content = data;
         return ctx;
       }
     }
@@ -98,29 +104,33 @@ const utils = {
   },
 
   /**
-   * Fetches the content from the proxy of the proxy-strain and streams it back to the response.
+   * Fetches the content from the url  and streams it back to the response.
    * @param {RequestContext} ctx Context
+   * @param {string} url The url to fetch from
    * @param {Request} req The original express request
    * @param {Response} res The express response
+   * @param {object} opts additional request options
    * @return {Promise} A promise that resolves when the stream is done.
    */
-  async proxyRequest(ctx, req, res) {
-    const { origin } = ctx.strain;
-    if (!origin) {
-      throw Error(`No proxy strain: ${ctx.strain.name}`);
-    }
-    let proxyPath = path.posix.relative(ctx.mount, req.path);
-    if (proxyPath.startsWith('/../')) {
-      proxyPath = req.path;
-    }
-    proxyPath = path.posix.join('/', origin.path, proxyPath);
-    const url = `${origin.useSSL ? 'https' : 'http'}://${origin.hostname}:${origin.port}${proxyPath}`;
-    ctx.logger.info(`Proxy ${req.method} request to ${url}`);
-    return new Promise((resolve, reject) => {
-      req.pipe(requestNative(url)
-        .on('error', reject)
-        .on('end', resolve)).pipe(res);
+  async proxyRequest(ctx, url, req, res, opts = {}) {
+    ctx.log.info(`Proxy ${req.method} request to ${url}`);
+    const stream = new PassThrough();
+    req.pipe(stream);
+    const headers = {
+      ...req.headers,
+      ...(opts.headers || {}),
+    };
+    const ret = await helixFetch(url, {
+      method: req.method,
+      headers,
+      cache: 'no-store',
+      redirect: 'follow',
+      body: stream,
     });
+    ctx.log.info(`Proxy ${req.method} request to ${url}: ${ret.status}`);
+    res.status = ret.status;
+    res.headers = ret.headers.raw();
+    (await ret.readable()).pipe(res);
   },
 
   /**
@@ -141,39 +151,36 @@ const utils = {
 
     // try to fetch from github first
     const githubUrl = `${contentUrl.raw}${contentUrl.path}${req.query.path}`;
-    ctx.logger.info(`content proxy: try loading from github first: ${githubUrl}`);
-    try {
-      let auth = null;
-      if (req.headers['x-github-token']) {
-        auth = {
-          bearer: req.headers['x-github-token'],
-        };
-      }
-      const headers = {};
-      const requestId = req.headers['x-request-id'];
-      if (requestId) {
-        headers['x-request-id'] = requestId;
-      }
-      const response = await request({
-        method: 'GET',
-        uri: githubUrl,
-        resolveWithFullResponse: true,
-        encoding: null,
-        auth,
-        headers,
-      });
-      ctx.logger.info(`content proxy: try loading from github first: ${githubUrl}: ${response.statusCode}`);
-      res.type(ext);
-      res.send(response.body);
-      return true;
-    } catch (e) {
-      const status = (e.response && e.response.statusCode) || 500;
-      ctx.logger[status === 404 ? 'info' : 'error'](`content proxy: ${githubUrl} does not exist. ${status} ${e.error}`);
-      if (status !== 404) {
-        res.status(status).send();
-        return true;
-      }
+    ctx.log.info(`simulator proxy: try loading from github first: ${githubUrl}`);
+
+    const headers = {};
+    if (req.headers['x-github-token']) {
+      headers.authorization = `Bearer ${req.headers['x-github-token']}`;
     }
+    const requestId = req.headers['x-request-id'];
+    if (requestId) {
+      headers['x-request-id'] = requestId;
+    }
+
+    let ret = await helixFetch(githubUrl, {
+      cache: 'no-store',
+      headers,
+    });
+    const body = await ret.buffer();
+
+    const { status } = ret;
+    if (ret.ok) {
+      ctx.log.info(`simulator proxy: loaded from github: ${githubUrl}: ${status}`);
+      res.type(ext);
+      res.send(body);
+      return true;
+    }
+    ctx.log[status === 404 ? 'info' : 'error'](`simulator proxy: ${githubUrl} does not exist. ${status}`);
+    if (status !== 404) {
+      res.status(status).send();
+      return true;
+    }
+
     // ignore some well known files
     if (['/head.md', '/header.md', '/footer.md'].indexOf(req.query.path) >= 0) {
       res.status(404).send();
@@ -209,12 +216,25 @@ const utils = {
     });
     // make content-proxy to ignore github
     url.searchParams.append('ignore', 'github');
-    ctx.logger.info(`content proxy: proxy to ${url}`);
+    ctx.log.info(`simulator proxy: fetch from content proxy ${url}`);
 
+    ret = await helixFetch(url.toString(), {
+      cache: 'no-store',
+    });
+    if (!ret.ok) {
+      const msg = await ret.text();
+      ctx.log.error(`simulator proxy: error fetching from content proxy ${url}: ${ret.status} ${msg}`);
+      res.status(ret.status).send();
+      return true;
+    }
+    ctx.log.info(`simulator proxy: fetch from content proxy ${url}: ${ret.status}`);
+    const stream = await ret.readable();
+    res.headers = ret.headers.raw();
+    res.status(ret.status);
     return new Promise((resolve, reject) => {
-      req.pipe(requestNative(url.toString())
+      stream.pipe(res)
         .on('error', reject)
-        .on('end', resolve)).pipe(res);
+        .on('end', resolve);
     });
   },
 
@@ -281,6 +301,60 @@ const utils = {
         cleanUp();
       });
     });
+  },
+
+  /**
+   * Create a NodeESI data provider that uses helix-fetch to retrieve the content.
+   * @param {object} config default config.
+   * @returns {DataProvider} a data provider;
+   */
+  createNodeESIDataProvider(config = {}) {
+    const defaultHeaders = {
+      Accept: 'text/html, application/xhtml+xml, application/xml',
+      'x-esi': 'true',
+    };
+    const { baseUrl = '' } = config;
+
+    function toFullyQualifiedURL(urlOrPath, baseOptions) {
+      if (urlOrPath.indexOf('http') === 0) {
+        return urlOrPath;
+      } else {
+        const base = baseOptions ? baseOptions.baseUrl || baseUrl : baseUrl;
+        return new URL(urlOrPath, base).toString();
+      }
+    }
+
+    function extendRequestOptions(src, baseOptions) {
+      return {
+        url: toFullyQualifiedURL(src, baseOptions),
+        headers: { ...defaultHeaders, ...baseOptions.headers },
+      };
+    }
+
+    async function get(src, baseOptions) {
+      const options = extendRequestOptions(src, baseOptions || {});
+      const { url } = options;
+      delete options.url;
+      // need extra fetch context, otherwise it causes helix-fetch to hang... !?!
+      const context = createFetchContext();
+      try {
+        const { fetch } = context;
+        const ret = await fetch(url, {
+          cache: 'no-store',
+          ...options,
+        });
+        const body = await ret.text();
+        if (!ret.ok) {
+          throw new Error(ret.status);
+        }
+        return {
+          body,
+        };
+      } finally {
+        context.disconnectAll();
+      }
+    }
+    return { toFullyQualifiedURL, get };
   },
 };
 

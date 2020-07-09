@@ -69,6 +69,7 @@ class TemplateResolver {
    * @return {Promise} A promise that resolves to the request context.
    */
   async resolve(ctx) {
+    const { log } = ctx;
     // test for cgi
     let templateName;
     if (ctx.path.startsWith('/cgi-bin/')) {
@@ -77,10 +78,10 @@ class TemplateResolver {
       templateName = ctx.selector ? `${ctx.selector}_` : '';
       templateName += `${ctx.extension || 'html'}`;
     }
-    ctx.logger.debug(`resolved ${ctx.path} -> ${templateName}`);
+    log.debug(`resolved ${ctx.path} -> ${templateName}`);
 
     if (!this._scripts[templateName]) {
-      ctx.logger.info(`no script for ${templateName}`);
+      log.info(`no script for ${templateName}`);
       return false;
     }
     const templatePath = this._scripts[templateName].main;
@@ -94,7 +95,7 @@ class TemplateResolver {
       }
     } catch (error) {
       // isFile fires an error when no file found
-      ctx.logger.info(`script file not found: ${templatePath}`);
+      log.info(`script file not found: ${templatePath}`);
     }
     return false;
   }

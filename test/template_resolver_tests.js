@@ -31,6 +31,7 @@ const mockConfig = {
       }),
     };
   },
+  log: console,
 };
 
 describe('Template Resolver', () => {
@@ -56,8 +57,7 @@ describe('Template Resolver', () => {
           url: t.url,
           get: (key) => (key === 'host' ? 'localhost' : ''),
         };
-        const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
-        ctx.logger = console;
+        const ctx = new RequestContext(mockReq, { buildDir: BUILD_DIR, ...mockConfig });
         const res = new TemplateResolver().withDirectory(BUILD_DIR);
         await res.init();
 
@@ -72,8 +72,7 @@ describe('Template Resolver', () => {
         url: '/index.nonexistent.html',
         get: (key) => (key === 'host' ? 'localhost' : ''),
       };
-      const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
-      ctx.logger = console;
+      const ctx = new RequestContext(mockReq, { buildDir: BUILD_DIR, ...mockConfig });
       const res = new TemplateResolver().withDirectory(BUILD_DIR);
       await res.init();
       assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a non existent file');
@@ -84,8 +83,7 @@ describe('Template Resolver', () => {
         url: '/index.noscript.html',
         get: (key) => (key === 'host' ? 'localhost' : ''),
       };
-      const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
-      ctx.logger = console;
+      const ctx = new RequestContext(mockReq, { buildDir: BUILD_DIR, ...mockConfig });
       const res = new TemplateResolver().withDirectory(BUILD_DIR);
       await res.init();
       assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a non existent file');
@@ -96,8 +94,7 @@ describe('Template Resolver', () => {
         url: '/index.wrong.html',
         get: (key) => (key === 'host' ? 'localhost' : ''),
       };
-      const ctx = new RequestContext(mockReq, ({ buildDir: BUILD_DIR, ...mockConfig }));
-      ctx.logger = console;
+      const ctx = new RequestContext(mockReq, { buildDir: BUILD_DIR, ...mockConfig });
       const res = new TemplateResolver().withDirectory(BUILD_DIR);
       await res.init();
       assert.equal(false, await res.resolve(ctx), 'Template does not resolve for a directory');

@@ -40,6 +40,7 @@ module.exports = class RequestContext {
     this._wskActivationId = utils.randomChars(32, true);
     this._requestId = utils.randomChars(32);
     this._cdnRequestId = utils.uuid();
+    this._logger = cfg.log;
 
     ({
       strain: this._strain,
@@ -69,6 +70,10 @@ module.exports = class RequestContext {
 
     if (lastDot > lastSlash) {
       this._extension = this._path.substring(lastDot + 1);
+    } else {
+      // append .html
+      this._extension = 'html';
+      this._path += '.html';
     }
     // check for selector
     const selDot = relPath.lastIndexOf('.');
@@ -243,6 +248,14 @@ module.exports = class RequestContext {
    */
   get requestId() {
     return this._requestId;
+  }
+
+  /**
+   * The logger;
+   * @returns {Logger}
+   */
+  get log() {
+    return this._logger;
   }
 
   get json() {
