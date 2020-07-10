@@ -217,6 +217,8 @@ const utils = {
         url.searchParams.append(key, originalContent.repo);
       } else if (key === 'owner' && originalContent) {
         url.searchParams.append(key, originalContent.owner);
+      } else if (key === 'ref' && originalContent) {
+        url.searchParams.append(key, originalContent.ref);
       } else {
         url.searchParams.append(key, value);
       }

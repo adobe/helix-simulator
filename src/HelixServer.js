@@ -339,6 +339,21 @@ class HelixServer extends EventEmitter {
     // start git server if needed and adjust content and static url
     await ctx.config.emulateGit(ctx.strain);
 
+    // check for .json or .md for content proxy
+    if (ctx.extension === 'json' || ctx.extension === 'md') {
+      // use fake repo/owner/ref - they will be replaced later with the strain content values.
+      req.query = {
+        ...req.query || {},
+        repo: 'repo',
+        owner: 'owner',
+        ref: 'ref',
+        path: ctx.path,
+      };
+      req.params.strain = ctx.strain.name;
+      await this.handleContentProxy(req, res);
+      return;
+    }
+
     this.emit('request', req, res, ctx);
 
     // ensure that esi uses correct base url
