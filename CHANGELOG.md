@@ -1,3 +1,16 @@
+# [5.0.0](https://github.com/adobe/helix-simulator/compare/v4.4.1...v5.0.0) (2020-07-10)
+
+
+### Features
+
+* **sever:** Support routing .json and .md requests to the content proxy ([#480](https://github.com/adobe/helix-simulator/issues/480)) ([97a82ff](https://github.com/adobe/helix-simulator/commit/97a82ff8e4a0a4d4740af6dad1916af531beacce)), closes [#476](https://github.com/adobe/helix-simulator/issues/476)
+
+
+### BREAKING CHANGES
+
+* **sever:** it is no longer possible to request `.json` or `.md` based HTL scripts in local dev.
+  those are now routed directly to the content-proxy.
+
 ## [4.4.1](https://github.com/adobe/helix-simulator/compare/v4.4.0...v4.4.1) (2020-07-10)
 
 
