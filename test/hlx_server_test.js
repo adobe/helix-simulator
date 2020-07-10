@@ -440,42 +440,6 @@ describe('Helix Server', () => {
     }
   });
 
-  it('deliver rendered json resource', async () => {
-    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
-    const project = new HelixProject()
-      .withCwd(cwd)
-      .withBuildDir('./build')
-      .withHttpPort(0)
-      .withLogsDir(path.resolve(cwd, 'logs'));
-    await project.init();
-    try {
-      await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/index.json`, 200, 'expected_index.json');
-    } finally {
-      await fetchContext.disconnectAll();
-      await project.stop();
-    }
-  });
-
-  it('deliver rendered json resource from alternate strain', async () => {
-    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
-    const project = new HelixProject()
-      .withCwd(cwd)
-      .withBuildDir('./build')
-      .withHttpPort(0)
-      .withLogsDir(path.resolve(cwd, 'logs'));
-    await project.init();
-    try {
-      await project.start();
-      // hack in correct port for hostname matching
-      project.config.strains.get('dev').condition = new Condition({ url: `http://127.0.0.1:${project.server.port}` });
-      await assertHttp(`http://127.0.0.1:${project.server.port}/index.json`, 200, 'expected_index_dev.json');
-    } finally {
-      await fetchContext.disconnectAll();
-      await project.stop();
-    }
-  });
-
   it('deliver content resource from secondary mapped git repo', async function test() {
     this.timeout(10000);
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
@@ -495,52 +459,6 @@ describe('Helix Server', () => {
       project.config.strains.get('api').condition = new Condition({ url: `http://127.0.0.1:${project.server.port}/api` });
       await assertHttp(`http://127.0.0.1:${project.server.port}/api/introduction.html`, 200, 'expected_api_introduction.html');
       await assertHttp(`http://127.0.0.1:${project.server.port}/api/welcome.txt`, 200, 'expected_api_welcome.txt');
-    } finally {
-      await fetchContext.disconnectAll();
-      await project.stop();
-    }
-  });
-
-  it('deliver rendered json resource from alternate strain with request override', async () => {
-    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
-    const project = new HelixProject()
-      .withCwd(cwd)
-      .withBuildDir('./build')
-      .withHttpPort(0)
-      .withLogsDir(path.resolve(cwd, 'logs'))
-      .withRequestOverride({
-        headers: {
-          host: '127.0.0.1',
-        },
-      });
-    await project.init();
-    try {
-      await project.start();
-      // hack in correct port for hostname matching
-      await assertHttp(`http://localhost:${project.server.port}/index.json`, 200, 'expected_index_dev.json');
-    } finally {
-      await fetchContext.disconnectAll();
-      await project.stop();
-    }
-  });
-
-  it('deliver rendered json resource from alternate strain with request override and path', async () => {
-    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
-    const project = new HelixProject()
-      .withCwd(cwd)
-      .withBuildDir('./build')
-      .withHttpPort(0)
-      .withLogsDir(path.resolve(cwd, 'logs'))
-      .withRequestOverride({
-        headers: {
-          host: '127.0.0.1',
-        },
-      });
-    await project.init();
-    try {
-      await project.start();
-      // hack in correct port for hostname matching
-      await assertHttp(`http://localhost:${project.server.port}/docs/general/index.json`, 200, 'expected_index_docs.json');
     } finally {
       await fetchContext.disconnectAll();
       await project.stop();
@@ -573,7 +491,7 @@ describe('Helix Server', () => {
       await project.start();
       await proxyProject.start();
       proxyProject.config.strains.get('proxy').origin._port = project.server.port;
-      await assertHttp(`http://localhost:${proxyProject.server.port}/docs/api/index.json`, 200, 'expected_proxy_docs.json');
+      await assertHttp(`http://localhost:${proxyProject.server.port}/docs/api/index.html`, 200, 'expected_proxy_docs.html');
     } finally {
       await fetchContext.disconnectAll();
       await project.stop();
@@ -607,7 +525,7 @@ describe('Helix Server', () => {
       await project.start();
       await proxyProject.start();
       proxyProject.config.strains.get('proxy_help').origin._port = project.server.port;
-      await assertHttp(`http://localhost:${proxyProject.server.port}/help/docs/api/index.json`, 200, 'expected_proxy_docs_chroot.json');
+      await assertHttp(`http://localhost:${proxyProject.server.port}/help/docs/api/index.html`, 200, 'expected_proxy_docs_chroot.html');
     } finally {
       await fetchContext.disconnectAll();
       await project.stop();
@@ -948,7 +866,7 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/index.param.json`, 200, 'expected_params.json');
+      await assertHttp(`http://localhost:${project.server.port}/index.param.html`, 200, 'expected_params.json');
     } finally {
       await fetchContext.disconnectAll();
       await project.stop();
@@ -1105,6 +1023,67 @@ describe('Content Proxy Tests', () => {
       await assertHttp(url.toString(), 200, 'expected_docx.md');
 
       // console.log(content);
+    } finally {
+      await fetchContext.disconnectAll();
+      await project.stop();
+    }
+  });
+
+  it('delivers .json from content proxy.', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'contentproxy'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    nock('https://adobeioruntime.net')
+      .get('/api/v1/web/helix/helix-services/content-proxy@v1')
+      .query({
+        owner: 'local',
+        repo: 'default',
+        ref: 'master',
+        path: '/table.json',
+        ignore: 'github',
+        limit: 1,
+      })
+      .reply(200, { foo: 'bar' });
+    try {
+      await project.start();
+      const ret = JSON.parse(await assertHttp(`http://localhost:${project.server.port}/table.json?limit=1`, 200));
+
+      assert.deepEqual(ret, { foo: 'bar' });
+    } finally {
+      await fetchContext.disconnectAll();
+      await project.stop();
+    }
+  });
+
+  it('delivers .md from content proxy.', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'contentproxy'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'));
+    await project.init();
+
+    nock('https://adobeioruntime.net')
+      .get('/api/v1/web/helix/helix-services/content-proxy@v1')
+      .query({
+        owner: 'local',
+        repo: 'default',
+        ref: 'master',
+        path: '/README.md',
+        ignore: 'github',
+      })
+      .reply(200, '# Hello');
+    try {
+      await project.start();
+      const ret = await assertHttp(`http://localhost:${project.server.port}/README.md`, 200);
+
+      assert.equal(ret, '# Hello');
     } finally {
       await fetchContext.disconnectAll();
       await project.stop();
