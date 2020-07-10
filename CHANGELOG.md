@@ -1,3 +1,10 @@
+## [4.4.1](https://github.com/adobe/helix-simulator/compare/v4.4.0...v4.4.1) (2020-07-10)
+
+
+### Bug Fixes
+
+* **server:** serve images from hlx_ ([#479](https://github.com/adobe/helix-simulator/issues/479)) ([7bc6674](https://github.com/adobe/helix-simulator/commit/7bc6674b688b759fa48cda3a7f6d3922378c359a)), closes [#478](https://github.com/adobe/helix-simulator/issues/478)
+
 # [4.4.0](https://github.com/adobe/helix-simulator/compare/v4.3.5...v4.4.0) (2020-07-09)
 
 
