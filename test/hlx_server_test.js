@@ -114,11 +114,14 @@ describe('Helix Server', () => {
 
     nock('https://hlx.blob.core.windows.net')
       .get('/external/098af326aa856bb42ce9a21240cf73d6f64b0b45')
-      .reply(() => [200, '', {}]);
+      .reply(function handler() {
+        assert.equal(this.req.headers.host, 'hlx.blob.core.windows.net');
+        return [304, '', {}];
+      });
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/hlx_098af326aa856bb42ce9a21240cf73d6f64b0b45.png`, 200);
+      await assertHttp(`http://localhost:${project.server.port}/hlx_098af326aa856bb42ce9a21240cf73d6f64b0b45.png`, 304);
     } finally {
       await fetchContext.disconnectAll();
       await project.stop();
