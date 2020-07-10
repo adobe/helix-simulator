@@ -120,6 +120,9 @@ const utils = {
       ...req.headers,
       ...(opts.headers || {}),
     };
+    delete headers.cookie;
+    delete headers.connection;
+    delete headers.host;
     const ret = await helixFetch(url, {
       method: req.method,
       headers,
@@ -128,8 +131,9 @@ const utils = {
       body: stream,
     });
     ctx.log.info(`Proxy ${req.method} request to ${url}: ${ret.status}`);
-    res.status = ret.status;
-    res.headers = ret.headers.raw();
+    res
+      .status(ret.status)
+      .set(ret.headers.raw());
     (await ret.readable()).pipe(res);
   },
 
@@ -176,10 +180,13 @@ const utils = {
       return true;
     }
     ctx.log[status === 404 ? 'info' : 'error'](`simulator proxy: ${githubUrl} does not exist. ${status}`);
-    if (status !== 404) {
-      res.status(status).send();
-      return true;
-    }
+
+    // temporarily disable until git-server is fixed:
+    // https://github.com/adobe/git-server/pull/206
+    // if (status !== 404) {
+    //   res.status(status).send();
+    //   return true;
+    // }
 
     // ignore some well known files
     if (['/head.md', '/header.md', '/footer.md'].indexOf(req.query.path) >= 0) {
