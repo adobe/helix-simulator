@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@adobe/git-server": "1.2.0",
-    "@adobe/helix-fetch": "1.7.0",
+    "@adobe/helix-fetch": "1.7.1",
     "@adobe/helix-log": "4.5.1",
     "@adobe/helix-shared": "7.9.0",
     "chokidar": "3.4.0",
