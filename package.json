@@ -18,7 +18,7 @@
     "lint": "./node_modules/.bin/eslint ."
   },
   "dependencies": {
-    "@adobe/git-server": "1.2.1",
+    "@adobe/git-server": "1.2.2",
     "@adobe/helix-fetch": "1.7.1",
     "@adobe/helix-log": "4.5.1",
     "@adobe/helix-shared": "7.9.0",
