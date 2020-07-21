@@ -1,3 +1,10 @@
+## [5.0.8](https://github.com/adobe/helix-simulator/compare/v5.0.7...v5.0.8) (2020-07-21)
+
+
+### Bug Fixes
+
+* **server:** return github error if not 404 ([#490](https://github.com/adobe/helix-simulator/issues/490)) ([2812587](https://github.com/adobe/helix-simulator/commit/2812587270f5b7145a02d97004a84670c6b0fd92))
+
 ## [5.0.7](https://github.com/adobe/helix-simulator/compare/v5.0.6...v5.0.7) (2020-07-21)
 
 
