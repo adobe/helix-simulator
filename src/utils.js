@@ -181,12 +181,10 @@ const utils = {
     }
     ctx.log[status === 404 ? 'info' : 'error'](`simulator proxy: ${githubUrl} does not exist. ${status}`);
 
-    // temporarily disable until git-server is fixed:
-    // https://github.com/adobe/git-server/pull/206
-    // if (status !== 404) {
-    //   res.status(status).send();
-    //   return true;
-    // }
+    if (status !== 404) {
+      res.status(status).send();
+      return true;
+    }
 
     // ignore some well known files
     if (['/head.md', '/header.md', '/footer.md'].indexOf(req.query.path) >= 0) {
