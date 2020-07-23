@@ -1,3 +1,10 @@
+## [5.0.10](https://github.com/adobe/helix-simulator/compare/v5.0.9...v5.0.10) (2020-07-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/git-server to v1.3.1 ([739d7d3](https://github.com/adobe/helix-simulator/commit/739d7d33e844be4370ec87164381ff1db1f77d03))
+
 ## [5.0.9](https://github.com/adobe/helix-simulator/compare/v5.0.8...v5.0.9) (2020-07-22)
 
 
