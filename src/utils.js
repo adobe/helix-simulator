@@ -324,7 +324,7 @@ const utils = {
 
     // need separate fetch context for ESI includes to prevent hanging proxy requests
     // TODO: investigate
-    const { fetch } = createFetchContext();
+    const esiContext = createFetchContext();
 
     function toFullyQualifiedURL(urlOrPath, baseOptions) {
       if (urlOrPath.indexOf('http') === 0) {
@@ -346,17 +346,22 @@ const utils = {
       const options = extendRequestOptions(src, baseOptions || {});
       const { url } = options;
       delete options.url;
-      const ret = await fetch(url, {
-        cache: 'no-store',
-        ...options,
-      });
-      const body = await ret.text();
-      if (!ret.ok) {
-        throw new Error(ret.status);
+      const { fetch } = esiContext;
+      try {
+        const ret = await fetch(url, {
+          cache: 'no-store',
+          ...options,
+        });
+        const body = await ret.text();
+        if (!ret.ok) {
+          throw new Error(ret.status);
+        }
+        return {
+          body,
+        };
+      } finally {
+        esiContext.disconnectAll();
       }
-      return {
-        body,
-      };
     }
 
     return { toFullyQualifiedURL, get };
