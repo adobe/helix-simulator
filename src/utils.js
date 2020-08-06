@@ -322,6 +322,10 @@ const utils = {
     };
     const { baseUrl = '' } = config;
 
+    // need separate fetch context for ESI includes to prevent hanging proxy requests
+    // TODO: investigate
+    const { fetch } = createFetchContext();
+
     function toFullyQualifiedURL(urlOrPath, baseOptions) {
       if (urlOrPath.indexOf('http') === 0) {
         return urlOrPath;
@@ -342,25 +346,19 @@ const utils = {
       const options = extendRequestOptions(src, baseOptions || {});
       const { url } = options;
       delete options.url;
-      // need extra fetch context, otherwise it causes helix-fetch to hang... !?!
-      const context = createFetchContext();
-      try {
-        const { fetch } = context;
-        const ret = await fetch(url, {
-          cache: 'no-store',
-          ...options,
-        });
-        const body = await ret.text();
-        if (!ret.ok) {
-          throw new Error(ret.status);
-        }
-        return {
-          body,
-        };
-      } finally {
-        context.disconnectAll();
+      const ret = await fetch(url, {
+        cache: 'no-store',
+        ...options,
+      });
+      const body = await ret.text();
+      if (!ret.ok) {
+        throw new Error(ret.status);
       }
+      return {
+        body,
+      };
     }
+
     return { toFullyQualifiedURL, get };
   },
 };
