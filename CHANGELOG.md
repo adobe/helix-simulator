@@ -1,3 +1,10 @@
+## [5.0.20](https://github.com/adobe/helix-simulator/compare/v5.0.19...v5.0.20) (2020-09-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency moment to v2.29.0 ([6b787ae](https://github.com/adobe/helix-simulator/commit/6b787ae9d55b43c4eca1a22893ab06d0cd3f50bd))
+
 ## [5.0.19](https://github.com/adobe/helix-simulator/compare/v5.0.18...v5.0.19) (2020-09-10)
 
 
