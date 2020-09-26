@@ -31,7 +31,7 @@
     "glob": "7.1.6",
     "livereload-js": "3.3.1",
     "lodash.clonedeep": "4.5.0",
-    "moment": "2.28.0",
+    "moment": "2.29.0",
     "nodesi": "1.15.0",
     "querystring": "0.2.0",
     "ws": "7.3.1"
