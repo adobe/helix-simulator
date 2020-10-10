@@ -31,7 +31,7 @@
     "glob": "7.1.6",
     "livereload-js": "3.3.1",
     "lodash.clonedeep": "4.5.0",
-    "moment": "2.29.0",
+    "moment": "2.29.1",
     "nodesi": "1.15.0",
     "querystring": "0.2.0",
     "ws": "7.3.1"
@@ -42,9 +42,9 @@
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@semantic-release/github": "7.1.1",
-    "codecov": "3.7.2",
+    "codecov": "3.8.0",
     "cz-conventional-changelog": "3.3.0",
-    "eslint": "7.10.0",
+    "eslint": "7.11.0",
     "eslint-plugin-header": "3.1.0",
     "eslint-plugin-import": "2.22.1",
     "ghooks": "2.0.4",
@@ -55,7 +55,7 @@
     "nyc": "15.1.0",
     "semantic-release": "17.1.2",
     "shelljs": "0.8.4",
-    "uuid": "8.3.0"
+    "uuid": "8.3.1"
   },
   "lint-staged": {
     "*.js": "eslint"
