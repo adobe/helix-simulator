@@ -271,67 +271,19 @@ class HelixServer extends EventEmitter {
       return;
     }
 
-    // check for helix blobs
-    let rgx = HELIX_BLOB_REGEXP.exec(ctx.path);
-    if (rgx) {
-      const url = `https://hlx.blob.core.windows.net/external/${rgx[1]}`;
-      log.debug(`helix blob, proxying to ${url}`);
+    // check for special hlx paths
+    if (HELIX_BLOB_REGEXP.test(ctx.path)
+      || HELIX_FONTS_REGEXP.test(ctx.path)
+      || HELIX_QUERY_REGEXP.test(ctx.path)) {
+      const content = ctx.strain.originalContent || ctx.strain.content;
+      const url = `https://${content.ref}--${content.repo}--${content.owner}.hlx.page${ctx.path}`;
+      log.debug(`helix url, proxying to ${url}`);
       // proxy to azure blob storage
       try {
         await utils.proxyRequest(ctx, url, req, res);
       } catch (err) {
-        log.error(`Failed to proxy blob request ${ctx.path}: ${err.message}`);
-        res.status(502).send(`Failed to proxy blob request: ${err.message}`);
-      }
-      return;
-    }
-
-    // check for helix fonts
-    rgx = HELIX_FONTS_REGEXP.exec(ctx.path);
-    if (rgx) {
-      const url = `https://use.typekit.net/${rgx[1]}`;
-      log.debug(`helix fonts, proxying to ${url}`);
-      // proxy to typekit CDN
-      try {
-        await utils.proxyRequest(ctx, url, req, res);
-      } catch (err) {
-        log.error(`Failed to proxy font request ${ctx.path}: ${err.message}`);
-        res.status(502).send(`Failed to proxy font request: ${err.message}`);
-      }
-      return;
-    }
-
-    // check for helix query
-    rgx = HELIX_QUERY_REGEXP.exec(ctx.path);
-    if (rgx) {
-      const [, indexName, queryName] = rgx;
-      const { owner, repo } = ctx.strain.code;
-      const { algoliaAppID, algoliaAPIKey, indexConfig } = ctx.config;
-
-      if (!indexConfig) {
-        res.status(404).send('no index configuration found');
-        return;
-      }
-      const urlPath = indexConfig.getQueryURL(
-        indexName, queryName, owner, repo, ctx.params,
-      );
-      if (!urlPath) {
-        res.status(404).send('index not found');
-        return;
-      }
-      const url = `https://${algoliaAppID}-dsn.algolia.net${urlPath}`;
-      log.debug(`helix query, proxying to ${url}`);
-      // proxy to algolia endpoint
-      try {
-        await utils.proxyRequest(ctx, url, req, res, {
-          headers: {
-            'X-Algolia-Application-Id': algoliaAppID,
-            'X-Algolia-API-Key': algoliaAPIKey,
-          },
-        });
-      } catch (err) {
-        log.error(`Failed to proxy query request ${ctx.path}: ${err.message}`);
-        res.status(502).send(`Failed to proxy query request: ${err.message}`);
+        log.error(`Failed to proxy helix request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy helix request: ${err.message}`);
       }
       return;
     }
