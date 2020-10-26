@@ -278,7 +278,7 @@ class HelixServer extends EventEmitter {
       const content = ctx.strain.originalContent || ctx.strain.content;
       const url = `https://${content.ref}--${content.repo}--${content.owner}.hlx.page${ctx.path}`;
       log.debug(`helix url, proxying to ${url}`);
-      // proxy to azure blob storage
+      // proxy to inner CDN
       try {
         await utils.proxyRequest(ctx, url, req, res);
       } catch (err) {
