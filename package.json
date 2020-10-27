@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-simulator",
-  "version": "5.0.26",
+  "version": "5.1.0",
   "description": "Helix Testing Environment",
   "repository": {
     "type": "git",
