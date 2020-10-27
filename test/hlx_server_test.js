@@ -103,7 +103,7 @@ describe('Helix Server', () => {
     }
   });
 
-  it('proxy blobs requests to azure blob storage', async () => {
+  it('proxy blobs requests via inner cdn', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
@@ -112,12 +112,9 @@ describe('Helix Server', () => {
       .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
 
-    nock('https://hlx.blob.core.windows.net')
-      .get('/external/098af326aa856bb42ce9a21240cf73d6f64b0b45')
-      .reply(function handler() {
-        assert.equal(this.req.headers.host, 'hlx.blob.core.windows.net');
-        return [304, '', {}];
-      });
+    nock('https://master--default--local.hlx.page')
+      .get('/hlx_098af326aa856bb42ce9a21240cf73d6f64b0b45.png')
+      .reply(304);
 
     try {
       await project.start();
@@ -128,7 +125,7 @@ describe('Helix Server', () => {
     }
   });
 
-  it('proxy fonts requests to typekit CDN', async () => {
+  it('proxy fonts requests via inner cdn', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
@@ -137,9 +134,9 @@ describe('Helix Server', () => {
       .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
 
-    nock('https://use.typekit.net')
-      .get('/pnv6nym.css')
-      .reply(() => [200, '', {}]);
+    nock('https://master--default--local.hlx.page')
+      .get('/hlx_fonts/pnv6nym.css')
+      .reply(200);
 
     try {
       await project.start();
@@ -150,66 +147,27 @@ describe('Helix Server', () => {
     }
   });
 
-  // currently not possible to test with helix-fetch
-  it.skip('proxy query requests to algolia endpoint', async () => {
+  it('proxy query requests to inner cdn', async () => {
     const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
 
     const idxCfg = new IndexConfig()
       .withConfigPath(path.resolve(path.join(SPEC_ROOT, 'local'), 'helix-index.yaml'));
     await idxCfg.init();
 
-    const algoliaAppID = 'fake-id';
-    const algoliaAPIKey = 'fake-key';
-
     const project = new HelixProject()
       .withCwd(cwd)
       .withBuildDir('./build')
       .withHttpPort(0)
-      .withIndexConfig(idxCfg)
-      .withAlgoliaAppID(algoliaAppID)
-      .withAlgoliaAPIKey(algoliaAPIKey)
       .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
 
-    function handler() {
-      if (this.req.headers['x-algolia-api-key'] === algoliaAPIKey
-        && this.req.headers['x-algolia-application-id'] === algoliaAppID) {
-        return [200, '', {}];
-      }
-      return [403, '', {}];
-    }
-
-    nock(`https://${algoliaAppID}-dsn.algolia.net`)
-      .get('/1/indexes/local--default--blog-posts?query=*&hitsPerPage=25')
-      .reply(handler);
+    nock('https://master--default--local.hlx.page')
+      .get('/_query/blog-posts/all.html')
+      .reply(200);
 
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 200);
-    } finally {
-      await fetchContext.disconnectAll();
-      await project.stop();
-    }
-  });
-
-  it('proxies query requests to algolia (no index configuration found)', async () => {
-    const cwd = await setupProject(path.join(SPEC_ROOT, 'local'), testRoot);
-
-    const algoliaAppID = 'fake-id';
-    const algoliaAPIKey = 'fake-key';
-
-    const project = new HelixProject()
-      .withCwd(cwd)
-      .withBuildDir('./build')
-      .withHttpPort(0)
-      .withAlgoliaAppID(algoliaAppID)
-      .withAlgoliaAPIKey(algoliaAPIKey)
-      .withLogsDir(path.resolve(cwd, 'logs'));
-    await project.init();
-
-    try {
-      await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 404);
     } finally {
       await fetchContext.disconnectAll();
       await project.stop();
