@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/adobe/helix-simulator/compare/v5.0.26...v5.1.0) (2020-10-31)
+
+
+### Features
+
+* **sim:** proxy all hlx_ and _query requests to inner cdn ([#530](https://github.com/adobe/helix-simulator/issues/530)) ([8fddab5](https://github.com/adobe/helix-simulator/commit/8fddab569b8d59396b778302aeabc03e5f770c36)), closes [#529](https://github.com/adobe/helix-simulator/issues/529)
+
 # [5.1.0](https://github.com/adobe/helix-simulator/compare/v5.0.26...v5.1.0) (2020-10-27)
 
 
