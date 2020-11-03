@@ -1,3 +1,10 @@
+## [5.1.2](https://github.com/adobe/helix-simulator/compare/v5.1.1...v5.1.2) (2020-11-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v7.16.1 ([18e9f1d](https://github.com/adobe/helix-simulator/commit/18e9f1daf564ac5a8e8dde36b7b1d95c9f969d09))
+
 ## [5.1.1](https://github.com/adobe/helix-simulator/compare/v5.1.0...v5.1.1) (2020-10-31)
 
 
