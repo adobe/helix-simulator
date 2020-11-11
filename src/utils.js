@@ -16,6 +16,8 @@ const { PassThrough } = require('stream');
 const { MountConfig } = require('@adobe/helix-shared');
 const fetchAPI = require('@adobe/helix-fetch');
 
+process.env.HELIX_FETCH_FORCE_HTTP1 = true;
+
 function createFetchContext() {
   if (process.env.HELIX_FETCH_FORCE_HTTP1) {
     return fetchAPI.context({ httpProtocol: 'http1', httpsProtocols: ['http1'] });
