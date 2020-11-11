@@ -1,3 +1,10 @@
+## [5.1.4](https://github.com/adobe/helix-simulator/compare/v5.1.3...v5.1.4) (2020-11-11)
+
+
+### Bug Fixes
+
+* **content:** use content proxy v2 ([#537](https://github.com/adobe/helix-simulator/issues/537)) ([dcdf146](https://github.com/adobe/helix-simulator/commit/dcdf1464ec88b4d27e949f84102787c96ae1a158)), closes [#536](https://github.com/adobe/helix-simulator/issues/536)
+
 ## [5.1.3](https://github.com/adobe/helix-simulator/compare/v5.1.2...v5.1.3) (2020-11-09)
 
 
