@@ -1,3 +1,10 @@
+## [5.1.5](https://github.com/adobe/helix-simulator/compare/v5.1.4...v5.1.5) (2020-11-11)
+
+
+### Bug Fixes
+
+* **proxy:** fix hanging requests to fastly ([#539](https://github.com/adobe/helix-simulator/issues/539)) ([03ac938](https://github.com/adobe/helix-simulator/commit/03ac93848fff47f71d7b48db556e1d8d05ab1946)), closes [#538](https://github.com/adobe/helix-simulator/issues/538)
+
 ## [5.1.4](https://github.com/adobe/helix-simulator/compare/v5.1.3...v5.1.4) (2020-11-11)
 
 
