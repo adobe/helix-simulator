@@ -205,7 +205,7 @@ const utils = {
     }
 
     // todo: use correct namespace ??
-    const url = new URL('https://adobeioruntime.net/api/v1/web/helix/helix-services/content-proxy@v1');
+    const url = new URL('https://adobeioruntime.net/api/v1/web/helix/helix-services/content-proxy@v2');
 
     const { originalContent } = ctx.strain;
     Object.entries(req.query).forEach(([key, value]) => {

@@ -963,7 +963,7 @@ describe('Content Proxy Tests', () => {
     await project.init();
 
     nock('https://adobeioruntime.net')
-      .get('/api/v1/web/helix/helix-services/content-proxy@v1?owner=local&repo=default&path=%2Fms%2Ffoo.docx&ignore=github')
+      .get('/api/v1/web/helix/helix-services/content-proxy@v2?owner=local&repo=default&path=%2Fms%2Ffoo.docx&ignore=github')
       .reply(200, '# Hello\n\ndocx\n');
     try {
       await project.start();
@@ -997,7 +997,7 @@ describe('Content Proxy Tests', () => {
     await project.init();
 
     nock('https://adobeioruntime.net')
-      .get('/api/v1/web/helix/helix-services/content-proxy@v1')
+      .get('/api/v1/web/helix/helix-services/content-proxy@v2')
       .query({
         owner: 'local',
         repo: 'default',
@@ -1028,7 +1028,7 @@ describe('Content Proxy Tests', () => {
     await project.init();
 
     nock('https://adobeioruntime.net')
-      .get('/api/v1/web/helix/helix-services/content-proxy@v1')
+      .get('/api/v1/web/helix/helix-services/content-proxy@v2')
       .query({
         owner: 'local',
         repo: 'default',
