@@ -111,7 +111,7 @@ workflows:
         - build_win
         filters:
           branches:
-            only: master
+            only: main
     - build
     - build_win
   smoke:
