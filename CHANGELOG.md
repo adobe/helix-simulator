@@ -1,3 +1,11 @@
+## [5.1.8](https://github.com/adobe/helix-simulator/compare/v5.1.7...v5.1.8) (2020-12-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v7.16.4 ([#550](https://github.com/adobe/helix-simulator/issues/550)) ([d04c31e](https://github.com/adobe/helix-simulator/commit/d04c31ed3d6b34dce7e5372e30059068b80f1f62))
+* **fonts:** use full path to fetch fonts ([#551](https://github.com/adobe/helix-simulator/issues/551)) ([d02509c](https://github.com/adobe/helix-simulator/commit/d02509c2339006c524f6ad732b61a3da2ec55c63)), closes [#549](https://github.com/adobe/helix-simulator/issues/549)
+
 ## [5.1.7](https://github.com/adobe/helix-simulator/compare/v5.1.6...v5.1.7) (2020-12-01)
 
 
