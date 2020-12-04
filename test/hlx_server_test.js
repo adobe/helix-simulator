@@ -135,12 +135,12 @@ describe('Helix Server', () => {
     await project.init();
 
     nock('https://master--default--local.hlx.page')
-      .get('/hlx_fonts/pnv6nym.css')
+      .get('/hlx_fonts/af/507e89/00000000000000003b9aee49/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=i4&v=3')
       .reply(200);
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/hlx_fonts/pnv6nym.css`, 200);
+      await assertHttp(`http://localhost:${project.server.port}/hlx_fonts/af/507e89/00000000000000003b9aee49/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=i4&v=3`, 200);
     } finally {
       await fetchContext.disconnectAll();
       await project.stop();
@@ -162,7 +162,7 @@ describe('Helix Server', () => {
     await project.init();
 
     nock('https://master--default--local.hlx.page')
-      .get('/_query/blog-posts/all.html')
+      .get('/_query/blog-posts/all')
       .reply(200);
 
     try {

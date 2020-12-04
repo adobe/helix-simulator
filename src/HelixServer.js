@@ -276,7 +276,7 @@ class HelixServer extends EventEmitter {
       || HELIX_FONTS_REGEXP.test(ctx.path)
       || HELIX_QUERY_REGEXP.test(ctx.path)) {
       const content = ctx.strain.originalContent || ctx.strain.content;
-      const url = `https://${content.ref}--${content.repo}--${content.owner}.hlx.page${ctx.path}`;
+      const url = `https://${content.ref}--${content.repo}--${content.owner}.hlx.page${ctx.url}`;
       log.debug(`helix url, proxying to ${url}`);
       // proxy to inner CDN
       try {
