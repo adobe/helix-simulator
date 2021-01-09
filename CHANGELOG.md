@@ -1,3 +1,10 @@
+## [5.1.13](https://github.com/adobe/helix-simulator/compare/v5.1.12...v5.1.13) (2021-01-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency chokidar to v3.5.0 ([3f2e7ee](https://github.com/adobe/helix-simulator/commit/3f2e7eee2a9fd22a79cd7ae7959a4c0ded48113d))
+
 ## [5.1.12](https://github.com/adobe/helix-simulator/compare/v5.1.11...v5.1.12) (2021-01-05)
 
 
