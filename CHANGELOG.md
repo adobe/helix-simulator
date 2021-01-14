@@ -1,3 +1,10 @@
+## [5.1.16](https://github.com/adobe/helix-simulator/compare/v5.1.15...v5.1.16) (2021-01-14)
+
+
+### Bug Fixes
+
+* **server:** clone of request object fails with node 15.x ([#567](https://github.com/adobe/helix-simulator/issues/567)) ([cbec17b](https://github.com/adobe/helix-simulator/commit/cbec17b6e91d7a87e8d1d8e3035c0414cb9ef70a)), closes [#566](https://github.com/adobe/helix-simulator/issues/566)
+
 ## [5.1.15](https://github.com/adobe/helix-simulator/compare/v5.1.14...v5.1.15) (2021-01-11)
 
 
