@@ -1,8 +1,8 @@
 version: 2.1
 executors:
-  node10:
+  node12:
     docker:
-    - image: circleci/node:10-buster
+    - image: circleci/node:12
       environment:
         NPM_CONFIG_PREFIX: "~/.npm-global"
     working_directory: ~/repo
@@ -45,7 +45,7 @@ jobs:
           name: prepare test git user
           command: git config --global user.name "Your Name"
       - checkout
-      - run: choco install nodejs-lts --version=10.16.3
+      - run: choco install nodejs-lts --version=12.20.1
       - run: npm install
       - run: mkdir junit
 
@@ -64,7 +64,7 @@ jobs:
           path: junit
 
   build:
-    executor: node10
+    executor: node12
 
     steps:
     - setup

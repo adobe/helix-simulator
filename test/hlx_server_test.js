@@ -64,7 +64,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -81,7 +81,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index`, 200, 'expected_index.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -98,7 +98,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/docs/`, 200, 'expected_docs_index.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -120,7 +120,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/hlx_098af326aa856bb42ce9a21240cf73d6f64b0b45.png`, 304);
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -142,7 +142,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/hlx_fonts/af/507e89/00000000000000003b9aee49/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=i4&v=3`, 200);
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -169,7 +169,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/_query/blog-posts/all`, 200);
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -189,7 +189,7 @@ describe('Helix Server', () => {
       await project.invalidateCache();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index2.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -209,7 +209,7 @@ describe('Helix Server', () => {
       await project.invalidateCache();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index3.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -237,7 +237,7 @@ describe('Helix Server', () => {
         assert.equal(e.message, `Port ${project.server.port} already in use by another process.`);
       }
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -256,7 +256,7 @@ describe('Helix Server', () => {
       project.config.strains.get('default').urls = [`http://127.0.0.1:${project.server.port}`];
       await assertHttp(`http://127.0.0.1:${project.server.port}/`, 200, 'expected_index_dev.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -273,7 +273,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.html?xxxxxxxxx=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&xxxxxxxxxxxx=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&xxxxxx=xxxxxxxx|xxxxxxx|xxxxxxxx&xxxxxxxxxxxxx=xxxxx%xxxx|xxxxx%xxxxxxxxx%xxxxxxxxxxxx|xxxxx-xx-xxxxxxxxx-xxxx`, 200, 'expected_index.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -290,7 +290,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.esi.html`, 200, 'expected_esi.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -307,7 +307,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.esitypo.html`, 200, 'expected_esitypo.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -324,7 +324,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.malformedesi.html`, 200, 'expected_malformedesi.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -342,7 +342,7 @@ describe('Helix Server', () => {
       // todo: verify behaviour on edge
       await assertHttp(`http://localhost:${project.server.port}/docs/api/index.esirel.html`, 200, 'expected_esirel.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -359,7 +359,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.esi1.html`, 200, 'expected_recesi.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -376,7 +376,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.esiremove1.html`, 200, 'expected_esiremove1.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -393,7 +393,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.esiremove2.html`, 200, 'expected_esiremove2.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -418,7 +418,7 @@ describe('Helix Server', () => {
       await assertHttp(`http://127.0.0.1:${project.server.port}/api/introduction.html`, 200, 'expected_api_introduction.html');
       await assertHttp(`http://127.0.0.1:${project.server.port}/api/welcome.txt`, 200, 'expected_api_welcome.txt');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -451,7 +451,7 @@ describe('Helix Server', () => {
       proxyProject.config.strains.get('proxy').origin._port = project.server.port;
       await assertHttp(`http://localhost:${proxyProject.server.port}/docs/api/index.html`, 200, 'expected_proxy_docs.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
       await proxyProject.stop();
     }
@@ -485,7 +485,7 @@ describe('Helix Server', () => {
       proxyProject.config.strains.get('proxy_help').origin._port = project.server.port;
       await assertHttp(`http://localhost:${proxyProject.server.port}/help/docs/api/index.html`, 200, 'expected_proxy_docs_chroot.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
       await proxyProject.stop();
     }
@@ -519,7 +519,7 @@ describe('Helix Server', () => {
       proxyProject.config.strains.get('proxy_help').origin._port = project.server.port;
       await assertHttp(`http://localhost:${proxyProject.server.port}/help/docs/api/`, 200, 'expected_proxy_docs_chroot.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
       await proxyProject.stop();
     }
@@ -559,7 +559,7 @@ describe('Helix Server', () => {
       proxyProject.config.strains.get('proxy').origin._port = project.server.port;
       await assertHttp(`http://localhost:${proxyProject.server.port}/docs/api/index.json`, 500);
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
       await proxyProject.stop();
     }
@@ -587,7 +587,7 @@ describe('Helix Server', () => {
         X_CDN_REQUEST_ID: reqCtx._cdnRequestId,
       }));
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -604,7 +604,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.dump.html?foo=bar&test=me`, 200, 'expected_dump_params.json');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -621,7 +621,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.binary.html`, 200, 'expected_binary.json');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -638,7 +638,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -659,7 +659,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -676,7 +676,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -694,7 +694,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/dist/styles.css`, 200, 'expected_styles.css');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -711,7 +711,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/dist/styles.css`, 200, 'expected_styles.css');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -728,7 +728,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/404.html`, 200, 'expected_404.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -745,7 +745,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/dist/notfound.css`, 404);
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -762,7 +762,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/notfound.css`, 404);
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -786,7 +786,7 @@ describe('Helix Server', () => {
         postData: {},
       }, 200, 'expected_index.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -806,7 +806,7 @@ describe('Helix Server', () => {
       await project.start();
       assert.equal(project._server._project.actionParams, fakeParams);
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -826,7 +826,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.param.html`, 200, 'expected_params.json');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -855,7 +855,7 @@ describe('Helix Server', () => {
         },
       }, 200, 'expected_index_post.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -872,7 +872,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/cgi-bin/post.js`, 200, 'expected_cgi.txt');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -929,7 +929,7 @@ describe('Private Repo Tests', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -982,7 +982,7 @@ describe('Content Proxy Tests', () => {
 
       // console.log(content);
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -1013,7 +1013,7 @@ describe('Content Proxy Tests', () => {
 
       assert.deepEqual(ret, { foo: 'bar' });
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -1043,7 +1043,7 @@ describe('Content Proxy Tests', () => {
 
       assert.equal(ret, '# Hello');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
