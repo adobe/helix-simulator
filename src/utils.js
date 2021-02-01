@@ -19,11 +19,11 @@ const fetchAPI = require('@adobe/helix-fetch');
 process.env.HELIX_FETCH_FORCE_HTTP1 = true;
 
 function createFetchContext() {
-  if (process.env.HELIX_FETCH_FORCE_HTTP1) {
-    return fetchAPI.context({ httpProtocol: 'http1', httpsProtocols: ['http1'] });
-  }
-  return fetchAPI.context({});
+  return process.env.HELIX_FETCH_FORCE_HTTP1
+    ? fetchAPI.context({ alpnProtocols: [fetchAPI.ALPN_HTTP1_1] })
+    : fetchAPI.context();
 }
+
 const fetchContext = createFetchContext();
 const { fetch: helixFetch } = fetchContext;
 
@@ -125,18 +125,21 @@ const utils = {
     delete headers.cookie;
     delete headers.connection;
     delete headers.host;
-    const ret = await helixFetch(url, {
+    const fetchOpts = {
       method: req.method,
       headers,
-      cache: 'no-store',
+      cache: 'no-cache',
       redirect: 'follow',
-      body: stream,
-    });
+    };
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      fetchOpts.body = stream;
+    }
+    const ret = await helixFetch(url, fetchOpts);
     ctx.log.info(`Proxy ${req.method} request to ${url}: ${ret.status}`);
     res
       .status(ret.status)
-      .set(ret.headers.raw());
-    (await ret.readable()).pipe(res);
+      .set(ret.headers.plain());
+    ret.body.pipe(res);
   },
 
   /**
@@ -237,11 +240,10 @@ const utils = {
       return true;
     }
     ctx.log.info(`simulator proxy: fetch from content proxy ${url}: ${ret.status}`);
-    const stream = await ret.readable();
-    res.headers = ret.headers.raw();
+    res.headers = ret.headers.plain();
     res.status(ret.status);
     return new Promise((resolve, reject) => {
-      stream.pipe(res)
+      ret.body.pipe(res)
         .on('error', reject)
         .on('end', resolve);
     });
@@ -360,7 +362,7 @@ const utils = {
           body,
         };
       } finally {
-        context.disconnectAll();
+        context.reset();
       }
     }
     return { toFullyQualifiedURL, get };

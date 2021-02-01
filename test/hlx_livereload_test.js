@@ -66,7 +66,7 @@ describe('Helix Server with Livereload', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/__internal__/livereload.js`, 200, require.resolve('livereload-js/dist/livereload.js'));
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -84,7 +84,7 @@ describe('Helix Server with Livereload', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.html`, 200, 'expected_index_w_lr.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -102,7 +102,7 @@ describe('Helix Server with Livereload', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.nohead.html`, 200, 'expected_index_w_lr_nohead.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -120,7 +120,7 @@ describe('Helix Server with Livereload', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.nobody.html`, 200, 'expected_index_w_lr_nobody.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -138,7 +138,7 @@ describe('Helix Server with Livereload', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.nohtml.html`, 200, 'expected_index_w_lr_nohtml.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -215,7 +215,7 @@ describe('Helix Server with Livereload', () => {
         reloadMissingCSS: true,
       });
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -287,7 +287,7 @@ describe('Helix Server with Livereload', () => {
         message: 'hello alert',
       });
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
@@ -305,7 +305,7 @@ describe('Helix Server with Livereload', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/index.esi1.html`, 200, 'expected_recesi_w_lr.html');
     } finally {
-      await fetchContext.disconnectAll();
+      await fetchContext.reset();
       await project.stop();
     }
   });
