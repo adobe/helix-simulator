@@ -20,8 +20,13 @@ const utils = require('./utils.js');
  */
 module.exports = class RequestContext {
   constructor(request, cfg) {
-    // todo: consider using lodash.defaultsDeep
-    const req = { ...request, ...cfg.requestOverride };
+    // see https://github.com/nodejs/node/issues/36550
+    const req = {
+      ...request,
+      get headers() { return request.headers; },
+      get trailers() { return request.trailers; },
+      ...cfg.requestOverride,
+    };
     if (cfg.requestOverride && cfg.requestOverride.headers) {
       req.headers = { ...request.headers, ...cfg.requestOverride.headers };
     }
