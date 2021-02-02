@@ -22,6 +22,9 @@
         "request": "launch",
         "name": "Mocha All",
         "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
         "args": [
             "--timeout",
             "999999",
@@ -36,6 +39,9 @@
       "request": "launch",
       "name": "Mocha Current File",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "args": [
         "--timeout",
         "999999",
