@@ -1,3 +1,12 @@
+## [5.1.22](https://github.com/adobe/helix-simulator/compare/v5.1.21...v5.1.22) (2021-02-03)
+
+
+### Bug Fixes
+
+* **deps:** migrate to helix-fetch v2 ([#577](https://github.com/adobe/helix-simulator/issues/577)) ([0a5331a](https://github.com/adobe/helix-simulator/commit/0a5331a2dd091e3a0477a8c80b1a7c260975feb5))
+* **deps:** update dependency @adobe/helix-shared to v7.19.4 ([#574](https://github.com/adobe/helix-simulator/issues/574)) ([d5f51ca](https://github.com/adobe/helix-simulator/commit/d5f51ca95de2297894359a7b026699e3b3eb167c))
+* **deps:** update dependency @adobe/helix-shared to v7.19.5 ([#576](https://github.com/adobe/helix-simulator/issues/576)) ([27e4994](https://github.com/adobe/helix-simulator/commit/27e4994f7e6243d7d4beed1655250b6a8d5d6465))
+
 ## [5.1.21](https://github.com/adobe/helix-simulator/compare/v5.1.20...v5.1.21) (2021-01-29)
 
 
