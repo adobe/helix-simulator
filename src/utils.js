@@ -16,23 +16,11 @@ const { PassThrough } = require('stream');
 const { MountConfig } = require('@adobe/helix-shared');
 const fetchAPI = require('@adobe/helix-fetch');
 
-process.env.HELIX_FETCH_FORCE_HTTP1 = true;
-
-function createFetchContext() {
-  return process.env.HELIX_FETCH_FORCE_HTTP1
-    ? fetchAPI.context({ alpnProtocols: [fetchAPI.ALPN_HTTP1_1] })
-    : fetchAPI.context();
-}
-
-const fetchContext = createFetchContext();
-const { fetch: helixFetch } = fetchContext;
+const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
+  ? fetchAPI.context({ alpnProtocols: [fetchAPI.ALPN_HTTP1_1] })
+  : fetchAPI.context({});
 
 const utils = {
-
-  /**
-   * Helix fetch context. Useful for unit tests to disconnect hanging sockets.
-   */
-  fetchContext,
 
   /**
    * Checks if the file addressed by the given filename exists and is a regular file.
@@ -61,9 +49,8 @@ const utils = {
     if (auth) {
       headers.authorization = `Bearer ${auth}`;
     }
-    const res = await helixFetch(uri, {
+    const res = await fetch(uri, {
       cache: 'no-store',
-      redirect: 'follow',
       headers,
     });
     const body = await res.buffer();
@@ -116,6 +103,12 @@ const utils = {
    */
   async proxyRequest(ctx, url, req, res, opts = {}) {
     ctx.log.info(`Proxy ${req.method} request to ${url}`);
+    let body;
+    // GET and HEAD requests can't have a body
+    if (!['GET', 'HEAD'].includes(req.method)) {
+      body = new PassThrough();
+      req.pipe(body);
+    }
     const stream = new PassThrough();
     req.pipe(stream);
     const headers = {
@@ -125,16 +118,12 @@ const utils = {
     delete headers.cookie;
     delete headers.connection;
     delete headers.host;
-    const fetchOpts = {
+    const ret = await fetch(url, {
       method: req.method,
       headers,
-      cache: 'no-cache',
-      redirect: 'follow',
-    };
-    if (req.method !== 'GET' && req.method !== 'HEAD') {
-      fetchOpts.body = stream;
-    }
-    const ret = await helixFetch(url, fetchOpts);
+      cache: 'no-store',
+      body,
+    });
     ctx.log.info(`Proxy ${req.method} request to ${url}: ${ret.status}`);
     res
       .status(ret.status)
@@ -171,7 +160,7 @@ const utils = {
       headers['x-request-id'] = requestId;
     }
 
-    let ret = await helixFetch(githubUrl, {
+    let ret = await fetch(githubUrl, {
       cache: 'no-store',
       headers,
     });
@@ -230,7 +219,7 @@ const utils = {
     url.searchParams.append('ignore', 'github');
     ctx.log.info(`simulator proxy: fetch from content proxy ${url}`);
 
-    ret = await helixFetch(url.toString(), {
+    ret = await fetch(url.toString(), {
       cache: 'no-store',
     });
     if (!ret.ok) {
@@ -346,24 +335,17 @@ const utils = {
       const options = extendRequestOptions(src, baseOptions || {});
       const { url } = options;
       delete options.url;
-      // need extra fetch context, otherwise it causes helix-fetch to hang... !?!
-      const context = createFetchContext();
-      try {
-        const { fetch } = context;
-        const ret = await fetch(url, {
-          cache: 'no-store',
-          ...options,
-        });
-        const body = await ret.text();
-        if (!ret.ok) {
-          throw new Error(ret.status);
-        }
-        return {
-          body,
-        };
-      } finally {
-        context.reset();
+      const ret = await fetch(url, {
+        cache: 'no-store',
+        ...options,
+      });
+      const body = await ret.text();
+      if (!ret.ok) {
+        throw new Error(ret.status);
       }
+      return {
+        body,
+      };
     }
     return { toFullyQualifiedURL, get };
   },
