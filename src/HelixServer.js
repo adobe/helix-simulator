@@ -10,8 +10,9 @@
  * governing permissions and limitations under the License.
  */
 
+const { promisify } = require('util');
 const EventEmitter = require('events');
-const path = require('path').posix;
+const path = require('path');
 const { Module } = require('module');
 const express = require('express');
 const cookieParser = require('cookie-parser');
@@ -191,20 +192,8 @@ class HelixServer extends EventEmitter {
       body = JSON.stringify(body, safeCycles());
     } else if (/.*\/octet-stream/.test(contentType) || /image\/.*/.test(contentType)) {
       body = Buffer.from(body, 'base64');
-    } else if (ctx.config.liveReload && contentType === 'text/html' && !req.headers['x-esi']) {
-      // inject live reload script
-      let match = body.match(/<\/head>/i);
-      if (!match) {
-        match = body.match(/<\/body>/i);
-      }
-      if (!match) {
-        match = body.match(/<\/html>/i);
-      }
-      // don't inject if no html found at all.
-      if (match) {
-        const { index } = match;
-        body = `${body.substring(0, index)}<script src="/__internal__/livereload.js"></script>${body.substring(index)}`;
-      }
+    } else if (ctx.config.liveReload && contentType.indexOf('text/html') === 0 && !req.headers['x-esi']) {
+      body = utils.injectLiveReloadScript(body);
     }
     res.set(headers).status(status).send(body);
     return true;
@@ -228,11 +217,11 @@ class HelixServer extends EventEmitter {
       res.status(500).send();
       return true;
     }
-    let proxyPath = path.relative(ctx.mount, ctx.path);
+    let proxyPath = path.posix.relative(ctx.mount, ctx.path);
     if (proxyPath.startsWith('/../')) {
       proxyPath = req.path;
     }
-    proxyPath = path.resolve('/', origin.path, proxyPath);
+    proxyPath = path.posix.resolve('/', origin.path, proxyPath);
     const url = `${origin.useSSL ? 'https' : 'http'}://${origin.hostname}:${origin.port}${proxyPath}`;
     try {
       await utils.proxyRequest(ctx, url, req, res);
@@ -350,6 +339,55 @@ class HelixServer extends EventEmitter {
     }
   }
 
+  /**
+   * Proxy Mode route handler
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   */
+  async handleProxyModeRequest(req, res) {
+    const sendFile = promisify(res.sendFile).bind(res);
+    const ctx = new RequestContext(req, this._project);
+    const { log } = this;
+    const { proxyUrl } = this._project;
+
+    const { liveReload } = ctx.config;
+    if (liveReload) {
+      liveReload.startRequest(ctx.requestId, ctx.path);
+    }
+
+    // try to serve static
+    try {
+      const filePath = path.join(this._project.directory, ctx.path);
+      log.debug('trying to serve local file', filePath);
+      await sendFile(filePath, {
+        dotfiles: 'allow',
+      });
+      if (liveReload) {
+        liveReload.registerFile(ctx.requestId, filePath);
+      }
+      return;
+    } catch (e) {
+      log.debug(`Error while delivering resource ${ctx.path} - ${e.stack || e}`);
+    } finally {
+      if (liveReload) {
+        liveReload.endRequest(ctx.requestId);
+      }
+    }
+
+    // use proxy
+    try {
+      const url = `${proxyUrl}${ctx.url}`;
+      await utils.proxyRequest(ctx, url, req, res, {
+        injectLiveReload: this._project.liveReload,
+      });
+    } catch (err) {
+      log.error(`Failed to proxy helix request ${ctx.path}: ${err.message}`);
+      res.status(502).send(`Failed to proxy helix request: ${err.message}`);
+    }
+
+    this.emit('request', req, res, ctx);
+  }
+
   async setupApp() {
     // setup ESI as express middleware
     const baseUrl = `http://localhost:${this._port}`;
@@ -367,7 +405,9 @@ class HelixServer extends EventEmitter {
     // use json body parser
     this._app.use(express.json());
 
-    const handler = asyncHandler(this.handleRequest.bind(this));
+    const handler = this._project.proxyUrl
+      ? asyncHandler(this.handleProxyModeRequest.bind(this))
+      : asyncHandler(this.handleRequest.bind(this));
     this._app.get('/__internal__/content-proxy/:strain', asyncHandler(this.handleContentProxy.bind(this)));
     this._app.get('*', handler);
     this._app.post('*', handler);
@@ -402,6 +442,9 @@ class HelixServer extends EventEmitter {
         }
         this._port = this._server.address().port;
         log.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
+        if (this._project.proxyUrl) {
+          log.info(`Enabled reverse proxy to ${this._project.proxyUrl}`);
+        }
         resolve();
       });
       this._project.initLiveReload(this._app, this._server);
