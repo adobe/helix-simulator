@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/adobe/helix-simulator/compare/v5.1.22...v5.2.0) (2021-02-05)
+
+
+### Features
+
+* **server:** add permanent proxy mode ([#578](https://github.com/adobe/helix-simulator/issues/578)) ([ade93d7](https://github.com/adobe/helix-simulator/commit/ade93d758e0e3bd9e93462d8dd6a64320ec45e6a))
+
 ## [5.1.22](https://github.com/adobe/helix-simulator/compare/v5.1.21...v5.1.22) (2021-02-03)
 
 
