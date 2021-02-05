@@ -53,7 +53,7 @@ module.exports = class RequestContext {
     } = cfg.selectStrain({ ...req, path: this._path }));
 
     if (!this._mount) {
-      if (this._strain.urls.length > 0) {
+      if (this._strain && this._strain.urls.length > 0) {
         this._mount = parse(this._strain.urls[0]).pathname.replace(/\/+$/, '');
       } else {
         this._mount = '';
@@ -98,7 +98,7 @@ module.exports = class RequestContext {
     }
 
     // prepend any content repository path
-    const repoPath = this._strain.content ? this._strain.content.path : '';
+    const repoPath = this._strain && this._strain.content ? this._strain.content.path : '';
     if (repoPath && repoPath !== '/') {
       relPath = repoPath + relPath;
     }
@@ -112,7 +112,7 @@ module.exports = class RequestContext {
       'X-Backend-Name': 'localhost--F_Petridish',
       'X-CDN-Request-ID': this._cdnRequestId,
       'X-CDN-URL': `${request.protocol}://${request.get('host')}${request.originalUrl}`,
-      'X-Strain': this._strain.name,
+      'X-Strain': this._strain ? this._strain.name : 'default',
       'X-Old-Url': this._url,
       'X-Repo-Root-Path': repoPath,
       ...this._headers,

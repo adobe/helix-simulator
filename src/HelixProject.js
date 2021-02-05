@@ -50,6 +50,8 @@ class HelixProject {
     this._algoliaAPIKey = null;
     this._liveReload = null;
     this._enableLiveReload = false;
+    this._proxyUrl = null;
+    this._proxyCache = true;
   }
 
   withCwd(cwd) {
@@ -134,8 +136,20 @@ class HelixProject {
     return this;
   }
 
+  withProxyUrl(value) {
+    this._proxyUrl = value;
+    return this;
+  }
+
+  withProxyCache(value) {
+    this._proxyCache = value;
+    return this;
+  }
+
   registerGitRepository(repoPath, gitUrl) {
-    this._gitMgr.registerServer(repoPath, gitUrl);
+    if (this._gitMgr) {
+      this._gitMgr.registerServer(repoPath, gitUrl);
+    }
     return this;
   }
 
@@ -191,6 +205,18 @@ class HelixProject {
     return this._liveReload;
   }
 
+  get proxyUrl() {
+    return this._proxyUrl;
+  }
+
+  get proxyCache() {
+    return this._proxyCache;
+  }
+
+  get directory() {
+    return this._cwd;
+  }
+
   /**
    * Returns the helix server
    * @returns {HelixServer}
@@ -215,6 +241,9 @@ class HelixProject {
   }
 
   selectStrain(request) {
+    if (!this.config) {
+      return {};
+    }
     // look for X-Strain cookie first
     if (request.cookies) {
       const cstrain = this.config.strains.get(request.cookies['X-Strain']);
@@ -318,28 +347,31 @@ class HelixProject {
       });
     }
     this._liveReload = this._enableLiveReload ? new LiveReload(this._logger) : null;
-    this._gitMgr = new GitManager()
-      .withCwd(this._cwd)
-      .withLogger(this._logger)
-      .withLogsDir(this._logsDir)
-      .withLiveReload(this._liveReload);
 
-    if (!this._cfg) {
-      this._cfg = await new HelixConfig()
-        .withDirectory(this._cwd)
-        .withLogger(this._logger).init();
+    if (!this._proxyUrl) {
+      this._gitMgr = new GitManager()
+        .withCwd(this._cwd)
+        .withLogger(this._logger)
+        .withLogsDir(this._logsDir)
+        .withLiveReload(this._liveReload);
+
+      if (!this._cfg) {
+        this._cfg = await new HelixConfig()
+          .withDirectory(this._cwd)
+          .withLogger(this._logger).init();
+      }
+
+      await this.checkPaths();
+
+      if (this._srcDirs.length === 0) {
+        throw new Error('Invalid config. No "src" directory.');
+      }
+
+      this.registerLocalStrains();
+
+      // init template resolver
+      this._templateResolver = new TemplateResolver().withDirectory(this._buildDir);
     }
-
-    await this.checkPaths();
-
-    if (this._srcDirs.length === 0) {
-      throw new Error('Invalid config. No "src" directory.');
-    }
-
-    this.registerLocalStrains();
-
-    // init template resolver
-    this._templateResolver = new TemplateResolver().withDirectory(this._buildDir);
 
     const log = this._logger;
     if (this._displayVersion) {
@@ -408,14 +440,18 @@ class HelixProject {
     this.log.debug('Launching helix simulation server for development...');
     await this._server.init();
     await this._server.start(this);
-    await this._templateResolver.init();
+    if (this._templateResolver) {
+      await this._templateResolver.init();
+    }
     return this;
   }
 
   async stop() {
     this.log.debug('Stopping helix simulation server..');
     await this._server.stop();
-    await this._gitMgr.stop();
+    if (this._gitMgr) {
+      await this._gitMgr.stop();
+    }
     if (this.liveReload) {
       this.liveReload.stop();
     }

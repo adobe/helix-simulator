@@ -1004,3 +1004,66 @@ describe('Content Proxy Tests', () => {
     }
   });
 });
+
+describe('Proxy Mode Tests', () => {
+  let testRoot;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+  });
+
+  afterEach(async () => {
+    if (os.platform() === 'win32') {
+      // Note: the async variant of remove hangs on windows, probably due to open filehandle to
+      // logs/request.log
+      fse.removeSync(testRoot);
+    } else {
+      await fse.remove(testRoot);
+    }
+    nock.cleanAll();
+  });
+
+  it('delivers local file system first.', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'pagesproxy'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'))
+      .withProxyUrl('http://main--foo--bar.hlx.page');
+
+    await project.init();
+
+    nock('http://main--foo--bar.hlx.page')
+      .get('/api/v1/web/helix/helix-services/content-proxy@v2?owner=local&repo=default&path=%2Fms%2Ffoo.docx&ignore=github')
+      .reply(200, '# Hello\n\ndocx\n');
+    try {
+      await project.start();
+      const ret = await assertHttp(`http://localhost:${project.server.port}/index.html`, 200);
+      assert.strictEqual(ret.trim(), 'hello index');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('delivers from proxy.', async () => {
+    const cwd = await setupProject(path.join(SPEC_ROOT, 'pagesproxy'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withLogsDir(path.resolve(cwd, 'logs'))
+      .withProxyUrl('http://main--foo--bar.hlx.page');
+
+    await project.init();
+
+    nock('http://main--foo--bar.hlx.page')
+      .get('/readme.html')
+      .reply(200, 'hello readme');
+    try {
+      await project.start();
+      const ret = await assertHttp(`http://localhost:${project.server.port}/readme.html`, 200);
+      assert.strictEqual(ret.trim(), 'hello readme');
+    } finally {
+      await project.stop();
+    }
+  });
+});

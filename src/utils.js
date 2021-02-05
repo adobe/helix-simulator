@@ -21,6 +21,18 @@ const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
   : fetchAPI.context({});
 
 const utils = {
+  status2level(status) {
+    if (status < 300) {
+      return 'debug';
+    }
+    if (status < 400) {
+      return 'info';
+    }
+    if (status < 500) {
+      return 'warn';
+    }
+    return 'error';
+  },
 
   /**
    * Checks if the file addressed by the given filename exists and is a regular file.
@@ -55,7 +67,8 @@ const utils = {
     });
     const body = await res.buffer();
     if (!res.ok) {
-      ctx.log.error(`resource at ${uri} does not exist. got ${res.status} from server`);
+      const level = utils.status2level(res.status);
+      ctx.log[level](`resource at ${uri} does not exist. got ${res.status} from server`);
       return null;
     }
     return body;
@@ -93,6 +106,28 @@ const utils = {
   },
 
   /**
+   * Injects the live-reload script
+   * @param {string} body the html body
+   * @returns {string} the modified body
+   */
+  injectLiveReloadScript(body) {
+    let match = body.match(/<\/head>/i);
+    if (!match) {
+      match = body.match(/<\/body>/i);
+    }
+    if (!match) {
+      match = body.match(/<\/html>/i);
+    }
+    // don't inject if no html found at all.
+    if (match) {
+      const { index } = match;
+      // eslint-disable-next-line no-param-reassign
+      body = `${body.substring(0, index)}<script src="/__internal__/livereload.js"></script>${body.substring(index)}`;
+    }
+    return body;
+  },
+
+  /**
    * Fetches the content from the url  and streams it back to the response.
    * @param {RequestContext} ctx Context
    * @param {string} url The url to fetch from
@@ -102,7 +137,7 @@ const utils = {
    * @return {Promise} A promise that resolves when the stream is done.
    */
   async proxyRequest(ctx, url, req, res, opts = {}) {
-    ctx.log.info(`Proxy ${req.method} request to ${url}`);
+    ctx.log.debug(`Proxy ${req.method} request to ${url}`);
     let body;
     // GET and HEAD requests can't have a body
     if (!['GET', 'HEAD'].includes(req.method)) {
@@ -124,7 +159,18 @@ const utils = {
       cache: 'no-store',
       body,
     });
-    ctx.log.info(`Proxy ${req.method} request to ${url}: ${ret.status}`);
+    const contentType = ret.headers.get('content-type') || 'text/plain';
+    const level = utils.status2level(ret.status);
+    ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
+    if (opts.injectLiveReload && ret.status === 200 && contentType.indexOf('text/html') === 0) {
+      const respBody = utils.injectLiveReloadScript(await ret.text());
+      res
+        .status(ret.status)
+        .set(ret.headers.plain())
+        .send(respBody);
+      return;
+    }
+
     res
       .status(ret.status)
       .set(ret.headers.plain());
