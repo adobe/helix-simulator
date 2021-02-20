@@ -1,3 +1,10 @@
+## [5.2.8](https://github.com/adobe/helix-simulator/compare/v5.2.7...v5.2.8) (2021-02-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency querystring to v0.2.1 ([ce76808](https://github.com/adobe/helix-simulator/commit/ce76808c3e639560bfa84290c087ba1084bbafef))
+
 ## [5.2.7](https://github.com/adobe/helix-simulator/compare/v5.2.6...v5.2.7) (2021-02-19)
 
 
