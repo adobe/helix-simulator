@@ -1,3 +1,10 @@
+## [5.2.15](https://github.com/adobe/helix-simulator/compare/v5.2.14...v5.2.15) (2021-02-25)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([250098a](https://github.com/adobe/helix-simulator/commit/250098a75302aa99f123327a40333528d083c0d7))
+
 ## [5.2.14](https://github.com/adobe/helix-simulator/compare/v5.2.13...v5.2.14) (2021-02-25)
 
 
