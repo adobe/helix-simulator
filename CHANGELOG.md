@@ -1,3 +1,10 @@
+## [5.2.12](https://github.com/adobe/helix-simulator/compare/v5.2.11...v5.2.12) (2021-02-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-log to v5 ([#595](https://github.com/adobe/helix-simulator/issues/595)) ([e29866c](https://github.com/adobe/helix-simulator/commit/e29866c1ed85f31bcd2a1493beeadd8ca1e1807c))
+
 ## [5.2.11](https://github.com/adobe/helix-simulator/compare/v5.2.10...v5.2.11) (2021-02-23)
 
 
