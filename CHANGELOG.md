@@ -1,3 +1,10 @@
+# [5.3.0](https://github.com/adobe/helix-simulator/compare/v5.2.18...v5.3.0) (2021-03-04)
+
+
+### Features
+
+* **proxy:** dump response with loglevel silly ([#603](https://github.com/adobe/helix-simulator/issues/603)) ([5294215](https://github.com/adobe/helix-simulator/commit/529421528737db305322b5071248dd49beac32c3)), closes [#602](https://github.com/adobe/helix-simulator/issues/602)
+
 ## [5.2.18](https://github.com/adobe/helix-simulator/compare/v5.2.17...v5.2.18) (2021-03-03)
 
 
