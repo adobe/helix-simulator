@@ -1054,6 +1054,7 @@ describe('Proxy Mode Tests', () => {
       .withProxyUrl('http://main--foo--bar.hlx.page');
 
     await project.init();
+    project.log.level = 'silly';
 
     nock('http://main--foo--bar.hlx.page')
       .get('/readme.html')

@@ -162,12 +162,43 @@ const utils = {
     const contentType = ret.headers.get('content-type') || 'text/plain';
     const level = utils.status2level(ret.status);
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
-    if (opts.injectLiveReload && ret.status === 200 && contentType.indexOf('text/html') === 0) {
-      const respBody = utils.injectLiveReloadScript(await ret.text());
+    const injectLR = opts.injectLiveReload && ret.status === 200 && contentType.indexOf('text/html') === 0;
+    if (ctx.log.level === 'silly' || injectLR) {
+      let respBody;
+      let textBody;
+      if (contentType.startsWith('text/')) {
+        textBody = await ret.text();
+      } else {
+        respBody = await ret.buffer();
+      }
+      const lines = ['----------------------------->'];
+      if (ctx.log.level === 'silly') {
+        lines.push(`${req.method} ${url}`);
+        Object.entries(headers).forEach(([name, value]) => {
+          lines.push(`${name}: ${value}`);
+        });
+        lines.push('');
+        lines.push('<-----------------------------');
+        lines.push('');
+        lines.push(`http/${ret.httpVersion} ${ret.status} ${ret.statusText}`);
+        Object.entries(ret.headers.plain()).forEach(([name, value]) => {
+          lines.push(`${name}: ${value}`);
+        });
+        lines.push('');
+        if (respBody) {
+          lines.push(`<binary ${respBody.length} bytes>`);
+        } else {
+          lines.push(textBody);
+        }
+        ctx.log.trace(lines.join('\n'));
+      }
+      if (injectLR) {
+        textBody = utils.injectLiveReloadScript(textBody);
+      }
       res
         .status(ret.status)
         .set(ret.headers.plain())
-        .send(respBody);
+        .send(respBody || textBody);
       return;
     }
 
