@@ -34,7 +34,7 @@
     "moment": "2.29.1",
     "nodesi": "1.15.0",
     "querystring": "0.2.1",
-    "ws": "7.4.3"
+    "ws": "7.4.4"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.4",
