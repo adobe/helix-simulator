@@ -1,3 +1,10 @@
+## [5.3.11](https://github.com/adobe/helix-simulator/compare/v5.3.10...v5.3.11) (2021-03-23)
+
+
+### Bug Fixes
+
+* **server:** Revert "use correct ref/repo/owner for locally mouted github ([#614](https://github.com/adobe/helix-simulator/issues/614))" ([#617](https://github.com/adobe/helix-simulator/issues/617)) ([6b851cc](https://github.com/adobe/helix-simulator/commit/6b851cc196c423853779265f9af9b36b03312dca))
+
 ## [5.3.10](https://github.com/adobe/helix-simulator/compare/v5.3.9...v5.3.10) (2021-03-23)
 
 
