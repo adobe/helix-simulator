@@ -20,7 +20,6 @@ const fse = require('fs-extra');
 const path = require('path');
 const shell = require('shelljs');
 const nock = require('nock');
-const { fetch } = require('@adobe/helix-fetch');
 const { GitUrl, IndexConfig, Condition } = require('@adobe/helix-shared');
 const HelixProject = require('../src/HelixProject.js');
 const { createTestRoot, setupProject, assertHttp } = require('./utils.js');
@@ -399,23 +398,6 @@ describe('Helix Server', () => {
       project.config.strains.get('api').condition = new Condition({ url: `http://127.0.0.1:${project.server.port}/api` });
       await assertHttp(`http://127.0.0.1:${project.server.port}/api/introduction.html`, 200, 'expected_api_introduction.html');
       await assertHttp(`http://127.0.0.1:${project.server.port}/api/welcome.txt`, 200, 'expected_api_welcome.txt');
-
-      // verify some action params
-      const resp = await fetch(`http://127.0.0.1:${project.server.port}/api/introduction.dump.html`, {
-        headers: {
-          'user-agent': 'helix-fetch',
-        },
-      });
-      assert.equal(resp.status, 200);
-      const actual = await resp.json();
-      assert.equal(actual.extension, 'html');
-      assert.equal(actual.owner, 'adobe');
-      assert.equal(actual.params, '');
-      assert.equal(actual.path, '/docs/introduction.md');
-      assert.equal(actual.ref, 'master');
-      assert.equal(actual.rootPath, '/api');
-      assert.equal(actual.selector, 'dump');
-      assert.equal(actual.repo, 'helix-api');
     } finally {
       await project.stop();
     }
@@ -573,30 +555,13 @@ describe('Helix Server', () => {
       project.server.on('request', (req, res, ctx) => {
         reqCtx = ctx;
       });
-
-      const resp = await fetch(`http://localhost:${project.server.port}/index.dump.html`, {
-        headers: {
-          'user-agent': 'helix-fetch',
-        },
-      });
-      assert.equal(resp.status, 200);
-      const actual = await resp.json();
-
-      assert.deepEqual(actual.__ow_headers, {
-        accept: '*/*',
-        'accept-encoding': 'gzip,deflate,br',
-        connection: 'close',
-        host: `localhost:${project.server.port}`,
-        'user-agent': 'helix-fetch',
-        'x-backend-name': 'localhost--F_Petridish',
-        'x-cdn-request-id': reqCtx._cdnRequestId,
-        'x-cdn-url': `http://localhost:${project.server.port}/index.dump.html`,
-        'x-old-url': '/index.dump.html',
-        'x-openwhisk-activation-id': reqCtx._wskActivationId,
-        'x-repo-root-path': '',
-        'x-request-id': reqCtx._requestId,
-        'x-strain': 'default',
-      });
+      await assertHttp(`http://localhost:${project.server.port}/index.dump.html`, 200, 'expected_dump.json', () => ({
+        SERVER_PORT: project.server.port,
+        GIT_PORT: project.gitState.httpPort,
+        X_WSK_ACTIVATION_ID: reqCtx._wskActivationId,
+        X_REQUEST_ID: reqCtx._requestId,
+        X_CDN_REQUEST_ID: reqCtx._cdnRequestId,
+      }));
     } finally {
       await project.stop();
     }
