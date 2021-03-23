@@ -130,29 +130,24 @@ class HelixServer extends EventEmitter {
     };
 
     Object.assign(actionParams, ctx.actionParams, ctx.body);
-
-    const contentRepo = ctx.strain.originalContent
-      ? ctx.strain.originalContent
-      : ctx.strain.content;
-
     if (ctx.url.match(/^\/cgi-bin\//)) {
       Object.assign(actionParams, {
-        __hlx_owner: contentRepo.owner,
-        __hlx_repo: contentRepo.repo,
-        __hlx_ref: contentRepo.ref || 'master',
+        __hlx_owner: ctx.strain.content.owner,
+        __hlx_repo: ctx.strain.content.repo,
+        __hlx_ref: ctx.strain.content.ref || 'master',
       }, ctx._params);
     } else {
       Object.assign(actionParams, {
-        owner: contentRepo.owner,
-        repo: contentRepo.repo,
-        ref: contentRepo.ref || 'master',
+        owner: ctx.strain.content.owner,
+        repo: ctx.strain.content.repo,
+        ref: ctx.strain.content.ref || 'master',
         path: `${ctx.resourcePath}.md`,
         selector: ctx._selector,
         extension: ctx._extension,
         rootPath: ctx._mount,
         params: querystring.stringify(ctx._params),
-        REPO_RAW_ROOT: `${contentRepo.rawRoot}/`, // the pipeline needs the final slash here
-        REPO_API_ROOT: `${contentRepo.apiRoot}/`,
+        REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
+        REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
         CONTENT_PROXY_URL: `http://localhost:${this._port}/__internal__/content-proxy/${ctx.strain.name}`,
       });
     }
