@@ -20,8 +20,6 @@ const GitMapping = require('./GitMapping.js');
 
 const GIT_LOCAL_HOST = '127.0.0.1';
 
-const GIT_LOCAL_OWNER = 'helix';
-
 const GIT_SERVER_CONFIG = {
   configPath: '<internal>',
   repoRoot: '.',
@@ -47,8 +45,6 @@ const GIT_SERVER_CONFIG = {
 
   // repository mapping. allows to 'mount' repositories outside the 'repoRoot' structure.
   virtualRepos: {
-    [GIT_LOCAL_OWNER]: {
-    },
   },
 
   logs: {
@@ -174,9 +170,14 @@ class GitManager {
     }
 
     const mappings = Array.from(this._serversByPath.values());
-    mappings.forEach((mapping) => {
-      this._gitConfig.virtualRepos[GIT_LOCAL_OWNER][mapping.key] = {
-        path: mapping.repoPath,
+    mappings.forEach(({ owner, repo, repoPath }) => {
+      let repos = this._gitConfig.virtualRepos[owner];
+      if (!repos) {
+        repos = {};
+        this._gitConfig.virtualRepos[owner] = repos;
+      }
+      repos[repo] = {
+        path: repoPath,
       };
     });
     this.log.debug('Launching local git server...');
@@ -192,7 +193,7 @@ class GitManager {
 
     await Promise.all(mappings.map(async (mapping) => {
       const { currentBranch } = await gitServer.getRepoInfo(
-        this._gitConfig, GIT_LOCAL_OWNER, mapping.key,
+        this._gitConfig, mapping.owner, mapping.repo,
       );
 
       // #65 consider currently checked out branch
@@ -201,8 +202,8 @@ class GitManager {
         protocol: 'http',
         hostname: GIT_LOCAL_HOST,
         port: this._gitState.httpPort,
-        owner: GIT_LOCAL_OWNER,
-        repo: mapping.key,
+        owner: mapping.owner,
+        repo: mapping.repo,
         ref: currentBranch,
       });
       this.log.debug(`git emulating ${mapping.gitUrl} via ${mapping.localUrl} from './${path.relative(this._cwd, mapping.repoPath)}'`);

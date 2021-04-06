@@ -24,7 +24,7 @@ const packageJson = require('../package.json');
 
 const RequestContext = require('./RequestContext.js');
 
-const HELIX_BLOB_REGEXP = /^\/hlx_([0-9a-f]{40}).(jpg|jpeg|png|webp|gif)$/;
+const HELIX_BLOB_REGEXP = /^\/hlx_([0-9a-f]{40,41}).(jpg|jpeg|png|webp|gif)$/;
 const HELIX_FONTS_REGEXP = /^\/hlx_fonts\/(.+)$/;
 const HELIX_QUERY_REGEXP = /^\/_query\/(.+)\/(.+)$/;
 
