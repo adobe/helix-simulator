@@ -426,6 +426,27 @@ const utils = {
     }
     return { toFullyQualifiedURL, get };
   },
+
+  /**
+   * Creates a proxy url for the proxy mode. it sanitizes the original request url by removing
+   * search params if needed.
+   * @param {string} reqUrl original request url
+   * @param {string} base base url
+   * @returns {string}
+   */
+  makeProxyURL(reqUrl, base) {
+    const url = new URL(reqUrl, base);
+    // remove search params if needed
+    if (url.search
+      && reqUrl.indexOf('/hlx_') < 0
+      && reqUrl.indexOf('/media_') < 0
+      && reqUrl.indexOf('.json') < 0
+      && reqUrl.indexOf('/cgi-bin/') < 0
+    ) {
+      url.search = '';
+    }
+    return url.href;
+  },
 };
 
 module.exports = Object.freeze(utils);
