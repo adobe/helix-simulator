@@ -1,3 +1,10 @@
+## [5.3.21](https://github.com/adobe/helix-simulator/compare/v5.3.20...v5.3.21) (2021-04-06)
+
+
+### Bug Fixes
+
+* **proxy:** strip query params from proxy reqests ([#630](https://github.com/adobe/helix-simulator/issues/630)) ([bbffdd8](https://github.com/adobe/helix-simulator/commit/bbffdd8e8daaf45b70fd53435919a7c8078ad42f)), closes [#625](https://github.com/adobe/helix-simulator/issues/625)
+
 ## [5.3.20](https://github.com/adobe/helix-simulator/compare/v5.3.19...v5.3.20) (2021-04-03)
 
 
