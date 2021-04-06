@@ -13,7 +13,6 @@ const fs = require('fs-extra');
 const crypto = require('crypto');
 const { Socket } = require('net');
 const { PassThrough } = require('stream');
-const { MountConfig } = require('@adobe/helix-shared');
 const fetchAPI = require('@adobe/helix-fetch');
 
 const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
@@ -263,39 +262,17 @@ const utils = {
       return true;
     }
 
-    // load fstab
-    const mount = await new MountConfig()
-      .withRepoURL(ctx.strain.content)
-      .init();
-
-    // mountpoint
-    const mp = mount.match(resourcePath);
-    if (!mp || !mp.type) {
-      res.status(404).send();
-      return true;
-    }
-
-    // todo: use correct namespace ??
-    const url = new URL('https://adobeioruntime.net/api/v1/web/helix/helix-services/content-proxy@v2');
-
-    const { originalContent } = ctx.strain;
-    Object.entries(req.query).forEach(([key, value]) => {
-      if (key === 'REPO_RAW_ROOT') {
-        // todo: potentially specify different root
-      } else if (key === 'repo' && originalContent) {
-        url.searchParams.append(key, originalContent.repo);
-      } else if (key === 'owner' && originalContent) {
-        url.searchParams.append(key, originalContent.owner);
-      } else if (key === 'ref' && originalContent) {
-        url.searchParams.append(key, originalContent.ref);
-      } else {
+    const {
+      ref, repo, owner, path, ...rest
+    } = req.query;
+    const url = new URL(`https://${ref}--${repo}--${owner}.hlx.page${path}`);
+    Object.entries(rest)
+      .filter(([key]) => key !== 'REPO_RAW_ROOT')
+      .forEach(([key, value]) => {
         url.searchParams.append(key, value);
-      }
-    });
-    // make content-proxy to ignore github
-    url.searchParams.append('ignore', 'github');
-    ctx.log.info(`simulator proxy: fetch from content proxy ${url}`);
+      });
 
+    ctx.log.info(`simulator proxy: fetch from content proxy ${url}`);
     ret = await fetch(url.toString(), {
       cache: 'no-store',
     });
