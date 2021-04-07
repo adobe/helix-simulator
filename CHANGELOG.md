@@ -1,3 +1,11 @@
+## [5.3.22](https://github.com/adobe/helix-simulator/compare/v5.3.21...v5.3.22) (2021-04-07)
+
+
+### Bug Fixes
+
+* **git:** use correct owner/repo for git server ([27f10af](https://github.com/adobe/helix-simulator/commit/27f10afb58a41deede52fbd13d9c86f4c76162a6)), closes [#613](https://github.com/adobe/helix-simulator/issues/613)
+* **server:** Use content proxy via fastly ([55664ad](https://github.com/adobe/helix-simulator/commit/55664adaa30dfa000fb0d5f93b2322b8ba44e3a2)), closes [#631](https://github.com/adobe/helix-simulator/issues/631)
+
 ## [5.3.21](https://github.com/adobe/helix-simulator/compare/v5.3.20...v5.3.21) (2021-04-06)
 
 
