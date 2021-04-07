@@ -24,7 +24,7 @@ const packageJson = require('../package.json');
 
 const RequestContext = require('./RequestContext.js');
 
-const HELIX_BLOB_REGEXP = /^\/hlx_([0-9a-f]{40}).(jpg|jpeg|png|webp|gif)$/;
+const HELIX_BLOB_REGEXP = /^\/hlx_([0-9a-f]{40,41}).(jpg|jpeg|png|webp|gif)$/;
 const HELIX_FONTS_REGEXP = /^\/hlx_fonts\/(.+)$/;
 const HELIX_QUERY_REGEXP = /^\/_query\/(.+)\/(.+)$/;
 
@@ -259,13 +259,13 @@ class HelixServer extends EventEmitter {
     if (await this.handleProxy(ctx, req, res)) {
       return;
     }
+    const { ref, repo, owner } = ctx.strain.originalContent || ctx.strain.content;
 
     // check for special hlx paths
     if (HELIX_BLOB_REGEXP.test(ctx.path)
       || HELIX_FONTS_REGEXP.test(ctx.path)
       || HELIX_QUERY_REGEXP.test(ctx.path)) {
-      const content = ctx.strain.originalContent || ctx.strain.content;
-      const url = `https://${content.ref}--${content.repo}--${content.owner}.hlx.page${ctx.url}`;
+      const url = `https://${ref}--${repo}--${owner}.hlx.page${ctx.url}`;
       log.debug(`helix url, proxying to ${url}`);
       // proxy to inner CDN
       try {
@@ -282,12 +282,11 @@ class HelixServer extends EventEmitter {
 
     // check for .json or .md for content proxy
     if (ctx.extension === 'json' || ctx.extension === 'md') {
-      // use fake repo/owner/ref - they will be replaced later with the strain content values.
       req.query = {
         ...req.query || {},
-        repo: 'repo',
-        owner: 'owner',
-        ref: 'ref',
+        repo,
+        owner,
+        ref,
         path: ctx.path,
       };
       req.params.strain = ctx.strain.name;

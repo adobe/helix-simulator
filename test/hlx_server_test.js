@@ -921,8 +921,8 @@ describe('Content Proxy Tests', () => {
       .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
 
-    nock('https://adobeioruntime.net')
-      .get('/api/v1/web/helix/helix-services/content-proxy@v2?owner=local&repo=default&path=%2Fms%2Ffoo.docx&ignore=github')
+    nock('https://undefined--default--local.hlx.page')
+      .get('/ms/foo.docx')
       .reply(200, '# Hello\n\ndocx\n');
     try {
       await project.start();
@@ -954,14 +954,9 @@ describe('Content Proxy Tests', () => {
       .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
 
-    nock('https://adobeioruntime.net')
-      .get('/api/v1/web/helix/helix-services/content-proxy@v2')
+    nock('https://master--default--local.hlx.page')
+      .get('/table.json')
       .query({
-        owner: 'local',
-        repo: 'default',
-        ref: 'master',
-        path: '/table.json',
-        ignore: 'github',
         limit: 1,
       })
       .reply(200, { foo: 'bar' });
@@ -984,15 +979,8 @@ describe('Content Proxy Tests', () => {
       .withLogsDir(path.resolve(cwd, 'logs'));
     await project.init();
 
-    nock('https://adobeioruntime.net')
-      .get('/api/v1/web/helix/helix-services/content-proxy@v2')
-      .query({
-        owner: 'local',
-        repo: 'default',
-        ref: 'master',
-        path: '/README.md',
-        ignore: 'github',
-      })
+    nock('https://master--default--local.hlx.page/')
+      .get('/README.md')
       .reply(200, '# Hello');
     try {
       await project.start();

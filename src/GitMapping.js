@@ -31,6 +31,14 @@ class GitMapping {
     return this._gitUrl;
   }
 
+  get repo() {
+    return this._gitUrl.repo;
+  }
+
+  get owner() {
+    return this._gitUrl.owner;
+  }
+
   get repoPath() {
     return this._repoPath;
   }
