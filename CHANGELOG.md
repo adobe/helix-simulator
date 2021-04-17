@@ -1,3 +1,10 @@
+## [5.3.31](https://github.com/adobe/helix-simulator/compare/v5.3.30...v5.3.31) (2021-04-17)
+
+
+### Bug Fixes
+
+* **proxy:** remove content-encoding ([#644](https://github.com/adobe/helix-simulator/issues/644)) ([b94f929](https://github.com/adobe/helix-simulator/commit/b94f92995afec49b0af0ccad06f7a2d2b861ef39)), closes [#643](https://github.com/adobe/helix-simulator/issues/643)
+
 ## [5.3.30](https://github.com/adobe/helix-simulator/compare/v5.3.29...v5.3.30) (2021-04-16)
 
 
