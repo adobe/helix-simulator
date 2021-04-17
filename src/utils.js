@@ -194,9 +194,11 @@ const utils = {
       if (injectLR) {
         textBody = utils.injectLiveReloadScript(textBody);
       }
+      const respHeaders = ret.headers.plain();
+      delete respHeaders['content-encoding'];
       res
         .status(ret.status)
-        .set(ret.headers.plain())
+        .set(respHeaders)
         .send(respBody || textBody);
       return;
     }
