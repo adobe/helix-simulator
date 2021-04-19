@@ -162,6 +162,12 @@ const utils = {
     const level = utils.status2level(ret.status);
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
     const injectLR = opts.injectLiveReload && ret.status === 200 && contentType.indexOf('text/html') === 0;
+
+    // because fetch decodes the response, we need to reset content encoding and length
+    const respHeaders = ret.headers.plain();
+    delete respHeaders['content-encoding'];
+    delete respHeaders['content-length'];
+
     if (ctx.log.level === 'silly' || injectLR) {
       let respBody;
       let textBody;
@@ -194,8 +200,6 @@ const utils = {
       if (injectLR) {
         textBody = utils.injectLiveReloadScript(textBody);
       }
-      const respHeaders = ret.headers.plain();
-      delete respHeaders['content-encoding'];
       res
         .status(ret.status)
         .set(respHeaders)
@@ -205,7 +209,7 @@ const utils = {
 
     res
       .status(ret.status)
-      .set(ret.headers.plain());
+      .set(respHeaders);
     ret.body.pipe(res);
   },
 
