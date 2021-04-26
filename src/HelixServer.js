@@ -18,6 +18,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const NodeESI = require('nodesi');
 const { SimpleInterface } = require('@adobe/helix-log');
+const { Request } = require('@adobe/helix-fetch');
 const querystring = require('querystring');
 const utils = require('./utils.js');
 const packageJson = require('../package.json');
@@ -29,21 +30,6 @@ const HELIX_FONTS_REGEXP = /^\/hlx_fonts\/(.+)$/;
 const HELIX_QUERY_REGEXP = /^\/_query\/(.+)\/(.+)$/;
 
 const DEFAULT_PORT = 3000;
-
-function safeCycles() {
-  const seen = [];
-  function guardCycles(_, v) {
-    if (!v || typeof (v) !== 'object') {
-      return (v);
-    }
-    if (seen.indexOf(v) !== -1) {
-      return ('[Circular]');
-    }
-    seen.push(v);
-    return (v);
-  }
-  return guardCycles;
-}
 
 /**
  * Wraps the route middleware so it can catch potential promise rejections
@@ -92,7 +78,7 @@ class HelixServer extends EventEmitter {
   /**
    * Executes the template and resolves with the content.
    * @param {RequestContext} ctx Context
-   * @return {Promise} A promise that resolves to generated output.
+   * @return {Promise} A promise that resolves to response.
    */
   async executeTemplate(ctx) {
     // the compiled script does not bundle the modules that are required for execution, since it
@@ -123,13 +109,12 @@ class HelixServer extends EventEmitter {
 
     Module._nodeModulePaths = nodeModulePathsFn;
 
-    const actionParams = {
-      __ow_headers: owHeaders,
-      __ow_method: ctx.method.toLowerCase(),
-      __ow_logger: ctx.log,
+    const actionParams = {};
+    const universalContext = {
+      log: ctx.log,
+      env: {},
     };
-
-    Object.assign(actionParams, ctx.actionParams, ctx.body);
+    Object.assign(actionParams, ctx.actionParams);
     if (ctx.url.match(/^\/cgi-bin\//)) {
       Object.assign(actionParams, {
         __hlx_owner: ctx.strain.content.owner,
@@ -146,13 +131,25 @@ class HelixServer extends EventEmitter {
         extension: ctx._extension,
         rootPath: ctx._mount,
         params: querystring.stringify(ctx._params),
+      });
+      universalContext.env = {
         REPO_RAW_ROOT: `${ctx.strain.content.rawRoot}/`, // the pipeline needs the final slash here
         REPO_API_ROOT: `${ctx.strain.content.apiRoot}/`,
         CONTENT_PROXY_URL: `http://localhost:${this._port}/__internal__/content-proxy/${ctx.strain.name}`,
-      });
+      };
     }
-    return Promise.resolve(mod.main(actionParams));
-    /* eslint-enable no-underscore-dangle */
+
+    const options = {
+      method: ctx.method.toLowerCase(),
+      headers: owHeaders,
+    };
+    if (options.method !== 'get' && options.method !== 'head' && ctx.body) {
+      options.body = ctx.body;
+    }
+
+    const req = new Request(`https://anywhere.run/action?${querystring.encode(actionParams)}`, options);
+
+    return mod.main(req, universalContext);
   }
 
   /**
@@ -161,41 +158,25 @@ class HelixServer extends EventEmitter {
    * @param {RequestContext} ctx the request context
    * @param {Express.Request} req request
    * @param {Express.Response} res response
-   * @returns {@code true} if the request is processed, {@code false} otherwise.
+   * @returns {boolean} {@code true} if the request is processed, {@code false} otherwise.
    */
   async handleDynamic(ctx, req, res) {
     const isResolved = await this._project.templateResolver.resolve(ctx);
     if (!isResolved) {
       return false;
     }
-    const result = await this.executeTemplate(ctx);
-    if (!result) {
-      throw new Error('Response is empty, don\'t know what to do');
-    }
-    if (result instanceof Error) {
-      // full response is an error: engine error
-      throw result;
-    }
-    if (result.error && result.error instanceof Error) {
-      throw result.error;
-    }
-
-    const status = result.statusCode || 200;
+    const response = await this.executeTemplate(ctx);
+    const status = response.status || 200;
     if (status === 404) {
       return false;
     }
 
-    let body = result.body || '';
-    const headers = result.headers || {};
-    const contentType = headers['Content-Type'] || 'text/html';
-    if (/.*\/json/.test(contentType)) {
-      body = JSON.stringify(body, safeCycles());
-    } else if (/.*\/octet-stream/.test(contentType) || /image\/.*/.test(contentType)) {
-      body = Buffer.from(body, 'base64');
-    } else if (ctx.config.liveReload && contentType.indexOf('text/html') === 0 && !req.headers['x-esi']) {
-      body = utils.injectLiveReloadScript(body);
+    const contentType = response.headers.get('content-type') || 'text/html;utf-8';
+    let body = await response.buffer();
+    if (ctx.config.liveReload && contentType.indexOf('text/html') === 0 && !response.headers.has('x-esi')) {
+      body = utils.injectLiveReloadScript(body.toString('utf-8'));
     }
-    res.set(headers).status(status).send(body);
+    res.set(response.headers.plain()).status(status).send(body);
     return true;
   }
 
@@ -204,7 +185,7 @@ class HelixServer extends EventEmitter {
    * @param {RequestContext} ctx the request context
    * @param {Express.Request} req request
    * @param {Express.Response} res response
-   * @returns {@code true} if the request is processed, {@code false} otherwise.
+   * @returns {boolean} {@code true} if the request is processed, {@code false} otherwise.
    */
   async handleProxy(ctx, req, res) {
     if (!ctx.strain.isProxy()) {
@@ -400,9 +381,7 @@ class HelixServer extends EventEmitter {
     }));
 
     this._app.use(cookieParser());
-
-    // use json body parser
-    this._app.use(express.json());
+    this._app.use(express.raw({ type: '*/*' }));
 
     const handler = this._project.proxyUrl
       ? asyncHandler(this.handleProxyModeRequest.bind(this))

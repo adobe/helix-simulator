@@ -60,7 +60,7 @@ module.exports = class RequestContext {
       }
     }
 
-    if (req.body && Object.entries(req.body).length > 0) {
+    if (req.body) {
       this._body = req.body;
     }
     const lastSlash = this._path.lastIndexOf('/');

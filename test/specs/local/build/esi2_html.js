@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const { Response } = require('@adobe/helix-fetch')
 
 /* eslint-disable */
 module.exports.main = function main() {
@@ -20,7 +21,9 @@ module.exports.main = function main() {
   for (let i =0; i<10; i++) {
     body += '<div><b>foo</b><b>foo</b><b>foo</b><b>foo</b><b>foo</b><b>foo</b><b>foo</b></div>\n';
   }
-  return {
-    body,
-  }
+  return new Response(body, {
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+    }
+  });
 };

@@ -9,10 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const { Response } = require('@adobe/helix-fetch')
 
 /* eslint-disable */
-module.exports.main = function main(params) {
-  return {
-    body: `<head><title>Test</title></head>`,
-  }
+module.exports.main = function main() {
+  return new Response(`<head><title>Test</title></head>`);
 };

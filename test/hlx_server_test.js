@@ -577,7 +577,7 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/index.dump.html?foo=bar&test=me`, 200, 'expected_dump_params.json');
+      await assertHttp(`http://localhost:${project.server.port}/index.dump.html?foo=bar&test=me`, 200, 'expected_dump_params.json', '', (d) => d.params);
     } finally {
       await project.stop();
     }
@@ -929,9 +929,9 @@ describe('Content Proxy Tests', () => {
       const ret = JSON.parse(await assertHttp(`http://localhost:${project.server.port}/index.html`, 200));
 
       // fetch header from internal content proxy. should return local github variant
-      const url = new URL(ret.CONTENT_PROXY_URL);
-      url.searchParams.append('owner', ret.owner);
-      url.searchParams.append('repo', ret.repo);
+      const url = new URL(ret.env.CONTENT_PROXY_URL);
+      url.searchParams.append('owner', ret.params.owner);
+      url.searchParams.append('repo', ret.params.repo);
       url.searchParams.append('path', '/header.md');
       await assertHttp(url.toString(), 200, 'expected_header.md');
 

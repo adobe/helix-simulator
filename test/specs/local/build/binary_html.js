@@ -9,13 +9,13 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const { Response } = require('@adobe/helix-fetch')
 
 /* eslint-disable */
 module.exports.main = function main(){
-  return {
+  return new Response(Buffer.from('00112233', 'hex'), {
     headers: {
       'Content-Type': 'application/octet-stream',
-    },
-    body: Buffer.from('00112233', 'hex'),
-  };
+    }
+  });
 };
