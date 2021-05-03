@@ -14,7 +14,7 @@
 
 const assert = require('assert');
 const net = require('net');
-const { Strain } = require('@adobe/helix-shared');
+const { Strain } = require('@adobe/helix-shared-config');
 const RequestContext = require('../src/RequestContext.js');
 const utils = require('../src/utils.js');
 

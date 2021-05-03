@@ -14,7 +14,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const cloneDeep = require('lodash.clonedeep');
 const gitServer = require('@adobe/git-server/lib/server.js');
-const { GitUrl } = require('@adobe/helix-shared');
+const { GitUrl } = require('@adobe/helix-shared-git');
 const { deriveLogger } = require('@adobe/helix-log');
 const GitMapping = require('./GitMapping.js');
 
