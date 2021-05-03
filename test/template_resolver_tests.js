@@ -14,7 +14,7 @@
 
 const assert = require('assert');
 const path = require('path');
-const { Strain } = require('@adobe/helix-shared');
+const { Strain } = require('@adobe/helix-shared-config');
 const TemplateResolver = require('../src/TemplateResolver.js');
 const RequestContext = require('../src/RequestContext.js');
 

@@ -15,7 +15,7 @@
 
 const assert = require('assert');
 const path = require('path');
-const { HelixConfig } = require('@adobe/helix-shared');
+const { HelixConfig } = require('@adobe/helix-shared-config');
 const HelixProject = require('../src/HelixProject.js');
 
 describe('Helix Project - Strain Select', () => {

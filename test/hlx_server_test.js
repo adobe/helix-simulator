@@ -20,7 +20,8 @@ const fse = require('fs-extra');
 const path = require('path');
 const shell = require('shelljs');
 const nock = require('nock');
-const { GitUrl, IndexConfig, Condition } = require('@adobe/helix-shared');
+const { GitUrl } = require('@adobe/helix-shared-git');
+const { IndexConfig, Condition } = require('@adobe/helix-shared-config');
 const HelixProject = require('../src/HelixProject.js');
 const { createTestRoot, setupProject, assertHttp } = require('./utils.js');
 
