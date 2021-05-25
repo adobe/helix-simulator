@@ -33,7 +33,7 @@
     "livereload-js": "3.3.2",
     "lodash.clonedeep": "4.5.0",
     "moment": "2.29.1",
-    "nodesi": "1.15.0",
+    "nodesi": "1.16.0",
     "ws": "7.4.5"
   },
   "devDependencies": {
