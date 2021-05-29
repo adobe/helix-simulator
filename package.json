@@ -27,7 +27,7 @@
     "colors": "1.4.0",
     "cookie-parser": "1.4.5",
     "express": "4.17.1",
-    "faye-websocket": "0.11.3",
+    "faye-websocket": "0.11.4",
     "fs-extra": "10.0.0",
     "glob": "7.1.7",
     "livereload-js": "3.3.2",
