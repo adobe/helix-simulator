@@ -1,3 +1,10 @@
+## [5.3.51](https://github.com/adobe/helix-simulator/compare/v5.3.50...v5.3.51) (2021-05-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency faye-websocket to v0.11.4 ([eba32fa](https://github.com/adobe/helix-simulator/commit/eba32fa5be462e7d8e1189f3e3ef23a28622166e))
+
 ## [5.3.50](https://github.com/adobe/helix-simulator/compare/v5.3.49...v5.3.50) (2021-05-25)
 
 
