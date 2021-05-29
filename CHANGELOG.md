@@ -1,3 +1,10 @@
+## [5.3.53](https://github.com/adobe/helix-simulator/compare/v5.3.52...v5.3.53) (2021-05-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v1.1.3 ([6a1f6ce](https://github.com/adobe/helix-simulator/commit/6a1f6ce1611b0c90ca6bd63c0556b79dd79db106))
+
 ## [5.3.52](https://github.com/adobe/helix-simulator/compare/v5.3.51...v5.3.52) (2021-05-29)
 
 
