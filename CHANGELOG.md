@@ -1,3 +1,10 @@
+## [5.3.55](https://github.com/adobe/helix-simulator/compare/v5.3.54...v5.3.55) (2021-06-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-fetch to v2.3.0 ([81dc634](https://github.com/adobe/helix-simulator/commit/81dc6341ba94fd4b9a41c85ff9316d963974c52d))
+
 ## [5.3.54](https://github.com/adobe/helix-simulator/compare/v5.3.53...v5.3.54) (2021-06-05)
 
 
