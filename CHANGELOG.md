@@ -1,3 +1,10 @@
+## [5.3.59](https://github.com/adobe/helix-simulator/compare/v5.3.58...v5.3.59) (2021-06-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nodesi to v1.17.0 ([7f4e4e6](https://github.com/adobe/helix-simulator/commit/7f4e4e6c9b25b65d019b79454e976abab6b05ba3))
+
 ## [5.3.58](https://github.com/adobe/helix-simulator/compare/v5.3.57...v5.3.58) (2021-06-19)
 
 
