@@ -34,7 +34,7 @@
     "lodash.clonedeep": "4.5.0",
     "moment": "2.29.1",
     "nodesi": "1.17.0",
-    "ws": "7.5.1"
+    "ws": "7.5.3"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.5",
@@ -51,7 +51,7 @@
     "lint-staged": "11.0.0",
     "mocha": "9.0.2",
     "mocha-junit-reporter": "2.0.0",
-    "nock": "13.1.0",
+    "nock": "13.1.1",
     "nyc": "15.1.0",
     "semantic-release": "17.4.4",
     "shelljs": "0.8.4",
