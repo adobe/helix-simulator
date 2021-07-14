@@ -9,11 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const { utils } = require('./helper.js');
+const { Response } = require('@adobe/helix-fetch')
 
 /* eslint-disable */
-module.exports.main = function main(params) {
-  return {
-    body: `<html><head>Test</head><body>${params.content.body}. path=${params.path}</body></html>`,
-  }
+module.exports.main = async function main(req) {
+  const params = Object.fromEntries(new URL(req.url).searchParams.entries());
+  const { content } = await req.json();
+  return new Response(`<html><head>Test</head><body>${content.body}. path=${params.path}</body></html>`);
 };

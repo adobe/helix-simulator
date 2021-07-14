@@ -10,14 +10,16 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-disable */
-module.exports.main = function main(params) {
+const { Response } = require('@adobe/helix-fetch');
+module.exports.main = function main(req, { env }) {
+  const params = Object.fromEntries(new URL(req.url).searchParams.entries());
   if (params.path === '/404.md') {
-    return {
-      statusCode: 404,
-      body: '404 Not Found',
-    };
+    return new Response('404 Not Found', {
+      status: 404,
+    });
   }
-  return {
-    body: JSON.stringify(params),
-  }
+  return new Response(JSON.stringify({
+    params,
+    env,
+  }));
 };

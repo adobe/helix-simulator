@@ -9,11 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const { Response } = require('@adobe/helix-fetch')
 
 /* eslint-disable */
 module.exports.main = function main() {
   // non-self closing esi tag (https://github.com/Schibsted-Tech-Polska/nodesi/issues/20)
-  return {
-    body: `<html><head>ESI Test</head><body><esi:include src="index.footer.html"></body></html>`,
-  }
+  return new Response(`<html><head>ESI Test</head><body><esi:include src="index.footer.html"></body></html>`);
 };

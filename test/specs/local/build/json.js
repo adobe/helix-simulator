@@ -9,14 +9,15 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const { Response } = require('@adobe/helix-fetch')
 
 /* eslint-disable */
-module.exports.main = function main(params) {
-  return {
-    body: JSON.stringify({
-      "path": params.path,
-      "json": "json",
-      "strain": params.__ow_headers['x-strain'],
-    })
-  }
+module.exports.main = function main(req) {
+  const params = Object.fromEntries(new URL(req.url).searchParams.entries());
+  const body = JSON.stringify({
+    "path": params.path,
+    "json": "json",
+    "strain": params.__ow_headers['x-strain'],
+  });
+  return new Response(body);
 };

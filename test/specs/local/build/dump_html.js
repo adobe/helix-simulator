@@ -9,17 +9,21 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const { Response } = require('@adobe/helix-fetch')
 
 /* eslint-disable */
-module.exports.main = function main(params){
-  if (!params.__ow_logger) {
+module.exports.main = function main(req, context){
+  if (!context.log) {
     throw Error('expected logger');
   }
-  delete params.__ow_logger; // remove for tests
-  return {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: params,
+  const body = {
+    params: Object.fromEntries(new URL(req.url).searchParams.entries()),
+    headers: req.headers.plain(),
+    env: context.env,
   };
+  return new Response(JSON.stringify(body), {
+    headers: {
+      'content-type': 'application/json',
+    },
+  });
 };

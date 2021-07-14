@@ -1,18 +1,29 @@
 {
-  "__ow_headers": {
-    "x-openwhisk-activation-id": "X_WSK_ACTIVATION_ID",
-    "x-request-id": "X_REQUEST_ID",
+  "env": {
+    "CONTENT_PROXY_URL": "http://localhost:SERVER_PORT/__internal__/content-proxy/default",
+    "REPO_API_ROOT": "http://127.0.0.1:GIT_PORT/api/",
+    "REPO_RAW_ROOT": "http://127.0.0.1:GIT_PORT/raw/"
+  },
+  "headers": {
+    "connection": "close",
+    "host": "localhost:SERVER_PORT",
     "x-backend-name": "localhost--F_Petridish",
     "x-cdn-request-id": "X_CDN_REQUEST_ID",
-    "host": "localhost:SERVER_PORT",
-    "connection": "close"
+    "x-cdn-url": "http://localhost:SERVER_PORT/index.dump.html",
+    "x-old-url": "/index.dump.html",
+    "x-openwhisk-activation-id": "X_WSK_ACTIVATION_ID",
+    "x-repo-root-path": "",
+    "x-request-id": "X_REQUEST_ID",
+    "x-strain": "default"
   },
-  "__ow_method": "get",
-  "owner": "helix",
-  "repo": "content",
-  "ref": "master",
-  "path": "/index.md",
-  "params": "",
-  "REPO_RAW_ROOT": "http://127.0.0.1:GIT_PORT/raw/",
-  "REPO_API_ROOT": "http://127.0.0.1:GIT_PORT/api/"
+  "params": {
+    "extension": "html",
+    "owner": "local",
+    "params": "",
+    "path": "/index.md",
+    "ref": "main",
+    "repo": "default",
+    "rootPath": "",
+    "selector": "dump"
+  }
 }

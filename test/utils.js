@@ -48,7 +48,7 @@ async function setupProject(srcDir, root, initGit = true) {
   return dir;
 }
 
-async function assertHttp(config, status, spec, subst) {
+async function assertHttp(config, status, spec, subst, filter = (d) => d) {
   return new Promise((resolve, reject) => {
     const data = [];
     const requestHandler = (res) => {
@@ -66,14 +66,14 @@ async function assertHttp(config, status, spec, subst) {
           try {
             const dat = Buffer.concat(data);
             if (spec) {
-              let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
+              let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec), 'utf-8');
               const repl = (_isFunction(subst) ? subst() : subst) || {};
               Object.keys(repl).forEach((k) => {
                 const reg = new RegExp(k, 'g');
                 expected = expected.replace(reg, repl[k]);
               });
               if (/\/json/.test(res.headers['content-type'])) {
-                assert.equal(JSON.parse(dat).params, JSON.parse(expected).params);
+                assert.deepEqual(filter(JSON.parse(dat)), filter(JSON.parse(expected)));
               } else if (/octet-stream/.test(res.headers['content-type'])) {
                 expected = JSON.parse(expected).data;
                 const actual = dat.toString('hex');
