@@ -20,12 +20,12 @@ const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
   : fetchAPI.context({});
 
 const utils = {
-  status2level(status) {
+  status2level(status, debug3xx) {
     if (status < 300) {
       return 'debug';
     }
     if (status < 400) {
-      return 'info';
+      return debug3xx ? 'debug' : 'info';
     }
     if (status < 500) {
       return 'warn';
@@ -159,7 +159,7 @@ const utils = {
       body,
     });
     const contentType = ret.headers.get('content-type') || 'text/plain';
-    const level = utils.status2level(ret.status);
+    const level = utils.status2level(ret.status, true);
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
     const injectLR = opts.injectLiveReload && ret.status === 200 && contentType.indexOf('text/html') === 0;
 
