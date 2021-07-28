@@ -1,3 +1,10 @@
+## [5.3.68](https://github.com/adobe/helix-simulator/compare/v5.3.67...v5.3.68) (2021-07-28)
+
+
+### Bug Fixes
+
+* use debug log level for 3xx responses from proxy ([#701](https://github.com/adobe/helix-simulator/issues/701)) ([e65f8cd](https://github.com/adobe/helix-simulator/commit/e65f8cd33a6a7c1f3181c48a6eba416cf4aa8528)), closes [#700](https://github.com/adobe/helix-simulator/issues/700)
+
 ## [5.3.67](https://github.com/adobe/helix-simulator/compare/v5.3.66...v5.3.67) (2021-07-27)
 
 
