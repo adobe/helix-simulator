@@ -34,7 +34,7 @@
     "lodash.clonedeep": "4.5.0",
     "moment": "2.29.1",
     "nodesi": "1.17.0",
-    "ws": "7.5.3"
+    "ws": "8.0.0"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.5",
