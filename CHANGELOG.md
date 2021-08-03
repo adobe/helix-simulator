@@ -1,3 +1,10 @@
+## [5.3.71](https://github.com/adobe/helix-simulator/compare/v5.3.70...v5.3.71) (2021-08-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ws to v8 ([#705](https://github.com/adobe/helix-simulator/issues/705)) ([5cfec0e](https://github.com/adobe/helix-simulator/commit/5cfec0eb36ca185c59b38c1677faf9c07e779ba9))
+
 ## [5.3.70](https://github.com/adobe/helix-simulator/compare/v5.3.69...v5.3.70) (2021-08-01)
 
 
