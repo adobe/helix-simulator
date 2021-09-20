@@ -1,3 +1,10 @@
+## [5.3.83](https://github.com/adobe/helix-simulator/compare/v5.3.82...v5.3.83) (2021-09-20)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#726](https://github.com/adobe/helix-simulator/issues/726)) ([6d777d0](https://github.com/adobe/helix-simulator/commit/6d777d0391423af895c82782175432b9a2265dfa))
+
 ## [5.3.82](https://github.com/adobe/helix-simulator/compare/v5.3.81...v5.3.82) (2021-09-20)
 
 
